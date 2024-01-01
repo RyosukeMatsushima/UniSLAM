@@ -3,6 +3,8 @@
 
 #include <opencv2/opencv.hpp>
 
+#define EDGE_THRESHOLD 0.8f
+
 class Frame {
 public:
     Frame(const cv::Mat& input_img);
