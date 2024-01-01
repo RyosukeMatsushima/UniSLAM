@@ -51,10 +51,10 @@ cv::Mat Frame::differentialOfGaussianImage(const cv::Mat& gray_img) {
 
     // Calculate the edge image with differential Gaussian filter
     cv::Mat smoothed_img_with_small_kernel;
-    cv::GaussianBlur(gray_img, smoothed_img_with_small_kernel, cv::Size(9, 9), 2.0);
+    cv::GaussianBlur(gray_img, smoothed_img_with_small_kernel, cv::Size(9, 9), GAUSIAN_KERNEL_SIZE_SMALL);
 
     cv::Mat smoothed_img_with_large_kernel;
-    cv::GaussianBlur(gray_img, smoothed_img_with_large_kernel, cv::Size(9, 9), 4.0);
+    cv::GaussianBlur(gray_img, smoothed_img_with_large_kernel, cv::Size(9, 9), GAUSIAN_KERNEL_SIZE_LARGE);
 
     cv::Mat differential_gausian_img;
     cv::subtract(smoothed_img_with_small_kernel, smoothed_img_with_large_kernel, differential_gausian_img);

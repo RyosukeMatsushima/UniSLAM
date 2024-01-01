@@ -3,7 +3,10 @@
 
 #include <opencv2/opencv.hpp>
 
-#define EDGE_THRESHOLD 0.8f
+#define EDGE_THRESHOLD 0.04f
+#define GAUSIAN_KERNEL_SIZE_SMALL 10.0f
+#define GAUSIAN_KERNEL_SIZE_LARGE 20.0f
+
 
 class Frame {
 public:
