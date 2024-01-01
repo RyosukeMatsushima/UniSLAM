@@ -7,13 +7,10 @@
 
 #define RESULT_IMAGE_PATH "./result/"
 
-// Test the Frame class
-TEST(FrameTest, TestFrame) {
-
-    // check test image exists
-    std::ifstream f(TEST_IMAGE_PATH);
+bool checkImageExist(const std::string &image_path) {
+    std::ifstream f(image_path);
     if (!f.good()) {
-        std::cout << "Test image not found: " << TEST_IMAGE_PATH << std::endl;
+        std::cout << "Test image not found: " << image_path << std::endl;
 
         // print current directory
         char cwd[1024];
@@ -22,18 +19,39 @@ TEST(FrameTest, TestFrame) {
         } else {
             perror("getcwd() error");
         }
+    }
 
+    return f.good();
+}
+
+// Test the Frame class
+TEST(FrameTest, TestFrame) {
+
+    if (!checkImageExist(TEST_IMAGE_PATH)) {
         return;
     }
+
     // Load an image (replace "your_image_path" with the actual path to an image)
     cv::Mat input_image = cv::imread(TEST_IMAGE_PATH);
 
     // Create a Frame object
     Frame frame(input_image);
+
+    cv::imwrite(RESULT_IMAGE_PATH "gray_img.jpg", frame.getGrayImage());
+
+    cv::imwrite(RESULT_IMAGE_PATH "edge_gausian_img.jpg", frame.getEdgeGausianImage());
+
+    // print edge_gausian_img
+    cv::imshow("edge_gausian_img", frame.getEdgeGausianImage());
 }
 
 // Test for confirmGrayImage function
 TEST(FrameTest, TestConfirmGrayImage) {
+    
+    if (!checkImageExist(TEST_IMAGE_PATH)) {
+        return;
+    }
+
     // Load an image (replace "your_image_path" with the actual path to an image)
     cv::Mat input_image = cv::imread(TEST_IMAGE_PATH);
 
@@ -46,4 +64,3 @@ TEST(FrameTest, TestConfirmGrayImage) {
     // Save image
     cv::imwrite(RESULT_IMAGE_PATH "input_image.jpg", input_image);
 }
-

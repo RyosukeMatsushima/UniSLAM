@@ -7,7 +7,13 @@ class Frame {
 public:
     Frame(const cv::Mat& input_img);
 
+    cv::Mat getGrayImage() const;
+
+    cv::Mat getEdgeGausianImage() const;
+
 private:
+    cv::Mat gray_img_;
+
     cv::Mat edge_gausian_img_;
 
     cv::Mat confirmGrayImage(const cv::Mat& input_img);
