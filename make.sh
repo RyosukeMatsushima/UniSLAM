@@ -6,6 +6,7 @@ cmake --build build
 cd build
 
 ./frame_test
+./edges_space_test
 
 cd ..
 
