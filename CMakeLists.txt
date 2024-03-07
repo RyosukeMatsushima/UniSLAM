@@ -27,7 +27,9 @@ set(SOURCES
   src/edges_space.cpp
 )
 
-include_directories(include)
+include_directories(
+  include
+)
 
 add_executable(
   frame_test
@@ -49,6 +51,18 @@ add_executable(
 
 target_link_libraries(
   edges_space_test
+  GTest::gtest_main
+  ${OpenCV_LIBS}
+)
+
+add_executable(
+  polygons_space_test
+  test/tools/polygons_space_test.cpp
+  test/tools/polygons_space.cpp
+)
+
+target_link_libraries(
+  polygons_space_test
   GTest::gtest_main
   ${OpenCV_LIBS}
 )

@@ -7,6 +7,7 @@ cd build
 
 ./frame_test
 ./edges_space_test
+./polygons_space_test
 
 cd ..
 
