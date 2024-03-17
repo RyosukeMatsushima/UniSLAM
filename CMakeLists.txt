@@ -67,3 +67,26 @@ target_link_libraries(
   ${OpenCV_LIBS}
 )
 
+add_executable(
+  edge_test
+  test/edge_test.cpp
+  src/edge.cpp
+)
+
+target_link_libraries(
+  edge_test
+  GTest::gtest_main
+  ${OpenCV_LIBS}
+)
+
+add_executable(
+    cpp_copy_test
+    test/cpp_copy_test.cpp
+)
+
+target_link_libraries(
+    cpp_copy_test
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+)
+
