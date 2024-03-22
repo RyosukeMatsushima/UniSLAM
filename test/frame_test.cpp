@@ -41,6 +41,8 @@ TEST(FrameTest, TestFrame) {
 
     cv::imwrite(RESULT_IMAGE_PATH "edge_gausian_img.jpg", frame.getEdgeGausianImage());
 
+    cv::imwrite(RESULT_IMAGE_PATH "laplacian_img.jpg", frame.getLaplacianImage());
+
     // print edge_gausian_img
     cv::imshow("edge_gausian_img", frame.getEdgeGausianImage());
 }

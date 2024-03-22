@@ -10,6 +10,8 @@ Frame::Frame(const cv::Mat& input_img)
     }
 
     edge_gausian_img_ = differentialOfGaussianImage(gray_img_);
+
+    laplacian_img_ = calculateLaplacianImage(edge_gausian_img_);
 }
 
 cv::Mat Frame::getGrayImage() const
@@ -20,6 +22,25 @@ cv::Mat Frame::getGrayImage() const
 cv::Mat Frame::getEdgeGausianImage() const
 {
     return edge_gausian_img_;
+}
+
+cv::Mat Frame::getLaplacianImage() const
+{
+    return laplacian_img_;
+}
+
+bool Frame::getKeyEdgePoints(const int window_size,
+                             const int num_keypoints,
+                             std::vector<EdgePoint>& key_edge_points)
+{
+    return false;
+}
+
+bool Frame::getMatchedEdgePoints(const EdgePoint& key_edge_point,
+                                 const int window_size,
+                                 std::vector<EdgePoint>& matched_edge_points)
+{
+    return false;
 }
 
 cv::Mat Frame::confirmGrayImage(const cv::Mat& input_img)
@@ -56,17 +77,15 @@ cv::Mat Frame::differentialOfGaussianImage(const cv::Mat& gray_img) {
     cv::Mat smoothed_img_with_large_kernel;
     cv::GaussianBlur(gray_img, smoothed_img_with_large_kernel, cv::Size(9, 9), GAUSIAN_KERNEL_SIZE_LARGE);
 
-    cv::Mat differential_gausian_img;
-    cv::subtract(smoothed_img_with_small_kernel, smoothed_img_with_large_kernel, differential_gausian_img);
+    cv::Mat differential_gausian_img = smoothed_img_with_small_kernel - smoothed_img_with_large_kernel;
 
-    cv::Mat negative_binded_img = cv::Mat::zeros(differential_gausian_img.size(), differential_gausian_img.type());
-    cv::Mat positive_binded_img = cv::Mat::zeros(differential_gausian_img.size(), differential_gausian_img.type());
+    return differential_gausian_img;
+}
 
-    cv::threshold(differential_gausian_img, negative_binded_img, -EDGE_THRESHOLD, -1.0f, cv::THRESH_BINARY);
-    cv::threshold(differential_gausian_img, positive_binded_img, EDGE_THRESHOLD, 1.0f, cv::THRESH_BINARY_INV);
-
-    // Convert the result to the desired output values (-1 and 1)
-    differential_gausian_img = negative_binded_img + positive_binded_img;
-
-    return differential_gausian_img + 1.0f;
+cv::Mat Frame::calculateLaplacianImage(const cv::Mat& dog_img) {
+    cv::Mat laplacian_img;
+    cv::Mat abs_dog_img = cv::abs(dog_img);
+    cv::Laplacian(abs_dog_img, laplacian_img, CV_32F, 3);
+    cv::normalize(laplacian_img, laplacian_img, 0.0f, 255.0f, cv::NORM_MINMAX, CV_32F);
+    return laplacian_img;
 }
