@@ -130,6 +130,7 @@ bool Edge::joinEdge(Edge& joining_edge)
     return false;
 }
 
+// TODO: rename this function to points()
 std::vector<EdgePoint> Edge::getEdgePoints()
 {
     std::vector<EdgePoint> edge_points;
@@ -138,5 +139,10 @@ std::vector<EdgePoint> Edge::getEdgePoints()
         edge_points.push_back(point);
     }
     return edge_points;
+}
+
+int Edge::size() const
+{
+    return edge_points_.size();
 }
 

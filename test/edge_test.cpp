@@ -41,6 +41,9 @@ TEST(EdegeTest, TestNormalCase) {
         generator.GenerateNextPoint(point, gradient);
         EXPECT_TRUE(edge.addPoint(point, gradient));
     }
+
+    // check edge size
+    EXPECT_EQ(edge.size(), 10);
 }
 
 TEST(EdgeTest, TestJoinEdge) {

@@ -31,6 +31,8 @@ public:
 
     std::vector<EdgePoint> getEdgePoints();
 
+    int size() const;
+
 private:
     std::vector<EdgePoint> edge_points_;
 };
