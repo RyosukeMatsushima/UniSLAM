@@ -1,5 +1,6 @@
 
 #include "frame.h"
+
 Frame::Frame(const cv::Mat& input_img)
 {
     gray_img_ = confirmGrayImage(input_img);
@@ -12,6 +13,12 @@ Frame::Frame(const cv::Mat& input_img)
     edge_gausian_img_ = differentialOfGaussianImage(gray_img_);
 
     laplacian_img_ = calculateLaplacianImage(edge_gausian_img_);
+
+    calculateGradientImages(gray_img_, gradient_x_img_, gradient_y_img_);
+
+    calculateGradientAngleImage(gradient_x_img_, gradient_y_img_, gradient_angle_img_);
+
+    calculateDiscreteAngleEdgeIntensity(laplacian_img_, gradient_angle_img_, discrete_angle_edge_intensity_);
 }
 
 cv::Mat Frame::getGrayImage() const
@@ -27,6 +34,26 @@ cv::Mat Frame::getEdgeGausianImage() const
 cv::Mat Frame::getLaplacianImage() const
 {
     return laplacian_img_;
+}
+
+cv::Mat Frame::getGradientXImage() const
+{
+    return gradient_x_img_;
+}
+
+cv::Mat Frame::getGradientYImage() const
+{
+    return gradient_y_img_;
+}
+
+cv::Mat Frame::getGradientAngleImage() const
+{
+    return gradient_angle_img_;
+}
+
+std::vector<cv::Mat> Frame::getDiscreteAngleEdgeIntensity() const
+{
+    return discrete_angle_edge_intensity_;
 }
 
 bool Frame::getKeyEdgePoints(const int window_size,
@@ -86,6 +113,51 @@ cv::Mat Frame::calculateLaplacianImage(const cv::Mat& dog_img) {
     cv::Mat laplacian_img;
     cv::Mat abs_dog_img = cv::abs(dog_img);
     cv::Laplacian(abs_dog_img, laplacian_img, CV_32F, 3);
-    cv::normalize(laplacian_img, laplacian_img, 0.0f, 255.0f, cv::NORM_MINMAX, CV_32F);
     return laplacian_img;
 }
+
+void Frame::calculateGradientImages(const cv::Mat& input_img,
+                                    cv::Mat& gradient_x_img,
+                                    cv::Mat& gradient_y_img)
+{
+    cv::Mat gradient_x;
+    cv::Mat gradient_y;
+    cv::Sobel(input_img, gradient_x, CV_32F, 1, 0, 3);
+    cv::Sobel(input_img, gradient_y, CV_32F, 0, 1, 3);
+
+    gradient_x_img = gradient_x;
+    gradient_y_img = gradient_y;
+}
+
+void Frame::calculateGradientAngleImage(const cv::Mat& gradient_x_img,
+                                        const cv::Mat& gradient_y_img,
+                                        cv::Mat& gradient_angle_img)
+{
+    cv::Mat magnitude_img;
+    cv::cartToPolar(gradient_x_img, gradient_y_img, magnitude_img, gradient_angle_img, true);
+}
+
+void Frame::calculateDiscreteAngleEdgeIntensity(const cv::Mat& laplacian_img,
+                                                const cv::Mat& gradient_angle_img,
+                                                std::vector<cv::Mat>& discrete_angle_edge_intensity)
+{
+    int num_discrete_angles = int(2 * M_PI / MAX_ANGLE_DIFF);
+
+    // normalize the gradient angle
+    cv::Mat normalized_gradient_angle;
+    cv::normalize(gradient_angle_img, normalized_gradient_angle, 0, num_discrete_angles - 1, cv::NORM_MINMAX, CV_8U);
+
+    // calculate the edge intensity for each discrete angle
+    for (int i = 0; i < num_discrete_angles; i++) {
+        cv::Mat mask = (normalized_gradient_angle == i);
+        cv::Mat edge_intensity;
+
+        // format to CV_32F
+        mask.convertTo(mask, CV_32F);
+
+        cv::multiply(laplacian_img, mask, edge_intensity);
+        discrete_angle_edge_intensity.push_back(edge_intensity);
+    }
+}
+
+

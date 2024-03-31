@@ -41,7 +41,25 @@ TEST(FrameTest, TestFrame) {
 
     cv::imwrite(RESULT_IMAGE_PATH "edge_gausian_img.jpg", frame.getEdgeGausianImage());
 
-    cv::imwrite(RESULT_IMAGE_PATH "laplacian_img.jpg", frame.getLaplacianImage());
+    cv::Mat laplacian_img = frame.getLaplacianImage();
+    // normalize the image
+    cv::normalize(laplacian_img, laplacian_img, 0, 255, cv::NORM_MINMAX, CV_8U);
+
+    cv::imwrite(RESULT_IMAGE_PATH "laplacian_img.jpg", laplacian_img);
+
+    cv::imwrite(RESULT_IMAGE_PATH "gradient_x_img.jpg", frame.getGradientXImage());
+
+    cv::imwrite(RESULT_IMAGE_PATH "gradient_y_img.jpg", frame.getGradientYImage());
+
+    cv::imwrite(RESULT_IMAGE_PATH "gradient_angle_img.jpg", frame.getGradientAngleImage());
+
+    std::vector<cv::Mat> discrete_angle_edge_intensity = frame.getDiscreteAngleEdgeIntensity();
+
+    for (int i = 0; i < discrete_angle_edge_intensity.size(); i++) {
+        // normalize the image
+        cv::normalize(discrete_angle_edge_intensity[i], discrete_angle_edge_intensity[i], 0, 255, cv::NORM_MINMAX, CV_8U);
+        cv::imwrite(RESULT_IMAGE_PATH "discrete_angle_edge_intensity_" + std::to_string(i) + ".jpg", discrete_angle_edge_intensity[i]);
+    }
 
     // print edge_gausian_img
     cv::imshow("edge_gausian_img", frame.getEdgeGausianImage());
