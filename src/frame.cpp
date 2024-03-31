@@ -154,6 +154,8 @@ void Frame::calculateDiscreteAngleEdgeIntensity(const cv::Mat& laplacian_img,
 
         // format to CV_32F
         mask.convertTo(mask, CV_32F);
+        // normalize the mask
+        cv::normalize(mask, mask, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32F);
 
         cv::multiply(laplacian_img, mask, edge_intensity);
         discrete_angle_edge_intensity.push_back(edge_intensity);
