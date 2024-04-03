@@ -25,6 +25,7 @@ set(SOURCES
   src/ImageProcessor.cpp
   src/frame.cpp
   src/edges_space.cpp
+  src/edge.cpp
 )
 
 include_directories(
@@ -35,6 +36,7 @@ add_executable(
   frame_test
   test/frame_test.cpp
   src/frame.cpp
+  src/edge.cpp
 )
 
 target_link_libraries(

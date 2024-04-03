@@ -5,6 +5,10 @@ cmake --build build
 
 cd build
 
+# create result directory if not exists
+mkdir -p result
+rm result/*
+
 ./frame_test
 ./edges_space_test
 ./polygons_space_test

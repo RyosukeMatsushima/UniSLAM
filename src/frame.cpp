@@ -56,11 +56,23 @@ std::vector<cv::Mat> Frame::getDiscreteAngleEdgeIntensity() const
     return discrete_angle_edge_intensity_;
 }
 
-bool Frame::getKeyEdgePoints(const int window_size,
-                             const int num_keypoints,
-                             std::vector<EdgePoint>& key_edge_points)
+std::vector<EdgePoint> Frame::getKeyEdgePoints()
 {
-    return false;
+    double min_intensity, max_intensity;
+    cv::Point min_loc, max_loc;
+    cv::minMaxLoc(laplacian_img_, &min_intensity, &max_intensity, &min_loc, &max_loc);
+
+    float min_intensity_threshold = max_intensity * MIN_INTENSITY_THRESHOLD;
+
+    std::vector<EdgePoint> key_edge_points;
+
+    for (cv::Mat& edge_intensity : discrete_angle_edge_intensity_) {
+        std::vector<EdgePoint> edge_points = getHighIntensityEdgePoints(edge_intensity, min_intensity_threshold, MAX_EDGE_POINTS_NUM);
+
+        key_edge_points.insert(key_edge_points.end(), edge_points.begin(), edge_points.end());
+    }
+
+    return key_edge_points;
 }
 
 bool Frame::getMatchedEdgePoints(const EdgePoint& key_edge_point,
@@ -68,6 +80,15 @@ bool Frame::getMatchedEdgePoints(const EdgePoint& key_edge_point,
                                  std::vector<EdgePoint>& matched_edge_points)
 {
     return false;
+}
+
+cv::Vec2f Frame::getGradient(const cv::Point2f& point)
+{
+    // read the gradient from the gradient images
+    float gradient_x = gradient_x_img_.at<float>(point);
+    float gradient_y = gradient_y_img_.at<float>(point);
+
+    return cv::Vec2f(gradient_x, gradient_y);
 }
 
 cv::Mat Frame::confirmGrayImage(const cv::Mat& input_img)
@@ -133,7 +154,7 @@ void Frame::calculateGradientAngleImage(const cv::Mat& gradient_x_img,
                                         const cv::Mat& gradient_y_img,
                                         cv::Mat& gradient_angle_img)
 {
-    cv::Mat magnitude_img;
+    cv::Mat magnitude_img; // not used
     cv::cartToPolar(gradient_x_img, gradient_y_img, magnitude_img, gradient_angle_img, true);
 }
 
@@ -160,6 +181,35 @@ void Frame::calculateDiscreteAngleEdgeIntensity(const cv::Mat& laplacian_img,
         cv::multiply(laplacian_img, mask, edge_intensity);
         discrete_angle_edge_intensity.push_back(edge_intensity);
     }
+}
+
+std::vector<EdgePoint> Frame::getHighIntensityEdgePoints(const cv::Mat& laplacian_img_in,
+                                                         const float min_intensity_threshold,
+                                                         const int max_points_num)
+{
+    // clone the laplacian image
+    cv::Mat laplacian_img = laplacian_img_in.clone();
+
+    std::vector<EdgePoint> edge_points;
+
+    for (int i = 0; i < max_points_num; i++) {
+        double min_intensity, max_intensity;
+        cv::Point min_loc, max_loc;
+        cv::minMaxLoc(laplacian_img, &min_intensity, &max_intensity, &min_loc, &max_loc);
+
+        if (max_intensity < min_intensity_threshold) {
+            break;
+        }
+
+        EdgePoint edge_point = EdgePoint(cv::Point2f(max_loc.x, max_loc.y), getGradient(max_loc));
+
+        edge_points.push_back(edge_point);
+
+        // remove the point from the image
+        cv::circle(laplacian_img, max_loc, MAX_POSITION_DIFF, cv::Scalar(0), -1);
+    }
+
+    return edge_points;
 }
 
 

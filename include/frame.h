@@ -10,7 +10,10 @@
 #define GAUSIAN_KERNEL_SIZE_LARGE 20.0f
 
 #define MAX_ANGLE_DIFF 0.5f // radians
-#define MAX_POSITION_DIFF 0.1f // pixels
+#define MAX_POSITION_DIFF 100 // pixels
+
+#define MIN_INTENSITY_THRESHOLD 0.3f // max intensity times this value
+#define MAX_EDGE_POINTS_NUM 100
 
 class Frame {
 public:
@@ -30,13 +33,13 @@ public:
 
     std::vector<cv::Mat> getDiscreteAngleEdgeIntensity() const;
 
-    bool getKeyEdgePoints(const int window_size,
-                          const int num_keypoints,
-                          std::vector<EdgePoint>& key_edge_points);
+    std::vector<EdgePoint> getKeyEdgePoints();
 
     bool getMatchedEdgePoints(const EdgePoint& key_edge_point,
                               const int window_size,
                               std::vector<EdgePoint>& matched_edge_points);
+
+    cv::Vec2f getGradient(const cv::Point2f& point);
 
 private:
     cv::Mat gray_img_;
@@ -70,6 +73,11 @@ private:
     void calculateDiscreteAngleEdgeIntensity(const cv::Mat& laplacian_img_,
                                              const cv::Mat& gradient_angle_img,
                                              std::vector<cv::Mat>& discrete_angle_edge_intensity);
+
+    std::vector<EdgePoint> getHighIntensityEdgePoints(const cv::Mat& laplacian_img_in,
+                                                      const float min_intensity_threshold,
+                                                      const int max_points_num);
+
 };
 
 #endif // FRAME_H
