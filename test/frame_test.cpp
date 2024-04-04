@@ -2,6 +2,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "frame.h"
+#include "debug_view.hpp"
 
 #define TEST_IMAGE_PATH "../test/data/sequence_01/imgs/00000.jpg"
 
@@ -69,6 +70,14 @@ TEST(FrameTest, TestFrame) {
     // diff should be all zeros
     cv::Scalar s = cv::sum(diff);
     ASSERT_EQ(s[0], 0.0);
+
+    std::vector<EdgePoint> key_edge_points = frame.getKeyEdgePoints();
+    std::cout << "size of key_edge_points: " << key_edge_points.size() << std::endl;
+
+    // Create a DebugView object
+    DebugView debug_view(frame.getGrayImage());
+    debug_view.drawEdgePoints(key_edge_points);
+    cv::imwrite(RESULT_IMAGE_PATH "key_edge_points.jpg", debug_view.getDebugImage());
 
     // print edge_gausian_img
     cv::imshow("edge_gausian_img", frame.getEdgeGausianImage());

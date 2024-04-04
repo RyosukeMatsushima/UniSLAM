@@ -21,6 +21,7 @@ EdgePoint::EdgePoint(const cv::Point2f& point,
     this->point = point;
     this->magnitude = cv::norm(gradient);
     this->angle = atan2(gradient[1], gradient[0]);
+    this->gradient = gradient;
 }
 
 bool EdgePoint::isContinuous(const EdgePoint& new_point,

@@ -10,6 +10,7 @@ struct EdgePoint {
     cv::Point2f point;
     float angle;
     float magnitude;
+    cv::Vec2f gradient;
 
     EdgePoint(const cv::Point2f& point,
               const cv::Vec2f& gradient);

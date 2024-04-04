@@ -37,6 +37,7 @@ add_executable(
   test/frame_test.cpp
   src/frame.cpp
   src/edge.cpp
+  src/debug_view.cpp
 )
 
 target_link_libraries(
