@@ -78,9 +78,6 @@ TEST(FrameTest, TestFrame) {
     DebugView debug_view(frame.getGrayImage());
     debug_view.drawEdgePoints(key_edge_points);
     cv::imwrite(RESULT_IMAGE_PATH "key_edge_points.jpg", debug_view.getDebugImage());
-
-    // print edge_gausian_img
-    cv::imshow("edge_gausian_img", frame.getEdgeGausianImage());
 }
 
 // Test for confirmGrayImage function
@@ -101,4 +98,57 @@ TEST(FrameTest, TestConfirmGrayImage) {
 
     // Save image
     cv::imwrite(RESULT_IMAGE_PATH "input_image.jpg", input_image);
+}
+
+TEST(WithTestImg, TestEdgeGausianImage) {
+    if (!checkImageExist(TEST_IMAGE_PATH)) {
+        return;
+    }
+
+    std::string test_name = "TestEdgeGausianImage";
+    
+    // create a black image
+    cv::Mat test_image = cv::Mat::zeros(1000, 1000, CV_8UC3);
+    // draw a white rectangle
+    cv::rectangle(test_image, cv::Point(54, 95), cv::Point(293, 296), cv::Scalar(255, 255, 255), -1);
+    // draw a blue circle
+    cv::circle(test_image, cv::Point(300, 500), 100, cv::Scalar(255, 0, 0), -1);
+    // draw a green line
+    cv::line(test_image, cv::Point(600, 400), cv::Point(400, 500), cv::Scalar(0, 255, 0), 5);
+    // draw a red filled polygon
+    std::vector<cv::Point> hexagon = {cv::Point(605, 605), cv::Point(705, 605), cv::Point(755, 655), cv::Point(705, 705), cv::Point(605, 705), cv::Point(555, 655)};
+    cv::fillConvexPoly(test_image, hexagon, cv::Scalar(0, 0, 255));
+
+    // Create a Frame object
+    cv::Mat input_image;
+    cv::cvtColor(test_image, input_image, cv::COLOR_BGR2GRAY);
+    Frame frame(input_image);
+
+    // get key edge points
+    std::vector<EdgePoint> key_edge_points = frame.getKeyEdgePoints();
+    // print key edge points
+    for (int i = 0; i < key_edge_points.size(); i++) {
+        std::cout << "key_edge_points[" << i << "] point: " << key_edge_points[i].point << std::endl;
+        std::cout << "key_edge_points[" << i << "] gradient: " << key_edge_points[i].gradient << std::endl;
+        std::cout << "" << std::endl;
+    }
+
+    // Create a DebugView object
+    DebugView debug_view(input_image);
+    debug_view.drawEdgePoints(key_edge_points);
+
+    // Save image
+    cv::imwrite(RESULT_IMAGE_PATH + test_name + "_test_image.jpg", test_image);
+
+    cv::imwrite(RESULT_IMAGE_PATH + test_name + "_key_edge_points.jpg", debug_view.getDebugImage());
+
+    cv::Mat edge_gausian_img = frame.getEdgeGausianImage();
+    // normalize the image
+    cv::normalize(edge_gausian_img, edge_gausian_img, 0, 255, cv::NORM_MINMAX, CV_8U);
+    cv::imwrite(RESULT_IMAGE_PATH + test_name + "_edge_gausian_img.jpg", edge_gausian_img);
+
+    cv::Mat laplacian_img = frame.getLaplacianImage();
+    // normalize the image
+    cv::normalize(laplacian_img, laplacian_img, 0, 255, cv::NORM_MINMAX, CV_8U);
+    cv::imwrite(RESULT_IMAGE_PATH + test_name + "_laplacian_img.jpg", laplacian_img);
 }

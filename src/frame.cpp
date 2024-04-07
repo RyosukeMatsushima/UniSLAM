@@ -67,11 +67,9 @@ std::vector<EdgePoint> Frame::getKeyEdgePoints()
     std::vector<EdgePoint> key_edge_points;
 
     for (cv::Mat& edge_intensity : discrete_angle_edge_intensity_) {
-        std::vector<EdgePoint> edge_points = getHighIntensityEdgePoints(edge_intensity, min_intensity_threshold, MAX_EDGE_POINTS_NUM);
-
+        std::vector<EdgePoint> edge_points = getHighIntensityEdgePoints(min_intensity_threshold);
         key_edge_points.insert(key_edge_points.end(), edge_points.begin(), edge_points.end());
     }
-
     return key_edge_points;
 }
 
@@ -113,19 +111,20 @@ cv::Mat Frame::confirmGrayImage(const cv::Mat& input_img)
     // Normalize the image
     cv::normalize(gray_img, gray_img, 0.0f, 100.0f, cv::NORM_MINMAX, CV_32F);
 
+    // Blur the image
+    cv::GaussianBlur(gray_img, gray_img, cv::Size(9, 9), GAUSIAN_KERNEL_SIZE_SMALL);
+
     return gray_img;
 }
 
 cv::Mat Frame::differentialOfGaussianImage(const cv::Mat& gray_img) {
 
-    // Calculate the edge image with differential Gaussian filter
-    cv::Mat smoothed_img_with_small_kernel;
-    cv::GaussianBlur(gray_img, smoothed_img_with_small_kernel, cv::Size(9, 9), GAUSIAN_KERNEL_SIZE_SMALL);
+    // gray_img is already blurred
 
     cv::Mat smoothed_img_with_large_kernel;
     cv::GaussianBlur(gray_img, smoothed_img_with_large_kernel, cv::Size(9, 9), GAUSIAN_KERNEL_SIZE_LARGE);
 
-    cv::Mat differential_gausian_img = smoothed_img_with_small_kernel - smoothed_img_with_large_kernel;
+    cv::Mat differential_gausian_img = gray_img - smoothed_img_with_large_kernel;
 
     return differential_gausian_img;
 }
@@ -183,30 +182,46 @@ void Frame::calculateDiscreteAngleEdgeIntensity(const cv::Mat& laplacian_img,
     }
 }
 
-std::vector<EdgePoint> Frame::getHighIntensityEdgePoints(const cv::Mat& laplacian_img_in,
-                                                         const float min_intensity_threshold,
-                                                         const int max_points_num)
+std::vector<EdgePoint> Frame::getHighIntensityEdgePoints(const float min_intensity_threshold)
 {
-    // clone the laplacian image
-    cv::Mat laplacian_img = laplacian_img_in.clone();
-
     std::vector<EdgePoint> edge_points;
 
-    for (int i = 0; i < max_points_num; i++) {
-        double min_intensity, max_intensity;
-        cv::Point min_loc, max_loc;
-        cv::minMaxLoc(laplacian_img, &min_intensity, &max_intensity, &min_loc, &max_loc);
+    int block_width = laplacian_img_.cols / BLOCK_NUM_X;
+    int block_height = laplacian_img_.rows / BLOCK_NUM_Y;
+    
+    for (int i = 0; i < BLOCK_NUM_X; i++) {
+        for (int j = 0; j < BLOCK_NUM_Y; j++) {
+            cv::Rect block_rect(i * block_width, j * block_height, block_width, block_height);
+            cv::Mat block = laplacian_img_(block_rect);
 
-        if (max_intensity < min_intensity_threshold) {
-            break;
+            // get max intensity point
+            double min_intensity, max_intensity;
+            cv::Point min_loc, max_loc;
+
+            int max_try_count = 3;
+            for (int try_count = 0; try_count < max_try_count; try_count++) {
+
+                cv::minMaxLoc(block, &min_intensity, &max_intensity, &min_loc, &max_loc);
+    
+                if (max_intensity < min_intensity_threshold) {
+                    continue;
+                }
+
+                // ignore edge pixels of the block since they could be not local maximum
+                if (max_loc.x == 0 || max_loc.y == 0 || max_loc.x == block_width - 1 || max_loc.y == block_height - 1) {
+                    // set the intensity of the max_loc to 0
+                    block.at<float>(max_loc) = 0;
+                    continue;
+                }
+
+                cv::Point2f max_loc_in_img = cv::Point2f(max_loc.x + i * block_width, max_loc.y + j * block_height);
+                EdgePoint edge_point = EdgePoint(max_loc_in_img, getGradient(max_loc_in_img));
+    
+                edge_points.push_back(edge_point);
+
+                break;
+            }
         }
-
-        EdgePoint edge_point = EdgePoint(cv::Point2f(max_loc.x, max_loc.y), getGradient(max_loc));
-
-        edge_points.push_back(edge_point);
-
-        // remove the point from the image
-        cv::circle(laplacian_img, max_loc, MAX_POSITION_DIFF, cv::Scalar(0), -1);
     }
 
     return edge_points;
