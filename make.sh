@@ -15,5 +15,8 @@ rm result/*
 ./edge_test
 ./cpp_copy_test
 
+mkdir -p result/edge_point_check
+./edge_point_check_test
+
 cd ..
 

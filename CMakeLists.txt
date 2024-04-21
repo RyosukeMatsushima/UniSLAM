@@ -26,6 +26,7 @@ set(SOURCES
   src/frame.cpp
   src/edges_space.cpp
   src/edge.cpp
+  src/edge_point_check.cpp
 )
 
 include_directories(
@@ -89,6 +90,18 @@ add_executable(
 
 target_link_libraries(
     cpp_copy_test
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+)
+
+add_executable(
+    edge_point_check_test
+    test/edge_point_check_test.cpp
+    src/edge_point_check.cpp
+)
+
+target_link_libraries(
+    edge_point_check_test
     GTest::gtest_main
     ${OpenCV_LIBS}
 )
