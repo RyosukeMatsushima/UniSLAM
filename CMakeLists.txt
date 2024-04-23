@@ -27,6 +27,7 @@ set(SOURCES
   src/edges_space.cpp
   src/edge.cpp
   src/edge_point_check.cpp
+  src/discrete_angle_edge_intensity.cpp
 )
 
 include_directories(
@@ -102,6 +103,18 @@ add_executable(
 
 target_link_libraries(
     edge_point_check_test
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+)
+
+add_executable(
+    discrete_angle_edge_intensity_test
+    test/discrete_angle_edge_intensity_test.cpp
+    src/discrete_angle_edge_intensity.cpp
+)
+
+target_link_libraries(
+    discrete_angle_edge_intensity_test
     GTest::gtest_main
     ${OpenCV_LIBS}
 )

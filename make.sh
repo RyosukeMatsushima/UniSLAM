@@ -18,5 +18,8 @@ rm result/*
 mkdir -p result/edge_point_check
 ./edge_point_check_test
 
+mkdir -p result/discrete_angle_edge_intensity
+./discrete_angle_edge_intensity_test
+
 cd ..
 
