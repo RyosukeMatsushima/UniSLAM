@@ -11,6 +11,7 @@ struct EdgePoint {
     float angle;
     float magnitude;
     cv::Vec2f gradient;
+    cv::Vec2f direction;
 
     EdgePoint(const cv::Point2f& point,
               const cv::Vec2f& gradient);

@@ -22,6 +22,10 @@ EdgePoint::EdgePoint(const cv::Point2f& point,
     this->magnitude = cv::norm(gradient);
     this->angle = atan2(gradient[1], gradient[0]);
     this->gradient = gradient;
+
+    // direction is 90 degree rotated normalised gradient
+    this->direction[0] = -gradient[1] / magnitude;
+    this->direction[1] = gradient[0] / magnitude;
 }
 
 bool EdgePoint::isContinuous(const EdgePoint& new_point,
