@@ -126,12 +126,6 @@ TEST(WithTestImg, TestEdgeGausianImage) {
 
     // get key edge points
     std::vector<EdgePoint> key_edge_points = frame.getKeyEdgePoints();
-    // print key edge points
-    for (int i = 0; i < key_edge_points.size(); i++) {
-        std::cout << "key_edge_points[" << i << "] point: " << key_edge_points[i].point << std::endl;
-        std::cout << "key_edge_points[" << i << "] gradient: " << key_edge_points[i].gradient << std::endl;
-        std::cout << "" << std::endl;
-    }
 
     // Create a DebugView object
     DebugView debug_view(input_image);
