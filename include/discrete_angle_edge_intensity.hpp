@@ -12,7 +12,7 @@ public:
     cv::Mat getBlockIntensity(const cv::Point& center_point,
                               const int block_size,
                               const float angle,
-                              const float angle_range) const;
+                              int angle_range) const;
 
     int discretizeAngle(const float angle) const;
 

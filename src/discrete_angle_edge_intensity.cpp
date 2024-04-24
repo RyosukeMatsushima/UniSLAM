@@ -29,15 +29,19 @@ DiscreteAngleEdgeIntensity::DiscreteAngleEdgeIntensity(const cv::Mat& intensity_
 cv::Mat DiscreteAngleEdgeIntensity::getBlockIntensity(const cv::Point& center_point,
                                                       const int block_size,
                                                       const float angle,
-                                                      const float angle_range) const {
+                                                      int angle_range) const {
     int angle_index = discretizeAngle(angle);
-    int half_angle_range_index = discretizeAngle(angle_range / 2);
+
+    // angle range should be more than zero or zero
+    if ( angle_range < 0 ) {
+        angle_range = 0;
+    }
 
     cv::Rect block_rect(center_point.x - block_size / 2, center_point.y - block_size / 2, block_size, block_size);
 
     cv::Mat block_intensity = cv::Mat::zeros(block_size, block_size, CV_32F);
 
-    for (int i = -half_angle_range_index; i <= half_angle_range_index; i++) {
+    for (int i = -angle_range; i <= angle_range; i++) {
         int current_angle_index = (angle_index + i);
         if (current_angle_index < 0) {
             current_angle_index += discrete_angle_edge_intensity_.size();
