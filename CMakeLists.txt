@@ -40,6 +40,7 @@ add_executable(
   src/frame.cpp
   src/edge.cpp
   src/debug_view.cpp
+  src/discrete_angle_edge_intensity.cpp
 )
 
 target_link_libraries(
@@ -115,6 +116,23 @@ add_executable(
 
 target_link_libraries(
     discrete_angle_edge_intensity_test
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+)
+
+add_executable(
+    edge_point_finder_test
+    test/edge_point_finder_test.cpp
+    src/discrete_angle_edge_intensity.cpp
+    src/edge_point_finder.cpp
+    src/edge_point_check.cpp
+    src/edge.cpp
+    src/frame.cpp
+    src/debug_view.cpp
+)
+
+target_link_libraries(
+    edge_point_finder_test
     GTest::gtest_main
     ${OpenCV_LIBS}
 )
