@@ -23,9 +23,10 @@ TEST(DiscreteAngleEdgeIntensityTest, TestDiscreteAngleEdgeIntensity) {
         gradient_angle_map.at<float>(i, i) = angle;
     }
 
-    DiscreteAngleEdgeIntensity discrete_angle_edge_intensity(intensity_map,
-                                                             gradient_angle_map,
-                                                             angle_resolution);
+    DiscreteAngleEdgeIntensity discrete_angle_edge_intensity;
+    discrete_angle_edge_intensity.setIntensityMap(intensity_map,
+                                                  gradient_angle_map,
+                                                  angle_resolution);
 
     // test the discretizeAngle function with angle range 0
     for (int i = 2; i < window_size - 2; i++) {
@@ -83,9 +84,10 @@ TEST(DiscretizeAngleTest, TestDiscretizeAngle) {
     float angle_resolution = 0.1f;
     cv::Mat intensity_map = cv::Mat::zeros(1, 1, CV_32F);
     cv::Mat gradient_angle_map = cv::Mat::zeros(1, 1, CV_32F);
-    DiscreteAngleEdgeIntensity discrete_angle_edge_intensity(intensity_map,
-                                                             gradient_angle_map,
-                                                             angle_resolution);
+    DiscreteAngleEdgeIntensity discrete_angle_edge_intensity;
+    discrete_angle_edge_intensity.setIntensityMap(intensity_map,
+                                                  gradient_angle_map,
+                                                  angle_resolution);
 
     // test the discretizeAngle function with small range of angle
     for (int i = 0; i < 10; i++) {

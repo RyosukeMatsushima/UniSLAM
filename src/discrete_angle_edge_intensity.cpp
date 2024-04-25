@@ -1,10 +1,13 @@
 
 #include "discrete_angle_edge_intensity.hpp"
 
+DiscreteAngleEdgeIntensity::DiscreteAngleEdgeIntensity() {
+}
+
 // angle should be in the range of [0, 2 * M_PI]
-DiscreteAngleEdgeIntensity::DiscreteAngleEdgeIntensity(const cv::Mat& intensity_map,
-                                                       const cv::Mat& gradient_angle_map,
-                                                       const float angle_resolution) {
+void DiscreteAngleEdgeIntensity::setIntensityMap(const cv::Mat& intensity_map,
+                                                 const cv::Mat& gradient_angle_map,
+                                                 const float angle_resolution) {
     angle_resolution_ = angle_resolution;
 
     // calculate the discrete angle edge intensity

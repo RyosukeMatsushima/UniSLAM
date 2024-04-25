@@ -18,6 +18,9 @@ Frame::Frame(const cv::Mat& input_img)
 
     calculateGradientAngleImage(gradient_x_img_, gradient_y_img_, gradient_angle_img_);
 
+    discreteAngleEdgeIntensity.setIntensityMap(laplacian_img_, gradient_angle_img_, MAX_ANGLE_DIFF);
+
+    // TODO: remove this
     calculateDiscreteAngleEdgeIntensity(laplacian_img_, gradient_angle_img_, discrete_angle_edge_intensity_);
 }
 
@@ -80,7 +83,7 @@ bool Frame::getMatchedEdgePoints(const EdgePoint& key_edge_point,
     return false;
 }
 
-cv::Vec2f Frame::getGradient(const cv::Point2f& point)
+cv::Vec2f Frame::getGradient(const cv::Point2f& point) const
 {
     // read the gradient from the gradient images
     float gradient_x = gradient_x_img_.at<float>(point);
@@ -154,7 +157,7 @@ void Frame::calculateGradientAngleImage(const cv::Mat& gradient_x_img,
                                         cv::Mat& gradient_angle_img)
 {
     cv::Mat magnitude_img; // not used
-    cv::cartToPolar(gradient_x_img, gradient_y_img, magnitude_img, gradient_angle_img, true);
+    cv::cartToPolar(gradient_x_img, gradient_y_img, magnitude_img, gradient_angle_img, false);
 }
 
 void Frame::calculateDiscreteAngleEdgeIntensity(const cv::Mat& laplacian_img,

@@ -4,12 +4,13 @@
 #include <opencv2/opencv.hpp>
 
 #include "edge.h"
+#include "discrete_angle_edge_intensity.hpp"
 
 #define EDGE_THRESHOLD 0.0007f
 #define GAUSIAN_KERNEL_SIZE_SMALL 1.0f
 #define GAUSIAN_KERNEL_SIZE_LARGE 20.0f
 
-#define MAX_ANGLE_DIFF 0.5f // radians
+#define MAX_ANGLE_DIFF 0.2f // radians
 #define MAX_POSITION_DIFF 40 // pixels
 
 #define MIN_INTENSITY_THRESHOLD 0.2f // max intensity times this value
@@ -40,7 +41,10 @@ public:
                               const int window_size,
                               std::vector<EdgePoint>& matched_edge_points);
 
-    cv::Vec2f getGradient(const cv::Point2f& point);
+    cv::Vec2f getGradient(const cv::Point2f& point) const;
+
+    // TODO: recheck this usage
+    DiscreteAngleEdgeIntensity discreteAngleEdgeIntensity;
 
 private:
     cv::Mat gray_img_;
@@ -55,6 +59,7 @@ private:
 
     cv::Mat gradient_angle_img_;
 
+    // TODO: remove this
     std::vector<cv::Mat> discrete_angle_edge_intensity_;
 
     cv::Mat confirmGrayImage(const cv::Mat& input_img);
