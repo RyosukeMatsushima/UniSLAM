@@ -22,6 +22,7 @@ mkdir -p result/discrete_angle_edge_intensity
 ./discrete_angle_edge_intensity_test
 
 mkdir -p result/edge_point_finder
+rm result/edge_point_finder/*
 ./edge_point_finder_test
 
 cd ..
