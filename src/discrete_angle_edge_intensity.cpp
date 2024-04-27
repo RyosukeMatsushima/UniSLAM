@@ -31,9 +31,9 @@ void DiscreteAngleEdgeIntensity::setIntensityMap(const cv::Mat& intensity_map,
 
 cv::Mat DiscreteAngleEdgeIntensity::getBlockIntensity(const cv::Point& center_point,
                                                       const int block_size,
-                                                      const float angle,
+                                                      const float gradient_angle,
                                                       int angle_range) const {
-    int angle_index = discretizeAngle(angle);
+    int angle_index = discretizeAngle(gradient_angle);
 
     // angle range should be more than zero or zero
     if ( angle_range < 0 ) {
