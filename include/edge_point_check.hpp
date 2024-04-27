@@ -2,8 +2,9 @@
 #define EDGE_POINT_CHECK_HPP
 
 #define EDGE_WIDTH 3
-#define EDGE_THRESHOLD_RATIO 0.5
-#define MIN_EDGE_PURITY_THRESHOLD 0.6f
+#define EDGE_THRESHOLD_RATIO 0.8
+#define MIN_EDGE_PURITY_THRESHOLD 0.7f
+#define MIN_EDGE_PIXEL_COUNT_RATE 0.4f  // shorter window size * this value is the minimum edge pixel count
 
 #include <opencv2/opencv.hpp>
 

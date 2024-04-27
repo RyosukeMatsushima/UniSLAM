@@ -29,7 +29,9 @@ bool EdgePointCheck::is_valid() const
     // check edge purity
     float edge_purity = float(over_threshold_count_in_edge) / float(total_over_threshold_count);
 
-    return edge_purity > MIN_EDGE_PURITY_THRESHOLD;
+    int edge_pixel_count_threshold = std::min(masked_intensity_map.cols, masked_intensity_map.rows) * MIN_EDGE_PIXEL_COUNT_RATE;
+
+    return (edge_purity > MIN_EDGE_PURITY_THRESHOLD) && (over_threshold_count_in_edge > edge_pixel_count_threshold);
 }
 
 int EdgePointCheck::over_threshold_count(const cv::Mat& intensity_map, float threshold) const
