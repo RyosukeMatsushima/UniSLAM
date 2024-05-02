@@ -14,15 +14,11 @@ void DiscreteAngleEdgeIntensity::setIntensityMap(const cv::Mat& intensity_map,
     int num_discrete_angles = int(2 * M_PI / angle_resolution_);
 
     cv::Mat shifted_angle_map = gradient_angle_map + angle_resolution_ / 2;
-    // make sure the angle is in the range of [0, 2 * M_PI]
-    cv::Mat overflow_mask = shifted_angle_map >= 2 * M_PI;
-    overflow_mask.convertTo(overflow_mask, CV_32F);
-    overflow_mask += 2 * M_PI;
 
     for (int i = 0; i < num_discrete_angles; i++) {
         float angle = i * angle_resolution_;
         cv::Mat mask = (shifted_angle_map >= angle) & (shifted_angle_map < angle + angle_resolution_);
-        cv::Mat intensity;
+        cv::Mat intensity = cv::Mat::zeros(intensity_map.size(), CV_32F);
         intensity_map.copyTo(intensity, mask);
         discrete_angle_edge_intensity_.push_back(intensity);
     }

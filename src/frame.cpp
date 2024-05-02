@@ -132,6 +132,12 @@ void Frame::calculateGradientAngleImage(const cv::Mat& gradient_x_img,
                                         cv::Mat& gradient_angle_img)
 {
     cv::Mat magnitude_img; // not used
+
+    // angle is in the range of [0, 2 * M_PI]
     cv::cartToPolar(gradient_x_img, gradient_y_img, magnitude_img, gradient_angle_img, false);
+
+    // set invalid angle -1 if gradient x and y are both 0
+    cv::Mat invalid_value_mask = (gradient_x_img == 0) & (gradient_y_img == 0);
+    gradient_angle_img.setTo(-1, invalid_value_mask);
 }
 
