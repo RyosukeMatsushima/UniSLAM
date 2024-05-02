@@ -20,7 +20,14 @@ EdgePoint::EdgePoint(const cv::Point2f& point,
 {
     this->point = point;
     this->magnitude = cv::norm(gradient);
+
+    // angle range is 0 to 2pi
     this->angle = atan2(gradient[1], gradient[0]);
+    if (this->angle < 0)
+    {
+        this->angle += 2 * M_PI;
+    }
+
     this->gradient = gradient;
 
     // direction is 90 degree rotated normalised gradient

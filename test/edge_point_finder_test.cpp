@@ -39,11 +39,31 @@ std::string getFileName(std::string name, float angle) {
     return RESULT_IMAGE_PATH + name + img_name;
 }
 
+bool checkEdgePointAngle(std::vector<EdgePoint> edge_points, float angle, float threshold) {
+    for (EdgePoint edge_point : edge_points) {
+        float diff = std::abs(edge_point.angle - angle);
+
+        // allow the difference to be 2 * M_PI
+        if (diff + threshold > 2 * M_PI) {
+            diff -= 2 * M_PI;
+        }
+
+        if (diff > threshold) {
+            std::cout << "Angle: " << edge_point.angle << " Expected: " << angle << " Threshold: " << threshold << std::endl;
+            std::cout << "gradient: " << edge_point.gradient << std::endl;
+            std::cout << "point: " << edge_point.point << std::endl;
+            return false;
+        }
+    }
+    return true;
+}
+
 TEST(WithSimpleLine, TestEdgePointFinder) {
     int image_width = 200;
     int edge_find_window_size = 30;
+    float angle_resolution = M_PI / 12;
 
-    for (float gradient_angle=0.0f; gradient_angle < 2 * M_PI; gradient_angle += M_PI / 6) {
+    for (float gradient_angle=0.0f; gradient_angle < 2 * M_PI; gradient_angle += angle_resolution) {
 
         cv::Mat input_image = cv::Mat::zeros(image_width, image_width, CV_32F);
 
@@ -78,9 +98,13 @@ TEST(WithSimpleLine, TestEdgePointFinder) {
 
         // result should be true
         ASSERT_TRUE(result);
+        ASSERT_TRUE(checkEdgePointAngle({edge_point}, gradient_angle, angle_resolution));
 
         // search every area
         std::vector<EdgePoint> edge_points = searchEveryArea(frame, edge_find_window_size, gradient_angle);
+
+        // check the angle of the edge points
+        ASSERT_TRUE(checkEdgePointAngle(edge_points, gradient_angle, angle_resolution));
 
         // Create a DebugView
         DebugView debug_view2(input_image);
@@ -96,6 +120,7 @@ TEST(WithTestImg, TestEdgePointFinder) {
 
     int window_size = 1000;
     int edge_find_window_size = 30;
+    float angle_resolution = M_PI / 12;
 
     // create a black image
     cv::Mat test_image = cv::Mat::zeros(window_size, window_size, CV_8UC3);
@@ -114,11 +139,12 @@ TEST(WithTestImg, TestEdgePointFinder) {
     cv::cvtColor(test_image, input_image, cv::COLOR_BGR2GRAY);
     Frame frame(input_image);
 
-    for (double angle = 0; angle < 2 * M_PI; angle += M_PI / 4) {
+    for (double angle = 0; angle < 2 * M_PI; angle += angle_resolution) {
         // search for the edge point every edge_find_window_size pixels and 30 degrees
         std::vector<EdgePoint> edge_points = searchEveryArea(frame, edge_find_window_size, angle);
 
-        std::cout << "Number of edge points: " << edge_points.size() << std::endl;
+        // check the angle of the edge points
+        ASSERT_TRUE(checkEdgePointAngle(edge_points, angle, angle_resolution));
 
         // Create a DebugView
         DebugView debug_view(input_image);
@@ -126,6 +152,38 @@ TEST(WithTestImg, TestEdgePointFinder) {
 
         // Save the image
         cv::imwrite(getFileName("edge_points_with_test_img", angle), debug_view.getDebugImage());
+    }
+}
+
+TEST(WithCircleImg, TestEdgePointFinder) {
+
+    int window_size = 1000;
+    int edge_find_window_size = 30;
+    float angle_resolution = M_PI / 6;
+
+    // create a black image
+    cv::Mat test_image = cv::Mat::zeros(window_size, window_size, CV_8UC3);
+    // draw a blue circle
+    cv::circle(test_image, cv::Point(500, 500), 400, cv::Scalar(255, 0, 0), -1);
+
+    // Create a Frame object
+    cv::Mat input_image;
+    cv::cvtColor(test_image, input_image, cv::COLOR_BGR2GRAY);
+    Frame frame(input_image);
+
+    for (double angle = 0; angle < 2 * M_PI; angle += angle_resolution) {
+        // search for the edge point every edge_find_window_size pixels and 30 degrees
+        std::vector<EdgePoint> edge_points = searchEveryArea(frame, edge_find_window_size, angle);
+
+        // Create a DebugView
+        DebugView debug_view(input_image);
+        debug_view.drawEdgePoints(edge_points);
+
+        // Save the image
+        cv::imwrite(getFileName("edge_points_with_circle_img", angle), debug_view.getDebugImage());
+
+        // check the angle of the edge points
+        ASSERT_TRUE(checkEdgePointAngle(edge_points, angle, angle_resolution));
     }
 }
 
@@ -142,12 +200,14 @@ TEST(WithCameraImg, TestEdgePointFinder) {
     EdgePointFinder edge_point_finder;
 
     int edge_find_window_size = 40;
+    float angle_resolution = M_PI / 12;
 
-    for (double angle = 0; angle < 2 * M_PI; angle += M_PI / 4) {
+    for (double angle = 0; angle < 2 * M_PI; angle += angle_resolution) {
         // search for the edge point every edge_find_window_size pixels and 30 degrees
         std::vector<EdgePoint> edge_points = searchEveryArea(frame, edge_find_window_size, angle);
 
-        std::cout << "Number of edge points: " << edge_points.size() << std::endl;
+        // check the angle of the edge points
+        ASSERT_TRUE(checkEdgePointAngle(edge_points, angle, angle_resolution));
 
         // Create a DebugView
         DebugView debug_view(input_image);
