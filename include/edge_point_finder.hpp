@@ -17,7 +17,8 @@ public:
                                   const int window_size,
                                   bool& result) const;
 
-    cv::Point find_max_intensity_point(const cv::Mat& intensity_map) const;
+    cv::Point find_max_intensity_point(const cv::Mat& intensity_map,
+                                       bool& is_valid) const;
 };
 
 #endif // EDGE_POINT_FINDER_HPP

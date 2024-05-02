@@ -15,7 +15,14 @@ EdgePoint EdgePointFinder::find_key_edge_point(const Frame frame,
 
     cv::Mat intensity_block = frame.discreteAngleEdgeIntensity.getBlockIntensity(entry_point, window_size, gradient_angle, 0);
 
-    cv::Point max_intensity_point_in_window = find_max_intensity_point(intensity_block);
+    bool is_valid;
+    cv::Point max_intensity_point_in_window = find_max_intensity_point(intensity_block, is_valid);
+
+    if (!is_valid) {
+        result = false;
+        return EdgePoint(cv::Point(0, 0), cv::Vec2f(0, 0));
+    }
+
     cv::Point max_intensity_point = cv::Point(max_intensity_point_in_window.x + entry_point.x - window_size / 2,
                                               max_intensity_point_in_window.y + entry_point.y - window_size / 2);
 
@@ -34,11 +41,14 @@ EdgePoint EdgePointFinder::find_key_edge_point(const Frame frame,
     return edgePoint;
 }
 
-cv::Point EdgePointFinder::find_max_intensity_point(const cv::Mat& intensity_map) const
+cv::Point EdgePointFinder::find_max_intensity_point(const cv::Mat& intensity_map,
+                                                    bool& is_valid) const
 {
     cv::Point min_intensity_point, max_intensity_point;
     double min_intensity, max_intensity;
     cv::minMaxLoc(intensity_map, &min_intensity, &max_intensity, &min_intensity_point, &max_intensity_point);
+
+    is_valid = max_intensity > 0;
 
     return max_intensity_point;
 }
