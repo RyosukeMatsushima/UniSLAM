@@ -18,7 +18,7 @@ Frame::Frame(const cv::Mat& input_img)
 
     calculateGradientAngleImage(gradient_x_img_, gradient_y_img_, gradient_angle_img_);
 
-    calculateDiscreteAngleEdgeIntensity(laplacian_img_, gradient_angle_img_, discrete_angle_edge_intensity_);
+    discreteAngleEdgeIntensity.setIntensityMap(laplacian_img_, gradient_angle_img_, MAX_ANGLE_DIFF);
 }
 
 cv::Mat Frame::getGrayImage() const
@@ -51,28 +51,6 @@ cv::Mat Frame::getGradientAngleImage() const
     return gradient_angle_img_;
 }
 
-std::vector<cv::Mat> Frame::getDiscreteAngleEdgeIntensity() const
-{
-    return discrete_angle_edge_intensity_;
-}
-
-std::vector<EdgePoint> Frame::getKeyEdgePoints()
-{
-    double min_intensity, max_intensity;
-    cv::Point min_loc, max_loc;
-    cv::minMaxLoc(laplacian_img_, &min_intensity, &max_intensity, &min_loc, &max_loc);
-
-    float min_intensity_threshold = max_intensity * MIN_INTENSITY_THRESHOLD;
-
-    std::vector<EdgePoint> key_edge_points;
-
-    for (cv::Mat& edge_intensity : discrete_angle_edge_intensity_) {
-        std::vector<EdgePoint> edge_points = getHighIntensityEdgePoints(min_intensity_threshold);
-        key_edge_points.insert(key_edge_points.end(), edge_points.begin(), edge_points.end());
-    }
-    return key_edge_points;
-}
-
 bool Frame::getMatchedEdgePoints(const EdgePoint& key_edge_point,
                                  const int window_size,
                                  std::vector<EdgePoint>& matched_edge_points)
@@ -80,7 +58,7 @@ bool Frame::getMatchedEdgePoints(const EdgePoint& key_edge_point,
     return false;
 }
 
-cv::Vec2f Frame::getGradient(const cv::Point2f& point)
+cv::Vec2f Frame::getGradient(const cv::Point2f& point) const
 {
     // read the gradient from the gradient images
     float gradient_x = gradient_x_img_.at<float>(point);
@@ -154,77 +132,12 @@ void Frame::calculateGradientAngleImage(const cv::Mat& gradient_x_img,
                                         cv::Mat& gradient_angle_img)
 {
     cv::Mat magnitude_img; // not used
-    cv::cartToPolar(gradient_x_img, gradient_y_img, magnitude_img, gradient_angle_img, true);
+
+    // angle is in the range of [0, 2 * M_PI]
+    cv::cartToPolar(gradient_x_img, gradient_y_img, magnitude_img, gradient_angle_img, false);
+
+    // set invalid angle -1 if gradient x and y are both 0
+    cv::Mat invalid_value_mask = (gradient_x_img == 0) & (gradient_y_img == 0);
+    gradient_angle_img.setTo(-1, invalid_value_mask);
 }
-
-void Frame::calculateDiscreteAngleEdgeIntensity(const cv::Mat& laplacian_img,
-                                                const cv::Mat& gradient_angle_img,
-                                                std::vector<cv::Mat>& discrete_angle_edge_intensity)
-{
-    int num_discrete_angles = int(2 * M_PI / MAX_ANGLE_DIFF);
-
-    // normalize the gradient angle
-    cv::Mat normalized_gradient_angle;
-    cv::normalize(gradient_angle_img, normalized_gradient_angle, 0, num_discrete_angles - 1, cv::NORM_MINMAX, CV_8U);
-
-    // calculate the edge intensity for each discrete angle
-    for (int i = 0; i < num_discrete_angles; i++) {
-        cv::Mat mask = (normalized_gradient_angle == i);
-        cv::Mat edge_intensity;
-
-        // format to CV_32F
-        mask.convertTo(mask, CV_32F);
-        // normalize the mask
-        cv::normalize(mask, mask, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32F);
-
-        cv::multiply(laplacian_img, mask, edge_intensity);
-        discrete_angle_edge_intensity.push_back(edge_intensity);
-    }
-}
-
-std::vector<EdgePoint> Frame::getHighIntensityEdgePoints(const float min_intensity_threshold)
-{
-    std::vector<EdgePoint> edge_points;
-
-    int block_width = laplacian_img_.cols / BLOCK_NUM_X;
-    int block_height = laplacian_img_.rows / BLOCK_NUM_Y;
-    
-    for (int i = 0; i < BLOCK_NUM_X; i++) {
-        for (int j = 0; j < BLOCK_NUM_Y; j++) {
-            cv::Rect block_rect(i * block_width, j * block_height, block_width, block_height);
-            cv::Mat block = laplacian_img_(block_rect);
-
-            // get max intensity point
-            double min_intensity, max_intensity;
-            cv::Point min_loc, max_loc;
-
-            int max_try_count = 3;
-            for (int try_count = 0; try_count < max_try_count; try_count++) {
-
-                cv::minMaxLoc(block, &min_intensity, &max_intensity, &min_loc, &max_loc);
-    
-                if (max_intensity < min_intensity_threshold) {
-                    continue;
-                }
-
-                // ignore edge pixels of the block since they could be not local maximum
-                if (max_loc.x == 0 || max_loc.y == 0 || max_loc.x == block_width - 1 || max_loc.y == block_height - 1) {
-                    // set the intensity of the max_loc to 0
-                    block.at<float>(max_loc) = 0;
-                    continue;
-                }
-
-                cv::Point2f max_loc_in_img = cv::Point2f(max_loc.x + i * block_width, max_loc.y + j * block_height);
-                EdgePoint edge_point = EdgePoint(max_loc_in_img, getGradient(max_loc_in_img));
-    
-                edge_points.push_back(edge_point);
-
-                break;
-            }
-        }
-    }
-
-    return edge_points;
-}
-
 

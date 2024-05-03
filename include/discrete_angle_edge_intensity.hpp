@@ -5,19 +5,21 @@
 
 class DiscreteAngleEdgeIntensity {
 public:
-    DiscreteAngleEdgeIntensity(const cv::Mat& intensity_map,
-                               const cv::Mat& gradient_angle_map,
-                               const float angle_resolution);
+    DiscreteAngleEdgeIntensity();
+
+    void setIntensityMap(const cv::Mat& intensity_map,
+                    const cv::Mat& gradient_angle_map,
+                    const float angle_resolution);
 
     cv::Mat getBlockIntensity(const cv::Point& center_point,
                               const int block_size,
-                              const float angle,
-                              const float angle_range) const;
+                              const float gradient_angle,
+                              int angle_range) const;
 
     int discretizeAngle(const float angle) const;
 
 private:
-    float angle_resolution_;
+    float angle_resolution_ = 0;
 
     std::vector<cv::Mat> discrete_angle_edge_intensity_;
 };
