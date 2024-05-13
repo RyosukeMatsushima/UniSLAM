@@ -19,6 +19,9 @@ enable_testing()
 # Find OpenCV package
 find_package(OpenCV REQUIRED)
 
+# Find Eigen package
+find_package(Eigen3 REQUIRED)
+
 set(SOURCES
   src/main.cpp
   src/MyClass.cpp
@@ -135,5 +138,18 @@ target_link_libraries(
     edge_point_finder_test
     GTest::gtest_main
     ${OpenCV_LIBS}
+)
+
+add_executable(
+    edge_3d_test
+    test/edge_3d_test.cpp
+    src/edge_3d.cpp
+)
+
+target_link_libraries(
+    edge_3d_test
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+    Eigen3::Eigen
 )
 
