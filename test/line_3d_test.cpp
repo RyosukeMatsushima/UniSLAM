@@ -25,3 +25,21 @@ TEST(Line3DTest, TestLine3D)
     ASSERT_NEAR(end_point(1), 0, 1e-6);
     ASSERT_NEAR(end_point(2), 0, 1e-6);
 }
+
+// Test the get_closest_points_between function
+TEST(Line3DTest, TestDistanceBetween)
+{
+    // Create two Line3D objects
+    Line3D line1(0, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(1, 0, 0), 1.0);
+    Line3D line2(1, Eigen::Vector3f(0, 0, 1), Eigen::Vector3f(0, 1, 0), 1.0);
+
+    // Compute the distance between the two lines
+    float distance1, distance2;
+    bool result = Line3D::get_closest_points_between(line1, line2, distance1, distance2);
+    ASSERT_TRUE(result);
+    ASSERT_NEAR(distance1, 0, 1e-6);
+    ASSERT_NEAR(distance2, 0, 1e-6);
+
+    float distance_between = (line1.get_point_at(distance1) - line2.get_point_at(distance2)).norm();
+    ASSERT_NEAR(distance_between, 1, 1e-6);
+}

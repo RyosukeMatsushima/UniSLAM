@@ -40,3 +40,29 @@ Eigen::Vector3f Line3D::get_point_at(const float distance_from_start) const
     return start_point_ + distance_from_start * direction_;
 }
 
+bool Line3D::get_closest_points_between(const Line3D& line1,
+                                        const Line3D& line2,
+                                        float& distance1,
+                                        float& distance2)
+{
+    Eigen::Vector3f w0 = line1.start_point_ - line2.start_point_;
+    float a = line1.direction_.dot(line1.direction_);
+    float b = line1.direction_.dot(line2.direction_);
+    float c = line2.direction_.dot(line2.direction_);
+    float d = line1.direction_.dot(w0);
+    float e = line2.direction_.dot(w0);
+
+    float denominator = a * c - b * b;
+    if (denominator < 1e-6) {
+        // Lines are parallel
+        return false;
+    }
+
+    distance1 = (b * e - c * d) / denominator;
+    distance2 = (a * e - b * d) / denominator;
+
+    Eigen::Vector3f p1 = line1.get_point_at(distance1);
+    Eigen::Vector3f p2 = line2.get_point_at(distance2);
+
+    return true;
+}

@@ -19,6 +19,11 @@ public:
 
     Eigen::Vector3f get_point_at(const float distance_from_start) const;
 
+    static bool get_closest_points_between(const Line3D& line1,
+                                           const Line3D& line2,
+                                           float& distance1,
+                                           float& distance2);
+
 private:
     int id_;
 
