@@ -1,14 +1,14 @@
-#ifndef EDGE_3D_HPP
-#define EDGE_3D_HPP
+#ifndef LINE_3D_HPP
+#define LINE_3D_HPP
 
 #include <Eigen/Dense>
 
 #include <opencv2/opencv.hpp>
 
-class Edge3D {
+class Line3D {
 public:
 
-    Edge3D(const int id,
+    Line3D(const int id,
            const Eigen::Vector3f start_point,
            const Eigen::Vector3f direction,
            const float length);
@@ -29,4 +29,4 @@ private:
     float length_;
 };
 
-#endif // EDGE_3D_HPP
+#endif // LINE_3D_HPP

@@ -14,7 +14,7 @@ rm result/*
 ./polygons_space_test
 ./edge_test
 ./cpp_copy_test
-./edge_3d_test
+./line_3d_test
 
 mkdir -p result/edge_point_check
 ./edge_point_check_test

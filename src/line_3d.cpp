@@ -1,6 +1,6 @@
-#include "edge_3d.hpp"
+#include "line_3d.hpp"
 
-Edge3D::Edge3D(const int id,
+Line3D::Line3D(const int id,
                const Eigen::Vector3f start_point,
                const Eigen::Vector3f direction,
                const float length)
@@ -11,7 +11,7 @@ Edge3D::Edge3D(const int id,
 {
 }
 
-void Edge3D::add_force(const Eigen::Vector3f force,
+void Line3D::add_force(const Eigen::Vector3f force,
                        const Eigen::Vector3f torque,
                        const float force_center_from_start)
 {
@@ -35,7 +35,7 @@ void Edge3D::add_force(const Eigen::Vector3f force,
     }
 }
 
-Eigen::Vector3f Edge3D::get_point_at(const float distance_from_start) const
+Eigen::Vector3f Line3D::get_point_at(const float distance_from_start) const
 {
     return start_point_ + distance_from_start * direction_;
 }

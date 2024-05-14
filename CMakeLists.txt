@@ -141,13 +141,13 @@ target_link_libraries(
 )
 
 add_executable(
-    edge_3d_test
-    test/edge_3d_test.cpp
-    src/edge_3d.cpp
+    line_3d_test
+    test/line_3d_test.cpp
+    src/line_3d.cpp
 )
 
 target_link_libraries(
-    edge_3d_test
+    line_3d_test
     GTest::gtest_main
     ${OpenCV_LIBS}
     Eigen3::Eigen
