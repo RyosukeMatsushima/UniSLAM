@@ -17,7 +17,8 @@ run_test() {
 }
 
 # List of test executables
-tests=("frame"
+tests=(
+       "frame"
        "edges_space"
        "polygons_space"
        "edge"
@@ -25,7 +26,9 @@ tests=("frame"
        "line_3d"
        "edge_point_check"
        "discrete_angle_edge_intensity"
-       "edge_point_finder")
+       "edge_point_finder"
+       "frame_node"
+       )
 
 # Variable to keep track of overall test result
 overall_result=0

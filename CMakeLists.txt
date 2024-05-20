@@ -153,3 +153,20 @@ target_link_libraries(
     Eigen3::Eigen
 )
 
+add_executable(
+    frame_node_test
+    test/frame_node_test.cpp
+    src/frame_node.cpp
+    src/frame.cpp
+    src/edge.cpp
+    src/edge_point_check.cpp
+    src/edge_point_finder.cpp
+    src/discrete_angle_edge_intensity.cpp
+)
+
+target_link_libraries(
+    frame_node_test
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+)
+
