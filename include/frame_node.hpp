@@ -1,9 +1,6 @@
 #ifndef FRAME_NODE_HPP
 #define FRAME_NODE_HPP
 
-#define ANGLE_RESOLUTION 0.2f
-#define WINDOW_SIZE 50
-
 #include <opencv2/opencv.hpp>
 
 #include "frame.h"
@@ -14,20 +11,26 @@
 class FrameNode {
 public:
 
-    FrameNode(const cv::Mat& image);
+    FrameNode(const cv::Mat& image,
+              const int window_size,
+              const float angle_resolution);
 
     bool matchEdge(const EdgePoint& edge_point,
                    EdgePoint& matched_edge_point);
     
-    void addFixedEdgePoint(const EdgePoint& edge_point);
-
     std::vector<EdgePoint> findNewEdgePoints();
+
+    void addFixedEdgePoint(const EdgePoint& edge_point);
 
     std::vector<EdgePoint> getFixedEdgePoints() const;
 
     bool isKeyFrame() const;
 
 private:
+
+    const int window_size;
+
+    const float angle_resolution;
 
     std::vector<EdgePoint> fixed_edge_points;
 

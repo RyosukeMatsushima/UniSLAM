@@ -162,6 +162,7 @@ add_executable(
     src/edge_point_check.cpp
     src/edge_point_finder.cpp
     src/discrete_angle_edge_intensity.cpp
+    src/debug_view.cpp
 )
 
 target_link_libraries(
