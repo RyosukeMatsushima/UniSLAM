@@ -175,3 +175,15 @@ target_link_libraries(
     ${OpenCV_LIBS}
 )
 
+add_executable(
+    edge_point_test
+    test/edge_point_test.cpp
+    src/edge_point.cpp
+)
+
+target_link_libraries(
+    edge_point_test
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+)
+
