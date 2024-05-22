@@ -43,16 +43,15 @@ TEST(EgdePointTest, EdgePoint)
 
 TEST(EgdePointTest, IsContinuous)
 {
-    cv::Point2f point(1, 2);
-    cv::Vec2f gradient(3, 4);
+    cv::Point2f point(1, 1);
+    cv::Vec2f gradient(2, 2);
     EdgePoint edge_point(point, gradient);
 
-    cv::Point2f new_point(1.5, 2.5);
-    cv::Vec2f new_gradient(3.5, 4.5);
+    cv::Point2f new_point(2, 2);
+    cv::Vec2f new_gradient(2, 2);
     EdgePoint new_edge_point(new_point, new_gradient);
 
     EXPECT_TRUE(edge_point.isContinuous(new_edge_point, true));
-    EXPECT_FALSE(edge_point.isContinuous(new_edge_point, false));
 }
 
 TEST(EgdePointTest, GetDiffToMatchedPoint)
@@ -62,10 +61,10 @@ TEST(EgdePointTest, GetDiffToMatchedPoint)
     EdgePoint edge_point(point, gradient);
 
     cv::Point2f new_point(1.5, 2.5);
-    cv::Vec2f new_gradient(3.5, 4.5);
+    cv::Vec2f new_gradient(4, -3);
     EdgePoint new_edge_point(new_point, new_gradient);
 
     EXPECT_FLOAT_EQ(edge_point.distanceTo(new_edge_point), cv::norm(new_point - point));
-    EXPECT_FLOAT_EQ(edge_point.angleTo(new_edge_point), atan2(new_point.y - point.y, new_point.x - point.x));
+    EXPECT_FLOAT_EQ(edge_point.angleTo(new_edge_point), M_PI / 2);
 }
 

@@ -22,6 +22,7 @@ tests=(
        "edges_space"
        "polygons_space"
        "edge"
+       "edge_point"
        "cpp_copy"
        "line_3d"
        "edge_point_check"
