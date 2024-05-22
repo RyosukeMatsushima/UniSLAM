@@ -3,22 +3,9 @@
 
 #include <opencv2/opencv.hpp>
 
-#define CONTINUOUS_ANGLE_THRESHOLD 0.1f
-#define CONTINUOUS_DISTANCE_THRESHOLD 1.7f
+#include "edge_point.hpp"
 
-struct EdgePoint {
-    cv::Point2f point;
-    float angle;
-    float magnitude;
-    cv::Vec2f gradient;
-    cv::Vec2f direction;
 
-    EdgePoint(const cv::Point2f& point,
-              const cv::Vec2f& gradient);
-
-    bool isContinuous(const EdgePoint& new_point,
-                      bool is_to_back) const;
-};
 
 class Edge {
 public:

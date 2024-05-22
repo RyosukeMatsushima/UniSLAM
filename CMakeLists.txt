@@ -44,6 +44,7 @@ add_executable(
   src/edge.cpp
   src/debug_view.cpp
   src/discrete_angle_edge_intensity.cpp
+  src/edge_point.cpp
 )
 
 target_link_libraries(
@@ -80,6 +81,7 @@ add_executable(
   edge_test
   test/edge_test.cpp
   src/edge.cpp
+  src/edge_point.cpp
 )
 
 target_link_libraries(
@@ -130,6 +132,7 @@ add_executable(
     src/edge_point_finder.cpp
     src/edge_point_check.cpp
     src/edge.cpp
+    src/edge_point.cpp
     src/frame.cpp
     src/debug_view.cpp
 )
@@ -159,6 +162,7 @@ add_executable(
     src/frame_node.cpp
     src/frame.cpp
     src/edge.cpp
+    src/edge_point.cpp
     src/edge_point_check.cpp
     src/edge_point_finder.cpp
     src/discrete_angle_edge_intensity.cpp
