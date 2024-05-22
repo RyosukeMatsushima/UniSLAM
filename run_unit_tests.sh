@@ -36,12 +36,15 @@ overall_result=0
 
 cd build
 
+failed_tests=()
+
 # Loop through each test and run it
 for test_executable in "${tests[@]}"; do
     run_test $test_executable
     result=$?
     if [ $result -ne 0 ]; then
         overall_result=1
+        failed_tests+=($test_executable)
     fi
 done
 
@@ -51,5 +54,15 @@ cd ..
 if [ $overall_result -eq 0 ]; then
     echo "All tests passed!"
 else
-    echo "Some tests failed."
+    # Print error message with RED color
+    echo -e "\e[31mSome tests failed.\e[0m"
+
+    # Print failed tests
+    echo "Failed tests:"
+
+    for failed_test in "${failed_tests[@]}"; do
+        echo "-" $failed_test "_test"
+    done
+
+    echo -e "\e[31mTake it easy and fix the tests!\e[0m"
 fi
