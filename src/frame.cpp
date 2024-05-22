@@ -70,7 +70,6 @@ cv::Vec2f Frame::getGradient(const cv::Point2f& point) const
 
 cv::Mat Frame::confirmGrayImage(const cv::Mat& input_img)
 {
-    printf("input_img.type() = %d\n", input_img.type());
     // Check if the input image is empty
     if (input_img.empty()) {
         throw std::invalid_argument("Input image is empty!");
