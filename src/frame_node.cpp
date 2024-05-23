@@ -23,6 +23,42 @@ bool FrameNode::matchEdge(const EdgePoint& edge_point,
     return is_valid;
 }
 
+bool FrameNode::matchWith(const FrameNode& other_frame_node, bool& is_key_frame) {
+
+    int healthy_points_num = 0;
+    int matched_points_num = 0;
+
+    float distance_threshold = window_size * HEALTHY_DISTANCE_RATIO;
+    float angle_threshold = angle_resolution * HEALTHY_ANGLE_RATIO;
+
+    for (const EdgePoint& fixed_edge_point : other_frame_node.getFixedEdgePoints()) {
+        EdgePoint matched_edge_point(cv::Point2f(0, 0), cv::Vec2f(0, 0));
+        bool result = matchEdge(fixed_edge_point, matched_edge_point);
+
+        if (!result) continue;
+
+        addFixedEdgePoint(matched_edge_point);
+        matched_points_num++;
+
+        if (matched_edge_point.distanceTo(fixed_edge_point) > distance_threshold) continue;
+
+        if (matched_edge_point.angleTo(fixed_edge_point) > angle_threshold) continue;
+
+        healthy_points_num++;
+    }
+
+    int keyframe_edgepoint_num_threshold = other_frame_node.getFixedEdgePoints().size() * KEYFRAME_EDGEPOINT_NUM_RATIO;
+
+    if (matched_points_num <= MIN_EDGEPOINT_NUM) { //TODO: reconsider this
+        is_key_frame = false;
+        return false;
+    }
+
+    is_key_frame = healthy_points_num <= keyframe_edgepoint_num_threshold;
+
+    return true;
+}
+
 void FrameNode::addFixedEdgePoint(const EdgePoint& edge_point) {
     fixed_edge_points.push_back(edge_point);
 
@@ -56,9 +92,5 @@ std::vector<EdgePoint> FrameNode::findNewEdgePoints() {
 
 std::vector<EdgePoint> FrameNode::getFixedEdgePoints() const {
     return fixed_edge_points;
-}
-
-bool FrameNode::isKeyFrame() const {
-    return false;
 }
 

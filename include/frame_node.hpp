@@ -1,6 +1,12 @@
 #ifndef FRAME_NODE_HPP
 #define FRAME_NODE_HPP
 
+#define HEALTHY_DISTANCE_RATIO 0.2f // compare with window_size
+#define HEALTHY_ANGLE_RATIO 0.2f // compare with angle_resolution
+#define KEYFRAME_EDGEPOINT_NUM_RATIO 0.8f // compare with fixed_edge_points.size() in previous frame
+
+#define MIN_EDGEPOINT_NUM 1
+
 #include <opencv2/opencv.hpp>
 
 #include "frame.h"
@@ -17,14 +23,14 @@ public:
 
     bool matchEdge(const EdgePoint& edge_point,
                    EdgePoint& matched_edge_point);
-    
+
+    bool matchWith(const FrameNode& other_frame_node, bool& is_key_frame);
+
     std::vector<EdgePoint> findNewEdgePoints();
 
     void addFixedEdgePoint(const EdgePoint& edge_point);
 
     std::vector<EdgePoint> getFixedEdgePoints() const;
-
-    bool isKeyFrame() const;
 
 private:
 
