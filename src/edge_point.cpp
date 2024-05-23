@@ -58,7 +58,7 @@ bool EdgePoint::isContinuous(const EdgePoint& new_point,
 
 float EdgePoint::AngleDiff(const float angle1, const float angle2)
 {
-    float diff = angle1 - angle2;
+    float diff = angle2 - angle1;
     if (diff > M_PI)
     {
         diff -= 2 * M_PI;
@@ -70,6 +70,7 @@ float EdgePoint::AngleDiff(const float angle1, const float angle2)
     return diff;
 }
 
+// TODO: rename to convertToAngle
 float EdgePoint::toAngle(const cv::Vec2f& vec) const
 {
     float angle = atan2(vec[1], vec[0]);
@@ -80,6 +81,7 @@ float EdgePoint::toAngle(const cv::Vec2f& vec) const
     return angle;
 }
 
+// TODO: rename to convertToVec
 cv::Vec2f EdgePoint::toUnitVec(const float angle) const
 {
     return cv::Vec2f(cos(angle), sin(angle));
@@ -87,7 +89,9 @@ cv::Vec2f EdgePoint::toUnitVec(const float angle) const
 
 float EdgePoint::distanceTo(const EdgePoint& target) const
 {
-    return cv::norm(point - target.point);
+    cv::Vec2f diff = target.point - point;
+    // dot product of direction vector and diff vector
+    return abs(diff[0] * gradient[0] + diff[1] * gradient[1]) / magnitude;
 }
 
 float EdgePoint::angleTo(const EdgePoint& target) const
