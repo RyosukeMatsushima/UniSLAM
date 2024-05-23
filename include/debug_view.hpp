@@ -9,7 +9,8 @@ class DebugView {
 public:
     DebugView(const cv::Mat& base_img);
 
-    void drawEdgePoints(const std::vector<EdgePoint>& edge_points);
+    void drawEdgePoints(const std::vector<EdgePoint>& edge_points,
+                        const cv::Scalar& color = cv::Scalar(0, 255, 0));
 
     cv::Mat getDebugImage() const;
 
