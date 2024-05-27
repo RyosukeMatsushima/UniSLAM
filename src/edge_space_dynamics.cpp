@@ -5,6 +5,8 @@ EdgeSpaceDynamics::EdgeSpaceDynamics() {
 
 bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode> edge_nodes,
                                        Pose3D& frame_pose) {
+
+    frame_pose.translate(Eigen::Vector3f(0.0f, 0.0f, -1.0f));
     return true;
 }
 

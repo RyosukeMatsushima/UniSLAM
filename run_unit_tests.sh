@@ -31,6 +31,7 @@ tests=(
        "frame_node"
        "pose_3d"
        "edge_space_dynamics"
+       "force_calculation"
        )
 
 # Variable to keep track of overall test result

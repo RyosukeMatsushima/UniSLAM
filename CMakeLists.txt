@@ -213,3 +213,17 @@ target_link_libraries(
     Eigen3::Eigen
 )
 
+add_executable(
+    force_calculation_test
+    test/force_calculation_test.cpp
+    src/force_calculation.cpp
+    src/line_3d.cpp
+)
+
+target_link_libraries(
+    force_calculation_test
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+    Eigen3::Eigen
+)
+
