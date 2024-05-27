@@ -187,3 +187,16 @@ target_link_libraries(
     ${OpenCV_LIBS}
 )
 
+# Add the test executable
+add_executable(
+    pose_3d_test
+    test/pose_3d_test.cpp
+)
+
+target_link_libraries(
+    pose_3d_test
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+    Eigen3::Eigen
+)
+

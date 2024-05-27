@@ -29,6 +29,7 @@ tests=(
        "discrete_angle_edge_intensity"
        "edge_point_finder"
        "frame_node"
+       "pose_3d"
        )
 
 # Variable to keep track of overall test result
