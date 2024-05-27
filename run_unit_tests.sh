@@ -30,6 +30,7 @@ tests=(
        "edge_point_finder"
        "frame_node"
        "pose_3d"
+       "edge_space_dynamics"
        )
 
 # Variable to keep track of overall test result

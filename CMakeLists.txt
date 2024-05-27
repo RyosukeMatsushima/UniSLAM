@@ -200,3 +200,16 @@ target_link_libraries(
     Eigen3::Eigen
 )
 
+add_executable(
+    edge_space_dynamics_test
+    test/edge_space_dynamics_test.cpp
+    src/edge_space_dynamics.cpp
+)
+
+target_link_libraries(
+    edge_space_dynamics_test
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+    Eigen3::Eigen
+)
+
