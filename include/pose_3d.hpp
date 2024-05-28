@@ -4,7 +4,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 
-class Pose3D {
+struct Pose3D {
 public:
     Eigen::Vector3f position;
     Eigen::Quaternionf orientation;
@@ -26,6 +26,22 @@ public:
         transformation.block<3,3>(0,0) = orientation.toRotationMatrix();
         transformation.block<3,1>(0,3) = position;
         return transformation;
+    }
+
+    Eigen::Vector3f transformToWorld(const Eigen::Vector3f& point) const {
+        return (orientation * point) + position;
+    }
+
+    Eigen::Vector3f transformToLocal(const Eigen::Vector3f& point) const {
+        return orientation.inverse() * (point - position);
+    }
+
+    Eigen::Vector3f rotateVectorToWorld(const Eigen::Vector3f& vector) const {
+        return orientation * vector;
+    }
+
+    Eigen::Vector3f rotateVectorToLocal(const Eigen::Vector3f& vector) const {
+        return orientation.inverse() * vector;
     }
 };
 

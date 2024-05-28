@@ -47,3 +47,53 @@ TEST(Pose3DTest, TransformationMatrix) {
 
     EXPECT_TRUE(transformation.isApprox(expectedTransformation));
 }
+
+TEST(Pose3DTest, TransformToWorld) {
+
+    Pose3D pose;
+    pose.translate(Eigen::Vector3f(1.0f, 2.0f, 3.0f));
+    pose.rotate(Eigen::Vector3f(0.0f, 0.0f, 1.0f), M_PI / 2); // 45 degrees in radians
+
+    Eigen::Vector3f point(1.0f, 2.0f, 3.0f);
+    Eigen::Vector3f transformedPoint = pose.transformToWorld(point);
+
+    Eigen::Vector3f expectedTransformedPoint(-1.0f, 3.0f, 6.0f);
+    EXPECT_TRUE(transformedPoint.isApprox(expectedTransformedPoint));
+}
+
+TEST(Pose3DTest, TransformToLocal) {
+    Pose3D pose;
+    pose.translate(Eigen::Vector3f(1.0f, 2.0f, 3.0f));
+    pose.rotate(Eigen::Vector3f(0.0f, 0.0f, 1.0f), M_PI / 2); // 90 degrees in radians
+
+    Eigen::Vector3f point(-1.0f, 3.0f, 6.0f);
+    Eigen::Vector3f transformedPoint = pose.transformToLocal(point);
+
+    Eigen::Vector3f expectedTransformedPoint(1.0f, 2.0f, 3.0f);
+    EXPECT_TRUE(transformedPoint.isApprox(expectedTransformedPoint));
+}
+
+TEST(Pose3DTest, RotateVectorToWorld) {
+    Pose3D pose;
+    pose.translate(Eigen::Vector3f(-1.0f, 13.0f, 3.0f)); // doesn't matter
+    pose.rotate(Eigen::Vector3f(0.0f, 0.0f, 1.0f), M_PI / 4); // 45 degrees in radians
+
+    Eigen::Vector3f vector(1.0f, 0.0f, 0.0f);
+    Eigen::Vector3f rotatedVector = pose.rotateVectorToWorld(vector);
+
+    Eigen::Vector3f expectedRotatedVector(0.70710678118f, 0.70710678118f, 0.0f);
+    EXPECT_TRUE(rotatedVector.isApprox(expectedRotatedVector));
+}
+
+TEST(Pose3DTest, RotateVectorToLocal) {
+    Pose3D pose;
+    pose.translate(Eigen::Vector3f(1.0f, 2.0f, 3.0f)); // doesn't matter
+    pose.rotate(Eigen::Vector3f(0.0f, 0.0f, 1.0f), M_PI / 4); // 45 degrees in radians
+
+    Eigen::Vector3f vector(0.70710678118f, 0.70710678118f, 0.0f);
+    Eigen::Vector3f rotatedVector = pose.rotateVectorToLocal(vector);
+
+    Eigen::Vector3f expectedRotatedVector(1.0f, 0.0f, 0.0f);
+    EXPECT_TRUE(rotatedVector.isApprox(expectedRotatedVector));
+}
+
