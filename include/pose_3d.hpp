@@ -43,6 +43,15 @@ public:
     Eigen::Vector3f rotateVectorToLocal(const Eigen::Vector3f& vector) const {
         return orientation.inverse() * vector;
     }
+
+    // Function to return a copy of this instance
+    Pose3D clone() const {
+        Pose3D copy;
+        copy.position = this->position;
+        copy.orientation = this->orientation;
+        return copy;
+    }
 };
 
 #endif // POSE_3D_HPP
+

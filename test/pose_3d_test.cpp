@@ -97,3 +97,19 @@ TEST(Pose3DTest, RotateVectorToLocal) {
     EXPECT_TRUE(rotatedVector.isApprox(expectedRotatedVector));
 }
 
+TEST(Pose3DTest, GetCopy) {
+    Pose3D pose;
+    pose.translate(Eigen::Vector3f(1.0f, 2.0f, 3.0f));
+    pose.rotate(Eigen::Vector3f(0.0f, 0.0f, 1.0f), M_PI / 4); // 45 degrees in radians
+
+    Pose3D poseClone = pose.clone();
+
+    EXPECT_TRUE(pose.position.isApprox(poseClone.position));
+    EXPECT_TRUE(pose.orientation.isApprox(poseClone.orientation));
+
+    // translate the copy and check if the original is not affected
+    Eigen::Vector3f translation(1.0f, 2.0f, 3.0f);
+    poseClone.translate(translation);
+    EXPECT_TRUE(poseClone.position.isApprox(pose.position + translation));
+}
+
