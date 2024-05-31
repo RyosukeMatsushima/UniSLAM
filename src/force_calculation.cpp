@@ -1,5 +1,6 @@
 #include "force_calculation.hpp"
 
+// TODO: make this as class.
 bool force_calculation(const Line3D &edge,
                        const EdgeNode &edge_node,
                        const Pose3D &frame_pose,
@@ -32,15 +33,22 @@ bool force_calculation(const Line3D &edge,
 
 
     // Calculate the torque to adjust the direction of edge line and observed line
+    // z-axis of observed_line_centered_pose is same as observed line direction
+    Pose3D observed_line_centered_pose = frame_pose.clone();
+    float x_rotate_angle = atan2(edge_node.direction_frame_to_edge(0), edge_node.direction_frame_to_edge(2));
+    float y_rotate_angle = atan2(edge_node.direction_frame_to_edge(1), edge_node.direction_frame_to_edge(2));
 
+    observed_line_centered_pose.rotate(observed_line_centered_pose.rotateVectorToWorld(Eigen::Vector3f(1.0f, 0.0f, 0.0f)), x_rotate_angle);
+    observed_line_centered_pose.rotate(observed_line_centered_pose.rotateVectorToWorld(Eigen::Vector3f(0.0f, 1.0f, 0.0f)), y_rotate_angle);
 
+    Eigen::Vector3f observed_line_centered_edge_direction = observed_line_centered_pose.rotateVectorToLocal(edge.direction());
+    Eigen::Vector2f observed_line_centered_edge_direction_2d(observed_line_centered_edge_direction(0), observed_line_centered_edge_direction(1));
+    // calculate cross product between observed_line_centered_edge_direction_2d and edge_node.edge_direction
+    float sin_angle = edge_node.edge_direction(0) * observed_line_centered_edge_direction_2d(1) - edge_node.edge_direction(1) * observed_line_centered_edge_direction_2d(0);
+    sin_angle = sin_angle / (observed_line_centered_edge_direction_2d.norm() * edge_node.edge_direction.norm());
 
-    Eigen::Vector3f edge_direction_in_frame_coordinate = frame_pose.rotateVectorToLocal(edge.direction());
-    Eigen::Vector2f edge_direction_2d(edge_direction_in_frame_coordinate(0), edge_direction_in_frame_coordinate(1));
-    // calculate the angle between the edge direction and the observed line direction
-    float angle = std::acos(edge_node.edge_direction.dot(edge_direction_2d) / (edge_node.edge_direction.norm() * edge_direction_2d.norm()));
     // torque is angle * observed_line.direction
-    Eigen::Vector3f torque_to_adjust = angle * observed_line.direction();
+    Eigen::Vector3f torque_to_adjust = sin_angle * observed_line.direction();
 
     force_to_frame = Force3D(force, torque + torque_to_adjust);
     force_to_edge = Force3D(-force, - torque_to_adjust);

@@ -64,7 +64,6 @@ TEST(ForceCalculationTest, torque_calculation_test) {
     float torque_threshold = 0.0001;
     EXPECT_NEAR(force_to_frame.torque(0), expected_torque_to_frame(0), torque_threshold);
     EXPECT_NEAR(force_to_frame.torque(1), expected_torque_to_frame(1), torque_threshold);
-    // TODO: Fix this test
-    // EXPECT_NEAR(force_to_frame.torque(2), expected_torque_to_frame(2), torque_threshold);
+    EXPECT_NEAR(force_to_frame.torque(2), expected_torque_to_frame(2), torque_threshold);
 }
 
