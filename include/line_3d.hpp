@@ -24,6 +24,10 @@ public:
                                            float& distance1,
                                            float& distance2);
 
+    Eigen::Vector3f start_point() const;
+
+    Eigen::Vector3f direction() const;
+
 private:
     int id_;
 
