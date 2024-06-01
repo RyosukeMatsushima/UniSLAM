@@ -23,7 +23,7 @@ TEST(Pose3DTest, Rotate) {
     Pose3D pose;
     Eigen::Vector3f axis(0.0f, 1.0f, 0.0f);
     float angle = M_PI; // 180 degrees in radians
-    pose.rotate(axis, angle);
+    pose.rotate(axis * angle);
 
     Eigen::Quaternionf expectedOrientation = Eigen::Quaternionf(0.0f, 0.0f, 1.0f, 0.0f);
 
@@ -37,7 +37,7 @@ TEST(Pose3DTest, Rotate) {
 TEST(Pose3DTest, TransformationMatrix) {
     Pose3D pose;
     pose.translate(Eigen::Vector3f(1.0f, 2.0f, 3.0f));
-    pose.rotate(Eigen::Vector3f(0.0f, 1.0f, 0.0f), M_PI / 4); // 45 degrees in radians
+    pose.rotate(Eigen::Vector3f(0.0f, 1.0f, 0.0f) * M_PI / 4); // 45 degrees in radians
 
     Eigen::Matrix4f transformation = pose.getTransformationMatrix();
     Eigen::Matrix4f expectedTransformation = Eigen::Matrix4f::Identity();
@@ -52,7 +52,7 @@ TEST(Pose3DTest, TransformToWorld) {
 
     Pose3D pose;
     pose.translate(Eigen::Vector3f(1.0f, 2.0f, 3.0f));
-    pose.rotate(Eigen::Vector3f(0.0f, 0.0f, 1.0f), M_PI / 2); // 45 degrees in radians
+    pose.rotate(Eigen::Vector3f(0.0f, 0.0f, 1.0f) * M_PI / 2); // 45 degrees in radians
 
     Eigen::Vector3f point(1.0f, 2.0f, 3.0f);
     Eigen::Vector3f transformedPoint = pose.transformToWorld(point);
@@ -64,7 +64,7 @@ TEST(Pose3DTest, TransformToWorld) {
 TEST(Pose3DTest, TransformToLocal) {
     Pose3D pose;
     pose.translate(Eigen::Vector3f(1.0f, 2.0f, 3.0f));
-    pose.rotate(Eigen::Vector3f(0.0f, 0.0f, 1.0f), M_PI / 2); // 90 degrees in radians
+    pose.rotate(Eigen::Vector3f(0.0f, 0.0f, 1.0f) * M_PI / 2); // 90 degrees in radians
 
     Eigen::Vector3f point(-1.0f, 3.0f, 6.0f);
     Eigen::Vector3f transformedPoint = pose.transformToLocal(point);
@@ -76,7 +76,7 @@ TEST(Pose3DTest, TransformToLocal) {
 TEST(Pose3DTest, RotateVectorToWorld) {
     Pose3D pose;
     pose.translate(Eigen::Vector3f(-1.0f, 13.0f, 3.0f)); // doesn't matter
-    pose.rotate(Eigen::Vector3f(0.0f, 0.0f, 1.0f), M_PI / 4); // 45 degrees in radians
+    pose.rotate(Eigen::Vector3f(0.0f, 0.0f, 1.0f) * M_PI / 4); // 45 degrees in radians
 
     Eigen::Vector3f vector(1.0f, 0.0f, 0.0f);
     Eigen::Vector3f rotatedVector = pose.rotateVectorToWorld(vector);
@@ -88,7 +88,7 @@ TEST(Pose3DTest, RotateVectorToWorld) {
 TEST(Pose3DTest, RotateVectorToLocal) {
     Pose3D pose;
     pose.translate(Eigen::Vector3f(1.0f, 2.0f, 3.0f)); // doesn't matter
-    pose.rotate(Eigen::Vector3f(0.0f, 0.0f, 1.0f), M_PI / 4); // 45 degrees in radians
+    pose.rotate(Eigen::Vector3f(0.0f, 0.0f, 1.0f) * M_PI / 4); // 45 degrees in radians
 
     Eigen::Vector3f vector(0.70710678118f, 0.70710678118f, 0.0f);
     Eigen::Vector3f rotatedVector = pose.rotateVectorToLocal(vector);
@@ -100,7 +100,7 @@ TEST(Pose3DTest, RotateVectorToLocal) {
 TEST(Pose3DTest, GetCopy) {
     Pose3D pose;
     pose.translate(Eigen::Vector3f(1.0f, 2.0f, 3.0f));
-    pose.rotate(Eigen::Vector3f(0.0f, 0.0f, 1.0f), M_PI / 4); // 45 degrees in radians
+    pose.rotate(Eigen::Vector3f(0.0f, 0.0f, 1.0f) * M_PI / 4); // 45 degrees in radians
 
     Pose3D poseClone = pose.clone();
 

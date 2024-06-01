@@ -38,8 +38,8 @@ bool force_calculation(const Line3D &edge,
     float x_rotate_angle = atan2(edge_node.direction_frame_to_edge(0), edge_node.direction_frame_to_edge(2));
     float y_rotate_angle = atan2(edge_node.direction_frame_to_edge(1), edge_node.direction_frame_to_edge(2));
 
-    observed_line_centered_pose.rotate(observed_line_centered_pose.rotateVectorToWorld(Eigen::Vector3f(1.0f, 0.0f, 0.0f)), x_rotate_angle);
-    observed_line_centered_pose.rotate(observed_line_centered_pose.rotateVectorToWorld(Eigen::Vector3f(0.0f, 1.0f, 0.0f)), y_rotate_angle);
+    observed_line_centered_pose.rotate(observed_line_centered_pose.rotateVectorToWorld(Eigen::Vector3f(1.0f, 0.0f, 0.0f)) * x_rotate_angle);
+    observed_line_centered_pose.rotate(observed_line_centered_pose.rotateVectorToWorld(Eigen::Vector3f(0.0f, 1.0f, 0.0f)) * y_rotate_angle);
 
     Eigen::Vector3f observed_line_centered_edge_direction = observed_line_centered_pose.rotateVectorToLocal(edge.direction());
     Eigen::Vector2f observed_line_centered_edge_direction_2d(observed_line_centered_edge_direction(0), observed_line_centered_edge_direction(1));
