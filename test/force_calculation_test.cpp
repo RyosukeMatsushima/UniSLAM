@@ -33,6 +33,16 @@ TEST(ForceCalculationTest, force_calculation_test) {
     EXPECT_NEAR(force_to_frame.torque(0), expected_torque_to_frame(0), torque_threshold);
     EXPECT_NEAR(force_to_frame.torque(1), expected_torque_to_frame(1), torque_threshold);
     EXPECT_NEAR(force_to_frame.torque(2), expected_torque_to_frame(2), torque_threshold);
+
+    Eigen::Vector3f expected_force_to_edge = -expected_force_to_frame;
+    EXPECT_NEAR(force_to_edge.force(0), expected_force_to_edge(0), force_threshold);
+    EXPECT_NEAR(force_to_edge.force(1), expected_force_to_edge(1), force_threshold);
+    EXPECT_NEAR(force_to_edge.force(2), expected_force_to_edge(2), force_threshold);
+
+    Eigen::Vector3f expected_torque_to_edge = Eigen::Vector3f(0, 0, 0);
+    EXPECT_NEAR(force_to_edge.torque(0), expected_torque_to_edge(0), torque_threshold);
+    EXPECT_NEAR(force_to_edge.torque(1), expected_torque_to_edge(1), torque_threshold);
+    EXPECT_NEAR(force_to_edge.torque(2), expected_torque_to_edge(2), torque_threshold);
 }
 
 TEST(ForceCalculationTest, torque_calculation_test) {
@@ -65,6 +75,16 @@ TEST(ForceCalculationTest, torque_calculation_test) {
     EXPECT_NEAR(force_to_frame.torque(0), expected_torque_to_frame(0), torque_threshold);
     EXPECT_NEAR(force_to_frame.torque(1), expected_torque_to_frame(1), torque_threshold);
     EXPECT_NEAR(force_to_frame.torque(2), expected_torque_to_frame(2), torque_threshold);
+
+    Eigen::Vector3f expected_force_to_edge = -expected_force_to_frame;
+    EXPECT_NEAR(force_to_edge.force(0), expected_force_to_edge(0), force_threshold);
+    EXPECT_NEAR(force_to_edge.force(1), expected_force_to_edge(1), force_threshold);
+    EXPECT_NEAR(force_to_edge.force(2), expected_force_to_edge(2), force_threshold);
+
+    Eigen::Vector3f expected_torque_to_edge = Eigen::Vector3f(0, 0, std::sin(M_PI/4));
+    EXPECT_NEAR(force_to_edge.torque(0), expected_torque_to_edge(0), torque_threshold);
+    EXPECT_NEAR(force_to_edge.torque(1), expected_torque_to_edge(1), torque_threshold);
+    EXPECT_NEAR(force_to_edge.torque(2), expected_torque_to_edge(2), torque_threshold);
 }
 
 TEST(ForceCalculationTest, force_and_torque_calculation_test) {
@@ -97,5 +117,15 @@ TEST(ForceCalculationTest, force_and_torque_calculation_test) {
     EXPECT_NEAR(force_to_frame.torque(0), expected_torque_to_frame(0), torque_threshold);
     EXPECT_NEAR(force_to_frame.torque(1), expected_torque_to_frame(1), torque_threshold);
     EXPECT_NEAR(force_to_frame.torque(2), expected_torque_to_frame(2), torque_threshold);
+
+    Eigen::Vector3f expected_force_to_edge = -expected_force_to_frame;
+    EXPECT_NEAR(force_to_edge.force(0), expected_force_to_edge(0), force_threshold);
+    EXPECT_NEAR(force_to_edge.force(1), expected_force_to_edge(1), force_threshold);
+    EXPECT_NEAR(force_to_edge.force(2), expected_force_to_edge(2), force_threshold);
+
+    Eigen::Vector3f expected_torque_to_edge = Eigen::Vector3f(0, 0, std::sin(M_PI/4));
+    EXPECT_NEAR(force_to_edge.torque(0), expected_torque_to_edge(0), torque_threshold);
+    EXPECT_NEAR(force_to_edge.torque(1), expected_torque_to_edge(1), torque_threshold);
+    EXPECT_NEAR(force_to_edge.torque(2), expected_torque_to_edge(2), torque_threshold);
 }
 
