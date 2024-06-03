@@ -7,4 +7,4 @@ if [ $? -ne 0 ]; then
     exit 0
 fi
 
-./run_unit_tests.sh
+./run_unit_tests.sh $1

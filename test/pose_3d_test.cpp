@@ -31,6 +31,14 @@ TEST(Pose3DTest, Rotate) {
     EXPECT_NEAR(pose.orientation.y(), expectedOrientation.y(), 1e-6);
     EXPECT_NEAR(pose.orientation.z(), expectedOrientation.z(), 1e-6);
     EXPECT_NEAR(pose.orientation.w(), expectedOrientation.w(), 1e-6);
+
+    // rotate back and value should be same as intial pose
+    pose.rotate(-axis * angle);
+    Pose3D expected_pose;
+    EXPECT_NEAR(pose.orientation.x(), expected_pose.orientation.x(), 1e-6);
+    EXPECT_NEAR(pose.orientation.y(), expected_pose.orientation.y(), 1e-6);
+    EXPECT_NEAR(pose.orientation.z(), expected_pose.orientation.z(), 1e-6);
+    EXPECT_NEAR(pose.orientation.w(), expected_pose.orientation.w(), 1e-6);
 }
 
 // Test transformation matrix

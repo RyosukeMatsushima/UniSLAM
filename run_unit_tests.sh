@@ -34,6 +34,11 @@ tests=(
        "force_calculation"
        )
 
+# if $1 is provided, run only that test
+if [ $# -eq 1 ]; then
+    tests=($1)
+fi
+
 # Variable to keep track of overall test result
 overall_result=0
 

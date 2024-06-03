@@ -1,8 +1,16 @@
 #ifndef EDGE_SPACE_DYNAMICS_HPP
 #define EDGE_SPACE_DYNAMICS_HPP
 
+#define MAX_CAL_ITER 60
+#define CAL_FINISH_FORCE_SIZE 0.0001
+#define CAL_FINISH_TORQUE_SIZE 0.0001
+
+#define FRAME_POSE_TRANSLATE_GAIN 0.1
+#define FRAME_POSE_ROTATE_GAIN 0.1
+
 #include <Eigen/Dense>
 
+#include "force_calculation.hpp"
 #include "edge_node.hpp"
 #include "pose_3d.hpp"
 #include "line_3d.hpp"

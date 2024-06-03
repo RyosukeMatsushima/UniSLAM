@@ -25,20 +25,20 @@ TEST(EdgeSpaceDynamics, getFramePose) {
 
 
     // EdgeNode represents the detected edge in the frame coordinate
-    EdgeNode edge_node1 = EdgeNode(Eigen::Vector3f(0.0, 1.0, 1.0), // direction_frame_to_edge
-                                   Eigen::Vector2f(1.0, 0.0), // edge_direction
+    EdgeNode edge_node1 = EdgeNode(Eigen::Vector3f(1.0, 0.0, 1.0), // direction_frame_to_edge
+                                   Eigen::Vector2f(0.0, 1.0), // edge_direction
                                    edge1_id); // edge_id
 
-    EdgeNode edge_node2 = EdgeNode(Eigen::Vector3f(0.0, -1.0, 1.0),
-                                   Eigen::Vector2f(1.0, 0.0),
+    EdgeNode edge_node2 = EdgeNode(Eigen::Vector3f(-1.0, 0.0, 1.0),
+                                   Eigen::Vector2f(0.0, 1.0),
                                    edge2_id);
 
-    EdgeNode edge_node3 = EdgeNode(Eigen::Vector3f(1.0, 0.0, 1.0),
-                                   Eigen::Vector2f(0.0, 1.0),
+    EdgeNode edge_node3 = EdgeNode(Eigen::Vector3f(0.0, 1.0, 1.0),
+                                   Eigen::Vector2f(1.0, 0.0),
                                    edge3_id);
 
-    EdgeNode edge_node4 = EdgeNode(Eigen::Vector3f(-1.0, 0.0, 1.0),
-                                   Eigen::Vector2f(0.0, -1.0),
+    EdgeNode edge_node4 = EdgeNode(Eigen::Vector3f(0.0, -1.0, 1.0),
+                                   Eigen::Vector2f(1.0, 0.0),
                                    edge4_id);
 
     std::vector<EdgeNode> edge_nodes = {edge_node1, edge_node2, edge_node3, edge_node4};
@@ -56,13 +56,15 @@ TEST(EdgeSpaceDynamics, getFramePose) {
     EXPECT_TRUE(result);
 
     // check the position
-    EXPECT_NEAR(frame_pose.position.x(), expected_position.x(), 1e-6);
-    EXPECT_NEAR(frame_pose.position.y(), expected_position.y(), 1e-6);
-    EXPECT_NEAR(frame_pose.position.z(), expected_position.z(), 1e-6);
+    float position_error_threshold = 1e-4;
+    EXPECT_NEAR(frame_pose.position.x(), expected_position.x(), position_error_threshold);
+    EXPECT_NEAR(frame_pose.position.y(), expected_position.y(), position_error_threshold);
+    EXPECT_NEAR(frame_pose.position.z(), expected_position.z(), position_error_threshold);
 
     // check the orientation
-    EXPECT_NEAR(frame_pose.orientation.x(), expected_orientation.x(), 1e-6);
-    EXPECT_NEAR(frame_pose.orientation.y(), expected_orientation.y(), 1e-6);
-    EXPECT_NEAR(frame_pose.orientation.z(), expected_orientation.z(), 1e-6);
-    EXPECT_NEAR(frame_pose.orientation.w(), expected_orientation.w(), 1e-6);
+    float rotate_error_threshold = 1e-4;
+    EXPECT_NEAR(frame_pose.orientation.x(), expected_orientation.x(), rotate_error_threshold);
+    EXPECT_NEAR(frame_pose.orientation.y(), expected_orientation.y(), rotate_error_threshold);
+    EXPECT_NEAR(frame_pose.orientation.z(), expected_orientation.z(), rotate_error_threshold);
+    EXPECT_NEAR(frame_pose.orientation.w(), expected_orientation.w(), rotate_error_threshold);
 }

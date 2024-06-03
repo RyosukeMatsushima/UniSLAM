@@ -204,6 +204,8 @@ add_executable(
     edge_space_dynamics_test
     test/edge_space_dynamics_test.cpp
     src/edge_space_dynamics.cpp
+    src/line_3d.cpp
+    src/force_calculation.cpp
 )
 
 target_link_libraries(
