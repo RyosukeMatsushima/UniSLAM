@@ -35,8 +35,8 @@ bool force_calculation(const Line3D &edge,
     // Calculate the torque to adjust the direction of edge line and observed line
     // z-axis of observed_line_centered_pose is same as observed line direction
     Pose3D observed_line_centered_pose = frame_pose.clone();
-    float x_rotate_angle = atan2(edge_node.direction_frame_to_edge(0), edge_node.direction_frame_to_edge(2));
-    float y_rotate_angle = atan2(edge_node.direction_frame_to_edge(1), edge_node.direction_frame_to_edge(2));
+    float x_rotate_angle = atan2(edge_node.direction_frame_to_edge(1), edge_node.direction_frame_to_edge(2));
+    float y_rotate_angle = atan2(edge_node.direction_frame_to_edge(0), edge_node.direction_frame_to_edge(2));
 
     observed_line_centered_pose.rotate(observed_line_centered_pose.rotateVectorToWorld(Eigen::Vector3f(1.0f, 0.0f, 0.0f)) * x_rotate_angle);
     observed_line_centered_pose.rotate(observed_line_centered_pose.rotateVectorToWorld(Eigen::Vector3f(0.0f, 1.0f, 0.0f)) * y_rotate_angle);
