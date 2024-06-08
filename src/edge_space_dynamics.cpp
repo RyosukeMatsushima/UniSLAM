@@ -8,6 +8,8 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode> edge_nodes,
     for (int i = 0; i < MAX_CAL_ITER; i++) {
         Pose3D current_frame_pose = frame_pose.clone();
 
+        Force3D force_to_frame_sum, force_to_edge_sum;
+
         for (int j = 0; j < edge_nodes.size(); j++) {
             EdgeNode edge_node = edge_nodes[j];
             Line3D edge = edges[edge_node.edge_id];
@@ -23,9 +25,12 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode> edge_nodes,
                 continue;
             }
 
-            frame_pose.translate(force_to_frame.force * FRAME_POSE_TRANSLATE_GAIN);
-            frame_pose.rotate(force_to_edge.torque * FRAME_POSE_ROTATE_GAIN);
+            force_to_frame_sum.add(force_to_frame);
+            force_to_edge_sum.add(force_to_edge);
         }
+
+        frame_pose.translate(force_to_frame_sum.force * FRAME_POSE_TRANSLATE_GAIN);
+        frame_pose.rotate(force_to_frame_sum.torque * FRAME_POSE_ROTATE_GAIN);
     }
     return true;
 }

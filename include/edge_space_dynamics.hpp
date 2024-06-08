@@ -6,7 +6,7 @@
 #define CAL_FINISH_TORQUE_SIZE 0.0001
 
 #define FRAME_POSE_TRANSLATE_GAIN 0.1
-#define FRAME_POSE_ROTATE_GAIN -0.1
+#define FRAME_POSE_ROTATE_GAIN 0.1
 
 #include <Eigen/Dense>
 

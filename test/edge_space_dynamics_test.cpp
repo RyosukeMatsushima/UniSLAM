@@ -47,6 +47,10 @@ TEST(EdgeSpaceDynamics, getFramePose) {
     // user can set initial frame pose for calculation
     Pose3D frame_pose;
 
+    // move to random pose
+    frame_pose.translate(Eigen::Vector3f(0.0f, 0.0f, -1.2f));
+    frame_pose.rotate(Eigen::Vector3f(0.1f, 0.0f, 0.0f));
+
     bool result = edge_space_dynamics.get_frame_pose(edge_nodes, frame_pose);
 
     Eigen::Vector3f expected_position = Eigen::Vector3f(0.0, 0.0, -1.0);
