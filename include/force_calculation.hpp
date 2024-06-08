@@ -20,6 +20,11 @@ struct Force3D {
         this->force = force;
         this->torque = torque;
     }
+
+    void add(const Force3D &force) {
+        this->force += force.force;
+        this->torque += force.torque;
+    }
 };
 
 bool force_calculation(const Line3D &edge,
