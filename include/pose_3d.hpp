@@ -17,9 +17,7 @@ public:
 
     void rotate(const Eigen::Vector3f& rotate_vector) {
         Eigen::Quaternionf q;
-        q = Eigen::AngleAxisf(rotate_vector[0], Eigen::Vector3f::UnitX())
-            * Eigen::AngleAxisf(rotate_vector[1], Eigen::Vector3f::UnitY())
-            * Eigen::AngleAxisf(rotate_vector[2], Eigen::Vector3f::UnitZ());
+        q = Eigen::AngleAxisf(rotate_vector.norm(), rotate_vector.normalized());
         orientation = q * orientation;
     }
 

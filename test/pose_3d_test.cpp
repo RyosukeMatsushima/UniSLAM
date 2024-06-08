@@ -41,6 +41,21 @@ TEST(Pose3DTest, Rotate) {
     EXPECT_NEAR(pose.orientation.w(), expected_pose.orientation.w(), 1e-6);
 }
 
+// Test rotate back and check if the pose is same as initial pose
+TEST(Pose3DTest, RotateBackAndForth) {
+    Pose3D pose;
+    Eigen::Vector3f axis(-0.0708944, 0.00457347, -0.0705402);
+    float angle = 0.5f;
+    pose.rotate(axis * angle);
+    pose.rotate(-axis * angle);
+
+    Pose3D expected_pose;
+    EXPECT_NEAR(pose.orientation.x(), expected_pose.orientation.x(), 1e-6);
+    EXPECT_NEAR(pose.orientation.y(), expected_pose.orientation.y(), 1e-6);
+    EXPECT_NEAR(pose.orientation.z(), expected_pose.orientation.z(), 1e-6);
+    EXPECT_NEAR(pose.orientation.w(), expected_pose.orientation.w(), 1e-6);
+}
+
 // Test transformation matrix
 TEST(Pose3DTest, TransformationMatrix) {
     Pose3D pose;
