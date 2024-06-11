@@ -82,6 +82,36 @@ TEST(ForceCalculationTest, force_calculation_test2) {
     compareTorques(force_to_edge, expected_torque_to_edge);
 }
 
+TEST(ForceCalculationTest, torque_to_adjust_test_about_x_axis) {
+    Line3D edge(0, Eigen::Vector3f(1, 0, 1), Eigen::Vector3f(0, 1, 0), 1);
+    EdgeNode edge_node(Eigen::Vector3f(1, 0, 1), Eigen::Vector2f(0, 1), 0);
+    Pose3D pose;
+    pose.rotate(Eigen::Vector3f(0.3f, 0.0f, 0.0f));
+
+    ForceCalculation force_calculation(edge, edge_node, pose);
+    ASSERT_TRUE(force_calculation.calculate());
+
+    Force3D force_to_frame = force_calculation.getForceToFrame();
+
+    // torque(0) should be less than 0
+    EXPECT_LT(force_to_frame.torque(0), 0);
+}
+
+TEST(ForceCalculationTest, torque_to_adjust_test_about_y_axis) {
+    Line3D edge(0, Eigen::Vector3f(0, 1, 1), Eigen::Vector3f(1, 0, 0), 1);
+    EdgeNode edge_node(Eigen::Vector3f(0, 1, 1), Eigen::Vector2f(1, 0), 0);
+    Pose3D pose;
+    pose.rotate(Eigen::Vector3f(0.0f, 0.3f, 0.0f));
+
+    ForceCalculation force_calculation(edge, edge_node, pose);
+    ASSERT_TRUE(force_calculation.calculate());
+
+    Force3D force_to_frame = force_calculation.getForceToFrame();
+
+    // torque(1) should be less than 0
+    EXPECT_LT(force_to_frame.torque(1), 0);
+}
+
 TEST(ForceCalculationTest, force_should_be_same_about_x_and_y_axis) {
     Line3D edge1(0, Eigen::Vector3f(1, 0, 1), Eigen::Vector3f(0, 1, 0), 1);
     EdgeNode edge_node1(Eigen::Vector3f(1, 0, 1), Eigen::Vector2f(0, 1), 0);

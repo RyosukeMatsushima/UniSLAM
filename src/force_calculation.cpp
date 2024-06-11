@@ -68,6 +68,7 @@ Eigen::Vector3f ForceCalculation::calculateTorqueToAdjust(const Line3D &observed
     sin_angle = sin_angle / (observed_line_centered_edge_direction_2d.norm() * edge_node.edge_direction.norm());
 
     Eigen::Vector3f torque_to_adjust = sin_angle * observed_line.direction();
+    // TODO: It is not clear why the y-axis is flipped here
     torque_to_adjust(1) = -torque_to_adjust(1); // y-axis is flipped
 
     return torque_to_adjust;
