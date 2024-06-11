@@ -19,6 +19,9 @@ enable_testing()
 # Find OpenCV package
 find_package(OpenCV REQUIRED)
 
+# Find Eigen package
+find_package(Eigen3 REQUIRED)
+
 set(SOURCES
   src/main.cpp
   src/MyClass.cpp
@@ -41,6 +44,7 @@ add_executable(
   src/edge.cpp
   src/debug_view.cpp
   src/discrete_angle_edge_intensity.cpp
+  src/edge_point.cpp
 )
 
 target_link_libraries(
@@ -77,6 +81,7 @@ add_executable(
   edge_test
   test/edge_test.cpp
   src/edge.cpp
+  src/edge_point.cpp
 )
 
 target_link_libraries(
@@ -127,6 +132,7 @@ add_executable(
     src/edge_point_finder.cpp
     src/edge_point_check.cpp
     src/edge.cpp
+    src/edge_point.cpp
     src/frame.cpp
     src/debug_view.cpp
 )
@@ -135,5 +141,91 @@ target_link_libraries(
     edge_point_finder_test
     GTest::gtest_main
     ${OpenCV_LIBS}
+)
+
+add_executable(
+    line_3d_test
+    test/line_3d_test.cpp
+    src/line_3d.cpp
+)
+
+target_link_libraries(
+    line_3d_test
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+    Eigen3::Eigen
+)
+
+add_executable(
+    frame_node_test
+    test/frame_node_test.cpp
+    src/frame_node.cpp
+    src/frame.cpp
+    src/edge.cpp
+    src/edge_point.cpp
+    src/edge_point_check.cpp
+    src/edge_point_finder.cpp
+    src/discrete_angle_edge_intensity.cpp
+    src/debug_view.cpp
+)
+
+target_link_libraries(
+    frame_node_test
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+)
+
+add_executable(
+    edge_point_test
+    test/edge_point_test.cpp
+    src/edge_point.cpp
+)
+
+target_link_libraries(
+    edge_point_test
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+)
+
+# Add the test executable
+add_executable(
+    pose_3d_test
+    test/pose_3d_test.cpp
+)
+
+target_link_libraries(
+    pose_3d_test
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+    Eigen3::Eigen
+)
+
+add_executable(
+    edge_space_dynamics_test
+    test/edge_space_dynamics_test.cpp
+    src/edge_space_dynamics.cpp
+    src/line_3d.cpp
+    src/force_calculation.cpp
+)
+
+target_link_libraries(
+    edge_space_dynamics_test
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+    Eigen3::Eigen
+)
+
+add_executable(
+    force_calculation_test
+    test/force_calculation_test.cpp
+    src/force_calculation.cpp
+    src/line_3d.cpp
+)
+
+target_link_libraries(
+    force_calculation_test
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+    Eigen3::Eigen
 )
 

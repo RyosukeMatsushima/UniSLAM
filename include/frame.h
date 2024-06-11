@@ -9,12 +9,10 @@
 #define GAUSIAN_KERNEL_SIZE_SMALL 1.0f
 #define GAUSIAN_KERNEL_SIZE_LARGE 20.0f
 
-#define MAX_ANGLE_DIFF 0.2f // radians
-#define MAX_POSITION_DIFF 40 // pixels
-
 class Frame {
 public:
-    Frame(const cv::Mat& input_img);
+    Frame(const cv::Mat& input_img,
+          const float angle_resolution);
 
     cv::Mat getGrayImage() const;
 

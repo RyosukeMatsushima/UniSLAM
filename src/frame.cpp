@@ -1,7 +1,8 @@
 
 #include "frame.h"
 
-Frame::Frame(const cv::Mat& input_img)
+Frame::Frame(const cv::Mat& input_img,
+             const float angle_resolution)
 {
     gray_img_ = confirmGrayImage(input_img);
 
@@ -18,7 +19,7 @@ Frame::Frame(const cv::Mat& input_img)
 
     calculateGradientAngleImage(gradient_x_img_, gradient_y_img_, gradient_angle_img_);
 
-    discreteAngleEdgeIntensity.setIntensityMap(laplacian_img_, gradient_angle_img_, MAX_ANGLE_DIFF);
+    discreteAngleEdgeIntensity.setIntensityMap(laplacian_img_, gradient_angle_img_, angle_resolution);
 }
 
 cv::Mat Frame::getGrayImage() const
@@ -69,7 +70,6 @@ cv::Vec2f Frame::getGradient(const cv::Point2f& point) const
 
 cv::Mat Frame::confirmGrayImage(const cv::Mat& input_img)
 {
-    printf("input_img.type() = %d\n", input_img.type());
     // Check if the input image is empty
     if (input_img.empty()) {
         throw std::invalid_argument("Input image is empty!");

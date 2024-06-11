@@ -76,7 +76,8 @@ TEST(WithSimpleLine, TestEdgePointFinder) {
 
         cv::line(input_image, start, end, cv::Scalar(255), 5);
 
-        Frame frame(input_image);
+        Frame frame(input_image,
+                    0.2f); // TODO: change to angle_resolution
 
         EdgePointFinder edge_point_finder;
 
@@ -137,7 +138,8 @@ TEST(WithTestImg, TestEdgePointFinder) {
     // Create a Frame object
     cv::Mat input_image;
     cv::cvtColor(test_image, input_image, cv::COLOR_BGR2GRAY);
-    Frame frame(input_image);
+    Frame frame(input_image,
+                0.2f); // TODO: change to angle_resolution
 
     for (double angle = 0; angle < 2 * M_PI; angle += angle_resolution) {
         // search for the edge point every edge_find_window_size pixels and 30 degrees
@@ -169,7 +171,8 @@ TEST(WithCircleImg, TestEdgePointFinder) {
     // Create a Frame object
     cv::Mat input_image;
     cv::cvtColor(test_image, input_image, cv::COLOR_BGR2GRAY);
-    Frame frame(input_image);
+    Frame frame(input_image,
+                0.2f); // TODO: change to angle_resolution
 
     for (double angle = 0; angle < 2 * M_PI; angle += angle_resolution) {
         // search for the edge point every edge_find_window_size pixels and 30 degrees
@@ -194,13 +197,14 @@ TEST(WithCameraImg, TestEdgePointFinder) {
     cv::Mat input_image;
     cv::cvtColor(test_image, input_image, cv::COLOR_BGR2GRAY);
 
-    Frame frame(test_image);
+    float angle_resolution = M_PI / 12;
+    Frame frame(test_image,
+                0.2f); // TODO: change to angle_resolution
 
     std::vector<EdgePoint> edge_points;
     EdgePointFinder edge_point_finder;
 
     int edge_find_window_size = 40;
-    float angle_resolution = M_PI / 12;
 
     for (double angle = 0; angle < 2 * M_PI; angle += angle_resolution) {
         // search for the edge point every edge_find_window_size pixels and 30 degrees

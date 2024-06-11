@@ -36,7 +36,9 @@ TEST(FrameTest, TestFrame) {
     cv::Mat input_image = cv::imread(TEST_IMAGE_PATH);
 
     // Create a Frame object
-    Frame frame(input_image);
+    float angle_resolution = 0.2f;
+    Frame frame(input_image,
+                angle_resolution);
 
     cv::imwrite(RESULT_IMAGE_PATH "gray_img.jpg", frame.getGrayImage());
 
@@ -58,7 +60,7 @@ TEST(FrameTest, TestFrame) {
     cv::imwrite(RESULT_IMAGE_PATH "gradient_angle_img.jpg", angle_img);
 
     // check discretize angle image
-    for (float angle = 0; angle < 2 * M_PI; angle += MAX_ANGLE_DIFF) {
+    for (float angle = 0; angle < 2 * M_PI; angle += angle_resolution) {
         cv::Point center_point(frame.getGrayImage().cols / 2, frame.getGrayImage().rows / 2);
         int block_size = std::min(frame.getGrayImage().cols, frame.getGrayImage().rows);
         cv::Mat block_intensity = frame.discreteAngleEdgeIntensity.getBlockIntensity(center_point, block_size, angle, 0);
@@ -75,7 +77,9 @@ TEST(WithCircleImg, TestFrame) {
     cv::circle(input_image, cv::Point(250, 250), 100, cv::Scalar(255, 255, 255), -1);
 
     // Create a Frame object
-    Frame frame(input_image);
+    float angle_resolution = 0.2f;
+    Frame frame(input_image,
+                angle_resolution);
 
     cv::imwrite(RESULT_IMAGE_PATH "gray_img_circle.jpg", frame.getGrayImage());
 
@@ -97,7 +101,7 @@ TEST(WithCircleImg, TestFrame) {
     cv::imwrite(RESULT_IMAGE_PATH "gradient_angle_img_circle.jpg", angle_img);
 
     // check discretize angle image
-    for (float angle = 0; angle < 2 * M_PI; angle += MAX_ANGLE_DIFF) {
+    for (float angle = 0; angle < 2 * M_PI; angle += angle_resolution) {
         cv::Point center_point(frame.getGrayImage().cols / 2, frame.getGrayImage().rows / 2);
         int block_size = std::min(frame.getGrayImage().cols, frame.getGrayImage().rows);
         cv::Mat block_intensity = frame.discreteAngleEdgeIntensity.getBlockIntensity(center_point, block_size, angle, 0);
@@ -118,7 +122,8 @@ TEST(FrameTest, TestConfirmGrayImage) {
     cv::Mat input_image = cv::imread(TEST_IMAGE_PATH);
 
     // Create a Frame object
-    Frame frame(input_image);
+    Frame frame(input_image,
+                0.2f);
 
     // Show image
     cv::imshow("Input Image", input_image);
