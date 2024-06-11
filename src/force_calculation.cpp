@@ -49,6 +49,7 @@ bool force_calculation(const Line3D &edge,
 
     // torque is angle * observed_line.direction
     Eigen::Vector3f torque_to_adjust = sin_angle * observed_line.direction();
+    torque_to_adjust(1) = -torque_to_adjust(1); // y-axis is flipped
 
     force_to_frame = Force3D(force, torque + torque_to_adjust);
     force_to_edge = Force3D(-force, - torque_to_adjust);
