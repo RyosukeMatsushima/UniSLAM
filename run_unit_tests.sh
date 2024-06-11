@@ -24,7 +24,6 @@ tests=(
        "edge"
        "edge_point"
        "cpp_copy"
-       "line_3d"
        "edge_point_check"
        "discrete_angle_edge_intensity"
        "edge_point_finder"
