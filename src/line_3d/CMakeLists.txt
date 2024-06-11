@@ -43,3 +43,5 @@ target_link_libraries(
     line_3d
 )
 
+include(GoogleTest)
+gtest_discover_tests(line_3d_test)
