@@ -13,17 +13,17 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode> edge_nodes,
         for (int j = 0; j < edge_nodes.size(); j++) {
             EdgeNode edge_node = edge_nodes[j];
             Line3D edge = edges[edge_node.edge_id];
-            Force3D force_to_frame, force_to_edge;
-            float torque_center_point_for_edge_line;
-            bool result = force_calculation(edge,
-                                            edge_node,
-                                            current_frame_pose,
-                                            force_to_frame,
-                                            force_to_edge,
-                                            torque_center_point_for_edge_line);
-            if (!result) {
+
+            ForceCalculation force_calculation(edge,
+                                               edge_node,
+                                               current_frame_pose);
+            if (!force_calculation.calculate()) {
                 continue;
             }
+
+            Force3D force_to_frame = force_calculation.getForceToFrame();
+            Force3D force_to_edge = force_calculation.getForceToEdge();
+            float torque_center_point_for_edge_line = force_calculation.getTorqueCenterPointForEdgeLine();
 
             force_to_frame_sum.add(force_to_frame);
             force_to_edge_sum.add(force_to_edge);

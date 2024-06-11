@@ -3,7 +3,7 @@
 ForceCalculation::ForceCalculation(const Line3D &edge, const EdgeNode &edge_node, const Pose3D &frame_pose)
     : edge(edge), edge_node(edge_node), frame_pose(frame_pose) {}
 
-bool ForceCalculation::init() {
+bool ForceCalculation::calculate() {
     Line3D observed_line = createObservedLine();
 
     float distance_edge, distance_observed_line;
@@ -71,17 +71,5 @@ Eigen::Vector3f ForceCalculation::calculateTorqueToAdjust(const Line3D &observed
     torque_to_adjust(1) = -torque_to_adjust(1); // y-axis is flipped
 
     return torque_to_adjust;
-}
-
-bool force_calculation(const Line3D &edge, const EdgeNode &edge_node, const Pose3D &frame_pose,
-                       Force3D &force_to_frame, Force3D &force_to_edge, float &torque_center_point_for_edge_line) {
-    ForceCalculation calc(edge, edge_node, frame_pose);
-    if (!calc.init()) {
-        return false;
-    }
-    force_to_frame = calc.getForceToFrame();
-    force_to_edge = calc.getForceToEdge();
-    torque_center_point_for_edge_line = calc.getTorqueCenterPointForEdgeLine();
-    return true;
 }
 

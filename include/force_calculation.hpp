@@ -29,7 +29,7 @@ struct Force3D {
 class ForceCalculation {
 public:
     ForceCalculation(const Line3D &edge, const EdgeNode &edge_node, const Pose3D &frame_pose);
-    bool init();
+    bool calculate();
 
     Force3D getForceToFrame() const;
     Force3D getForceToEdge() const;
@@ -50,8 +50,5 @@ private:
     Force3D force_to_edge;
     float torque_center_point_for_edge_line;
 };
-
-bool force_calculation(const Line3D &edge, const EdgeNode &edge_node, const Pose3D &frame_pose,
-                       Force3D &force_to_frame, Force3D &force_to_edge, float &torque_center_point_for_edge_line);
 
 #endif // FORCE_CALCULATION_HPP

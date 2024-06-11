@@ -48,11 +48,11 @@ TEST(ForceCalculationTest, force_calculation_test) {
 
     Pose3D pose;
 
-    Force3D force_to_frame, force_to_edge;
-
-    float torque_center_point_for_edge_line;
-
-    force_calculation(edge, edge_node, pose, force_to_frame, force_to_edge, torque_center_point_for_edge_line);
+    ForceCalculation force_calculation(edge, edge_node, pose);
+    EXPECT_TRUE(force_calculation.calculate());
+    Force3D force_to_frame = force_calculation.getForceToFrame();
+    Force3D force_to_edge = force_calculation.getForceToEdge();
+    float torque_center_point_for_edge_line = force_calculation.getTorqueCenterPointForEdgeLine();
 
     Eigen::Vector3f expected_force_to_frame = Eigen::Vector3f(0, 1, 0);
     Eigen::Vector3f expected_torque_to_frame = Eigen::Vector3f(-std::sin(M_PI/4), 0, 0);
@@ -91,11 +91,11 @@ TEST(ForceCalculationTest, force_calculation_test2) {
 
     Pose3D pose;
 
-    Force3D force_to_frame, force_to_edge;
-
-    float torque_center_point_for_edge_line;
-
-    force_calculation(edge, edge_node, pose, force_to_frame, force_to_edge, torque_center_point_for_edge_line);
+    ForceCalculation force_calculation(edge, edge_node, pose);
+    EXPECT_TRUE(force_calculation.calculate());
+    Force3D force_to_frame = force_calculation.getForceToFrame();
+    Force3D force_to_edge = force_calculation.getForceToEdge();
+    float torque_center_point_for_edge_line = force_calculation.getTorqueCenterPointForEdgeLine();
 
     Eigen::Vector3f expected_force_to_frame = Eigen::Vector3f(1, 0, 0);
     Eigen::Vector3f expected_torque_to_frame = Eigen::Vector3f(0, std::sin(M_PI/4), 0);
@@ -138,10 +138,11 @@ TEST(ForceCalculationTest, force_should_be_same_about_x_and_y_axis) {
     Pose3D pose;
     pose.translate(Eigen::Vector3f(delta_xy, 0.0f, 0.0f));
 
-    Force3D force_to_frame1, force_to_edge1;
-    float torque_center_point_for_edge_line1;
-
-    force_calculation(edge1, edge_node1, pose, force_to_frame1, force_to_edge1, torque_center_point_for_edge_line1);
+    ForceCalculation force_calculation(edge1, edge_node1, pose);
+    EXPECT_TRUE(force_calculation.calculate());
+    Force3D force_to_frame1 = force_calculation.getForceToFrame();
+    Force3D force_to_edge1 = force_calculation.getForceToEdge();
+    float torque_center_point_for_edge_line1 = force_calculation.getTorqueCenterPointForEdgeLine();
 
 
     Line3D edge2(0,
@@ -156,10 +157,11 @@ TEST(ForceCalculationTest, force_should_be_same_about_x_and_y_axis) {
     Pose3D pose2;
     pose2.translate(Eigen::Vector3f(0.0f, delta_xy, 0.0f));
 
-    Force3D force_to_frame2, force_to_edge2;
-    float torque_center_point_for_edge_line2;
-
-    force_calculation(edge2, edge_node2, pose2, force_to_frame2, force_to_edge2, torque_center_point_for_edge_line2);
+    ForceCalculation force_calculation2(edge2, edge_node2, pose2);
+    EXPECT_TRUE(force_calculation2.calculate());
+    Force3D force_to_frame2 = force_calculation2.getForceToFrame();
+    Force3D force_to_edge2 = force_calculation2.getForceToEdge();
+    float torque_center_point_for_edge_line2 = force_calculation2.getTorqueCenterPointForEdgeLine();
 
 
     EXPECT_EQ(force_to_frame1.force(0), force_to_frame2.force(1));
@@ -185,10 +187,11 @@ TEST(ForceCalculationTest, force_should_be_zero_if_translation_direction_is_same
     Pose3D pose;
     pose.translate(Eigen::Vector3f(1, 0, 0));
 
-    Force3D force_to_frame, force_to_edge;
-    float torque_center_point_for_edge_line;
-
-    force_calculation(edge, edge_node, pose, force_to_frame, force_to_edge, torque_center_point_for_edge_line);
+    ForceCalculation force_calculation(edge, edge_node, pose);
+    EXPECT_TRUE(force_calculation.calculate());
+    Force3D force_to_frame = force_calculation.getForceToFrame();
+    Force3D force_to_edge = force_calculation.getForceToEdge();
+    float torque_center_point_for_edge_line = force_calculation.getTorqueCenterPointForEdgeLine();
 
     Eigen::Vector3f expected_force_to_frame = Eigen::Vector3f(0, 0, 0);
     Eigen::Vector3f expected_torque_to_frame = Eigen::Vector3f(0, 0, 0);
@@ -228,10 +231,11 @@ TEST(ForceCalculationTest, force_should_be_zero_if_translation_direction_is_same
     Pose3D pose;
     pose.translate(Eigen::Vector3f(0, 1, 0));
 
-    Force3D force_to_frame, force_to_edge;
-    float torque_center_point_for_edge_line;
-
-    force_calculation(edge, edge_node, pose, force_to_frame, force_to_edge, torque_center_point_for_edge_line);
+    ForceCalculation force_calculation(edge, edge_node, pose);
+    EXPECT_TRUE(force_calculation.calculate());
+    Force3D force_to_frame = force_calculation.getForceToFrame();
+    Force3D force_to_edge = force_calculation.getForceToEdge();
+    float torque_center_point_for_edge_line = force_calculation.getTorqueCenterPointForEdgeLine();
 
     Eigen::Vector3f expected_force_to_frame = Eigen::Vector3f(0, 0, 0);
     Eigen::Vector3f expected_torque_to_frame = Eigen::Vector3f(0, 0, 0);
@@ -270,10 +274,11 @@ TEST(ForceCalculationTest, torque_calculation_test) {
 
     Pose3D pose;
 
-    Force3D force_to_frame, force_to_edge;
-    float torque_center_point_for_edge_line;
-
-    force_calculation(edge, edge_node, pose, force_to_frame, force_to_edge, torque_center_point_for_edge_line);
+    ForceCalculation force_calculation(edge, edge_node, pose);
+    EXPECT_TRUE(force_calculation.calculate());
+    Force3D force_to_frame = force_calculation.getForceToFrame();
+    Force3D force_to_edge = force_calculation.getForceToEdge();
+    float torque_center_point_for_edge_line = force_calculation.getTorqueCenterPointForEdgeLine();
 
     Eigen::Vector3f expected_force_to_frame = Eigen::Vector3f(0, 0, 0);
     Eigen::Vector3f expected_torque_to_frame = Eigen::Vector3f(0, 0, -std::sin(M_PI/4));
@@ -312,10 +317,11 @@ TEST(ForceCalculationTest, force_and_torque_calculation_test) {
 
     Pose3D pose;
 
-    Force3D force_to_frame, force_to_edge;
-    float torque_center_point_for_edge_line;
-
-    force_calculation(edge, edge_node, pose, force_to_frame, force_to_edge, torque_center_point_for_edge_line);
+    ForceCalculation force_calculation(edge, edge_node, pose);
+    EXPECT_TRUE(force_calculation.calculate());
+    Force3D force_to_frame = force_calculation.getForceToFrame();
+    Force3D force_to_edge = force_calculation.getForceToEdge();
+    float torque_center_point_for_edge_line = force_calculation.getTorqueCenterPointForEdgeLine();
 
     Eigen::Vector3f expected_force_to_frame = Eigen::Vector3f(0, 1, 0);
     Eigen::Vector3f expected_torque_to_frame = Eigen::Vector3f(-std::sin(M_PI/4), 0, -std::sin(M_PI/4));
@@ -358,10 +364,12 @@ TEST(ForceCalculationTest, torque_calculation_with_virtical_edge_test) {
     const float pose_x_rotate = 0.3f;
     pose.rotate(Eigen::Vector3f(pose_x_rotate, 0.0f, 0.0f));
 
-    Force3D force_to_frame, force_to_edge;
-    float torque_center_point_for_edge_line;
+    ForceCalculation force_calculation(edge, edge_node, pose);
+    EXPECT_TRUE(force_calculation.calculate());
+    Force3D force_to_frame = force_calculation.getForceToFrame();
+    Force3D force_to_edge = force_calculation.getForceToEdge();
+    float torque_center_point_for_edge_line = force_calculation.getTorqueCenterPointForEdgeLine();
 
-    force_calculation(edge, edge_node, pose, force_to_frame, force_to_edge, torque_center_point_for_edge_line);
 
     Eigen::Vector3f expected_torque_to_frame = Eigen::Vector3f(-std::sin(pose_x_rotate), 0, 0);
 
@@ -393,10 +401,11 @@ TEST(ForceCalculationTest, torque_calculation_with_horizontal_edge_test) {
     const float pose_x_rotate = 0.3f;
     pose.rotate(Eigen::Vector3f(pose_x_rotate, 0.0f, 0.0f));
 
-    Force3D force_to_frame1, force_to_edge1;
-    float torque_center_point_for_edge_line1;
-
-    force_calculation(edge1, edge_node1, pose, force_to_frame1, force_to_edge1, torque_center_point_for_edge_line1);
+    ForceCalculation force_calculation(edge1, edge_node1, pose);    
+    EXPECT_TRUE(force_calculation.calculate());
+    Force3D force_to_frame1 = force_calculation.getForceToFrame();
+    Force3D force_to_edge1 = force_calculation.getForceToEdge();
+    float torque_center_point_for_edge_line1 = force_calculation.getTorqueCenterPointForEdgeLine();
 
     Line3D edge2(0,
                 Eigen::Vector3f(-1, 0, 0),
@@ -407,10 +416,12 @@ TEST(ForceCalculationTest, torque_calculation_with_horizontal_edge_test) {
                        Eigen::Vector2f(0, 1),
                        0);
 
-    Force3D force_to_frame2, force_to_edge2;
-    float torque_center_point_for_edge_line2;
 
-    force_calculation(edge2, edge_node2, pose, force_to_frame2, force_to_edge2, torque_center_point_for_edge_line2);
+    ForceCalculation force_calculation2(edge2, edge_node2, pose);
+    EXPECT_TRUE(force_calculation2.calculate());
+    Force3D force_to_frame2 = force_calculation2.getForceToFrame();
+    Force3D force_to_edge2 = force_calculation2.getForceToEdge();
+    float torque_center_point_for_edge_line2 = force_calculation2.getTorqueCenterPointForEdgeLine();
 
 
     float force_threshold = 0.0001;
@@ -441,10 +452,11 @@ TEST(ForceCalculationTest, torque_calculation_with_horizontal_edge_test2) {
     const float pose_y_rotate = 0.3f;
     pose.rotate(Eigen::Vector3f(0.0f, pose_y_rotate, 0.0f));
 
-    Force3D force_to_frame1, force_to_edge1;
-    float torque_center_point_for_edge_line1;
-
-    force_calculation(edge1, edge_node1, pose, force_to_frame1, force_to_edge1, torque_center_point_for_edge_line1);
+    ForceCalculation force_calculation(edge1, edge_node1, pose);
+    EXPECT_TRUE(force_calculation.calculate());
+    Force3D force_to_frame1 = force_calculation.getForceToFrame();
+    Force3D force_to_edge1 = force_calculation.getForceToEdge();
+    float torque_center_point_for_edge_line1 = force_calculation.getTorqueCenterPointForEdgeLine();
 
     Line3D edge2(0,
                 Eigen::Vector3f(0, -1, 0),
@@ -455,10 +467,11 @@ TEST(ForceCalculationTest, torque_calculation_with_horizontal_edge_test2) {
                        Eigen::Vector2f(1, 0),
                        0);
 
-    Force3D force_to_frame2, force_to_edge2;
-    float torque_center_point_for_edge_line2;
-
-    force_calculation(edge2, edge_node2, pose, force_to_frame2, force_to_edge2, torque_center_point_for_edge_line2);
+    ForceCalculation force_calculation2(edge2, edge_node2, pose);
+    EXPECT_TRUE(force_calculation2.calculate());
+    Force3D force_to_frame2 = force_calculation2.getForceToFrame();
+    Force3D force_to_edge2 = force_calculation2.getForceToEdge();
+    float torque_center_point_for_edge_line2 = force_calculation2.getTorqueCenterPointForEdgeLine();
 
 
     float force_threshold = 0.0001;
