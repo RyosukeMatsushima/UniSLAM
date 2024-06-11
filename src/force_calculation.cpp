@@ -1,39 +1,60 @@
 #include "force_calculation.hpp"
 
-// TODO: make this as class.
-bool force_calculation(const Line3D &edge,
-                       const EdgeNode &edge_node,
-                       const Pose3D &frame_pose,
-                       Force3D &force_to_frame,
-                       Force3D &force_to_edge,
-                       float &torque_center_point_for_edge_line) {
+ForceCalculation::ForceCalculation(const Line3D &edge, const EdgeNode &edge_node, const Pose3D &frame_pose)
+    : edge(edge), edge_node(edge_node), frame_pose(frame_pose) {}
 
-    Line3D observed_line(-1, // do not care about id
-                         frame_pose.position,
-                         frame_pose.rotateVectorToWorld(edge_node.direction_frame_to_edge),
-                         1.0f);
+bool ForceCalculation::init() {
+    Line3D observed_line = createObservedLine();
 
-    // Get the closest points between the edge and the frame-to-edge line
     float distance_edge, distance_observed_line;
-    bool result = Line3D::get_closest_points_between(edge, observed_line, distance_edge, distance_observed_line);
-
-    if (!result) {
+    if (!calculateClosestPoints(observed_line, distance_edge, distance_observed_line)) {
         return false;
     }
 
-    // Get the vector from the closest point on the observed line to the edge
-    // this will be the force
-    Eigen::Vector3f force = edge.get_point_at(distance_edge) - observed_line.get_point_at(distance_observed_line);
+    Eigen::Vector3f force = calculateForce(observed_line, distance_edge, distance_observed_line);
+    Eigen::Vector3f torque = calculateTorque(observed_line, distance_edge);
+    Eigen::Vector3f torque_to_adjust = calculateTorqueToAdjust(observed_line);
 
-    // Get the vector from the frame to the closest point on the edge
+    force_to_frame = Force3D(force, torque + torque_to_adjust);
+    force_to_edge = Force3D(-force, -torque_to_adjust);
+    torque_center_point_for_edge_line = distance_edge;
+
+    return true;
+}
+
+Force3D ForceCalculation::getForceToFrame() const {
+    return force_to_frame;
+}
+
+Force3D ForceCalculation::getForceToEdge() const {
+    return force_to_edge;
+}
+
+float ForceCalculation::getTorqueCenterPointForEdgeLine() const {
+    return torque_center_point_for_edge_line;
+}
+
+Line3D ForceCalculation::createObservedLine() const {
+    return Line3D(-1, // do not care about id
+                  frame_pose.position,
+                  frame_pose.rotateVectorToWorld(edge_node.direction_frame_to_edge),
+                  1.0f);
+}
+
+bool ForceCalculation::calculateClosestPoints(const Line3D &observed_line, float &distance_edge, float &distance_observed_line) const {
+    return Line3D::get_closest_points_between(edge, observed_line, distance_edge, distance_observed_line);
+}
+
+Eigen::Vector3f ForceCalculation::calculateForce(const Line3D &observed_line, float distance_edge, float distance_observed_line) const {
+    return edge.get_point_at(distance_edge) - observed_line.get_point_at(distance_observed_line);
+}
+
+Eigen::Vector3f ForceCalculation::calculateTorque(const Line3D &observed_line, float distance_edge) const {
     Eigen::Vector3f vector_frame_to_edge = edge.get_point_at(distance_edge) - frame_pose.position;
-    // calculate cross product of observed_line.direction and vector_frame_to_edge
-    // this will be the torque
-    Eigen::Vector3f torque = observed_line.direction().cross(vector_frame_to_edge) / (vector_frame_to_edge.norm() * observed_line.direction().norm());
+    return observed_line.direction().cross(vector_frame_to_edge) / (vector_frame_to_edge.norm() * observed_line.direction().norm());
+}
 
-
-    // Calculate the torque to adjust the direction of edge line and observed line
-    // z-axis of observed_line_centered_pose is same as observed line direction
+Eigen::Vector3f ForceCalculation::calculateTorqueToAdjust(const Line3D &observed_line) const {
     Pose3D observed_line_centered_pose = frame_pose.clone();
     float x_rotate_angle = atan2(edge_node.direction_frame_to_edge(1), edge_node.direction_frame_to_edge(2));
     float y_rotate_angle = atan2(edge_node.direction_frame_to_edge(0), edge_node.direction_frame_to_edge(2));
@@ -43,17 +64,24 @@ bool force_calculation(const Line3D &edge,
 
     Eigen::Vector3f observed_line_centered_edge_direction = observed_line_centered_pose.rotateVectorToLocal(edge.direction());
     Eigen::Vector2f observed_line_centered_edge_direction_2d(observed_line_centered_edge_direction(0), observed_line_centered_edge_direction(1));
-    // calculate cross product between observed_line_centered_edge_direction_2d and edge_node.edge_direction
     float sin_angle = edge_node.edge_direction(0) * observed_line_centered_edge_direction_2d(1) - edge_node.edge_direction(1) * observed_line_centered_edge_direction_2d(0);
     sin_angle = sin_angle / (observed_line_centered_edge_direction_2d.norm() * edge_node.edge_direction.norm());
 
-    // torque is angle * observed_line.direction
     Eigen::Vector3f torque_to_adjust = sin_angle * observed_line.direction();
     torque_to_adjust(1) = -torque_to_adjust(1); // y-axis is flipped
 
-    force_to_frame = Force3D(force, torque + torque_to_adjust);
-    force_to_edge = Force3D(-force, - torque_to_adjust);
-    torque_center_point_for_edge_line = distance_edge;
+    return torque_to_adjust;
+}
 
+bool force_calculation(const Line3D &edge, const EdgeNode &edge_node, const Pose3D &frame_pose,
+                       Force3D &force_to_frame, Force3D &force_to_edge, float &torque_center_point_for_edge_line) {
+    ForceCalculation calc(edge, edge_node, frame_pose);
+    if (!calc.init()) {
+        return false;
+    }
+    force_to_frame = calc.getForceToFrame();
+    force_to_edge = calc.getForceToEdge();
+    torque_center_point_for_edge_line = calc.getTorqueCenterPointForEdgeLine();
     return true;
 }
+
