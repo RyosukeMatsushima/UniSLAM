@@ -24,16 +24,12 @@ find_package(Eigen3 REQUIRED)
 
 add_subdirectory(edge_point)
 
-add_library(
-    edge
-    edge.cpp
-)
+add_library(edge edge.cpp)
 
 target_include_directories(
     edge
     PUBLIC
     edge_point
-    ${CMAKE_CURRENT_SOURCE_DIR}
     ${EIGEN3_INCLUDE_DIR}
     ${OpenCV_INCLUDE_DIRS}
 )
@@ -45,6 +41,7 @@ add_executable(
 
 target_link_libraries(
     edge_test
+    PRIVATE
     edge
     edge_point
     GTest::gtest_main
