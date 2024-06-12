@@ -103,4 +103,7 @@ TEST(EdgePointCheckTest, TestGetDesiredEdgeArea) {
     cv::imwrite(RESULT_IMAGE_PATH "get_desired_edge_area_original.jpg", image);
 }
 
-
+int main(int argc, char **argv) {
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}

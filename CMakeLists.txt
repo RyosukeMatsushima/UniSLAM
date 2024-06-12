@@ -26,6 +26,7 @@ add_subdirectory(src/line_3d)
 add_subdirectory(src/frame)
 add_subdirectory(src/edges_space)
 add_subdirectory(src/polygons_space)
+add_subdirectory(src/edge_point_check)
 
 include_directories(
   include
@@ -43,22 +44,9 @@ target_link_libraries(
 )
 
 add_executable(
-    edge_point_check_test
-    test/edge_point_check_test.cpp
-    src/edge_point_check.cpp
-)
-
-target_link_libraries(
-    edge_point_check_test
-    GTest::gtest_main
-    ${OpenCV_LIBS}
-)
-
-add_executable(
     edge_point_finder_test
     test/edge_point_finder_test.cpp
     src/edge_point_finder.cpp
-    src/edge_point_check.cpp
 )
 
 target_link_libraries(
@@ -68,6 +56,7 @@ target_link_libraries(
     edge
     discrete_angle_edge_intensity
     debug_view
+    edge_point_check
     GTest::gtest_main
     ${OpenCV_LIBS}
 )
@@ -76,7 +65,6 @@ add_executable(
     frame_node_test
     test/frame_node_test.cpp
     src/frame_node.cpp
-    src/edge_point_check.cpp
     src/edge_point_finder.cpp
 )
 
@@ -87,6 +75,7 @@ target_link_libraries(
     frame
     discrete_angle_edge_intensity
     debug_view
+    edge_point_check
     GTest::gtest_main
     ${OpenCV_LIBS}
 )
