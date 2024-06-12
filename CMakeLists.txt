@@ -25,21 +25,10 @@ find_package(Eigen3 REQUIRED)
 add_subdirectory(src/line_3d)
 add_subdirectory(src/frame)
 add_subdirectory(src/edges_space)
+add_subdirectory(src/polygons_space)
 
 include_directories(
   include
-)
-
-add_executable(
-  polygons_space_test
-  test/tools/polygons_space_test.cpp
-  test/tools/polygons_space.cpp
-)
-
-target_link_libraries(
-  polygons_space_test
-  GTest::gtest_main
-  ${OpenCV_LIBS}
 )
 
 add_executable(
