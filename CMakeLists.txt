@@ -24,6 +24,7 @@ find_package(Eigen3 REQUIRED)
 
 add_subdirectory(src/line_3d)
 add_subdirectory(src/edge)
+add_subdirectory(src/discrete_angle_edge_intensity)
 
 include_directories(
   include
@@ -34,13 +35,13 @@ add_executable(
   test/frame_test.cpp
   src/frame.cpp
   src/debug_view.cpp
-  src/discrete_angle_edge_intensity.cpp
 )
 
 target_link_libraries(
   frame_test
   edge_point
   edge
+  discrete_angle_edge_intensity
   GTest::gtest_main
   ${OpenCV_LIBS}
 )
@@ -93,21 +94,8 @@ target_link_libraries(
 )
 
 add_executable(
-    discrete_angle_edge_intensity_test
-    test/discrete_angle_edge_intensity_test.cpp
-    src/discrete_angle_edge_intensity.cpp
-)
-
-target_link_libraries(
-    discrete_angle_edge_intensity_test
-    GTest::gtest_main
-    ${OpenCV_LIBS}
-)
-
-add_executable(
     edge_point_finder_test
     test/edge_point_finder_test.cpp
-    src/discrete_angle_edge_intensity.cpp
     src/edge_point_finder.cpp
     src/edge_point_check.cpp
     src/frame.cpp
@@ -118,6 +106,7 @@ target_link_libraries(
     edge_point_finder_test
     edge_point
     edge
+    discrete_angle_edge_intensity
     GTest::gtest_main
     ${OpenCV_LIBS}
 )
@@ -129,7 +118,6 @@ add_executable(
     src/frame.cpp
     src/edge_point_check.cpp
     src/edge_point_finder.cpp
-    src/discrete_angle_edge_intensity.cpp
     src/debug_view.cpp
 )
 
@@ -137,6 +125,7 @@ target_link_libraries(
     frame_node_test
     edge_point
     edge
+    discrete_angle_edge_intensity
     GTest::gtest_main
     ${OpenCV_LIBS}
 )
