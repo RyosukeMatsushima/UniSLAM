@@ -24,21 +24,10 @@ find_package(Eigen3 REQUIRED)
 
 add_subdirectory(src/line_3d)
 add_subdirectory(src/frame)
+add_subdirectory(src/edges_space)
 
 include_directories(
   include
-)
-
-add_executable(
-  edges_space_test
-  test/edges_space_test.cpp
-  src/edges_space.cpp
-)
-
-target_link_libraries(
-  edges_space_test
-  GTest::gtest_main
-  ${OpenCV_LIBS}
 )
 
 add_executable(
