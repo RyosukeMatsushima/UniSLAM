@@ -65,6 +65,8 @@ target_link_libraries(
     ${OpenCV_LIBS}
 )
 
+target_compile_definitions(edge_point_finder_test PRIVATE PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
+
 include(GoogleTest)
 gtest_discover_tests(edge_point_finder_test)
 
