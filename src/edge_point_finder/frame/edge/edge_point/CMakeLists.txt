@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(Frame)
+project(EdgePoint)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -22,55 +22,35 @@ find_package(OpenCV REQUIRED)
 # Find Eigen package
 find_package(Eigen3 REQUIRED)
 
-add_subdirectory(edge)
-add_subdirectory(discrete_angle_edge_intensity)
-
 add_library(
-    frame
-    frame.cpp
+    edge_point
+    edge_point.cpp
+    edge_point.hpp
 )
 
-target_include_directories(
-    frame
-    PUBLIC
-    discrete_angle_edge_intensity
-    edge/edge_point
-    edge
-    debug_view
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${EIGEN3_INCLUDE_DIR}
-    ${OpenCV_INCLUDE_DIRS}
-)
-
-add_executable(
-    frame_test
-    frame_test.cpp
-)
+target_include_directories(edge_point PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(
-    frame_test
+    edge_point
     PRIVATE
-    frame
-    discrete_angle_edge_intensity
-    edge
     GTest::gtest_main
     ${OpenCV_LIBS}
     Eigen3::Eigen
 )
 
+add_executable(
+    edge_point_test
+    edge_point_test.cpp
+)
+
+target_link_libraries(
+    edge_point_test
+    PRIVATE
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+    Eigen3::Eigen
+    edge_point
+)
+
 include(GoogleTest)
-gtest_discover_tests(frame_test)
-
-add_library(
-    debug_view
-    debug_view.cpp
-)
-
-target_include_directories(
-    debug_view
-    PUBLIC
-    edge
-    edge/edge_point
-    ${OpenCV_INCLUDE_DIRS}
-)
-
+gtest_discover_tests(edge_point_test)

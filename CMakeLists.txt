@@ -23,10 +23,9 @@ find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 add_subdirectory(src/line_3d)
-add_subdirectory(src/frame)
 add_subdirectory(src/edges_space)
 add_subdirectory(src/polygons_space)
-add_subdirectory(src/edge_point_check)
+add_subdirectory(src/edge_point_finder)
 
 include_directories(
   include
@@ -44,28 +43,9 @@ target_link_libraries(
 )
 
 add_executable(
-    edge_point_finder_test
-    test/edge_point_finder_test.cpp
-    src/edge_point_finder.cpp
-)
-
-target_link_libraries(
-    edge_point_finder_test
-    frame
-    edge_point
-    edge
-    discrete_angle_edge_intensity
-    debug_view
-    edge_point_check
-    GTest::gtest_main
-    ${OpenCV_LIBS}
-)
-
-add_executable(
     frame_node_test
     test/frame_node_test.cpp
     src/frame_node.cpp
-    src/edge_point_finder.cpp
 )
 
 target_link_libraries(
@@ -76,6 +56,7 @@ target_link_libraries(
     discrete_angle_edge_intensity
     debug_view
     edge_point_check
+    edge_point_finder
     GTest::gtest_main
     ${OpenCV_LIBS}
 )
