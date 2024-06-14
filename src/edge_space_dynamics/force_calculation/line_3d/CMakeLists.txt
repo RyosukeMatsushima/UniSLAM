@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(MyCppProject)
+project(Line3D)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -16,18 +16,38 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-# Find OpenCV package
-find_package(OpenCV REQUIRED)
-
 # Find Eigen package
 find_package(Eigen3 REQUIRED)
 
-add_subdirectory(src/edges_space)
-add_subdirectory(src/polygons_space)
-add_subdirectory(src/frame_node)
-add_subdirectory(src/edge_space_dynamics)
-
-include_directories(
-  include
+add_library(
+    line_3d
+    line_3d.cpp
+    line_3d.hpp
 )
 
+target_include_directories(
+    line_3d
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(
+    line_3d
+    PRIVATE
+    Eigen3::Eigen
+)
+
+add_executable(
+    line_3d_test
+    line_3d_test.cpp
+)
+
+target_link_libraries(
+    line_3d_test
+    GTest::gtest_main
+    Eigen3::Eigen
+    line_3d
+)
+
+include(GoogleTest)
+gtest_discover_tests(line_3d_test)

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(Line3D)
+project(EdgeSpaceDynamics)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -16,32 +16,46 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-# Find Eigen package
+# Find Eigen
 find_package(Eigen3 REQUIRED)
 
+add_subdirectory(force_calculation)
+
 add_library(
-    line_3d
-    line_3d.cpp
+    edge_space_dynamics
+    edge_space_dynamics.cpp
 )
 
 target_include_directories(
-    line_3d
+    edge_space_dynamics
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${EIGEN3_INCLUDE_DIR}
-)
-
-add_executable(
-    line_3d_test
-    line_3d_test.cpp
 )
 
 target_link_libraries(
-    line_3d_test
+    edge_space_dynamics
+    PRIVATE
+    force_calculation
+    line_3d
     GTest::gtest_main
     Eigen3::Eigen
+)
+
+add_executable(
+    edge_space_dynamics_test
+    edge_space_dynamics_test.cpp
+)
+
+target_link_libraries(
+    edge_space_dynamics_test
+    PRIVATE
+    edge_space_dynamics
+    force_calculation
     line_3d
+    GTest::gtest_main
+    Eigen3::Eigen
 )
 
 include(GoogleTest)
-gtest_discover_tests(line_3d_test)
+gtest_discover_tests(edge_space_dynamics_test)
+
