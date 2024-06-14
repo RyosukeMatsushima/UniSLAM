@@ -32,17 +32,6 @@ include_directories(
 )
 
 add_executable(
-    cpp_copy_test
-    test/cpp_copy_test.cpp
-)
-
-target_link_libraries(
-    cpp_copy_test
-    GTest::gtest_main
-    ${OpenCV_LIBS}
-)
-
-add_executable(
     frame_node_test
     test/frame_node_test.cpp
     src/frame_node.cpp
