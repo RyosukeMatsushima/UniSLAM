@@ -25,29 +25,10 @@ find_package(Eigen3 REQUIRED)
 add_subdirectory(src/line_3d)
 add_subdirectory(src/edges_space)
 add_subdirectory(src/polygons_space)
-add_subdirectory(src/edge_point_finder)
+add_subdirectory(src/frame_node)
 
 include_directories(
   include
-)
-
-add_executable(
-    frame_node_test
-    test/frame_node_test.cpp
-    src/frame_node.cpp
-)
-
-target_link_libraries(
-    frame_node_test
-    edge_point
-    edge
-    frame
-    discrete_angle_edge_intensity
-    debug_view
-    edge_point_check
-    edge_point_finder
-    GTest::gtest_main
-    ${OpenCV_LIBS}
 )
 
 # Add the test executable
