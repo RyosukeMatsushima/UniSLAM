@@ -43,3 +43,9 @@ TEST(Line3DTest, TestDistanceBetween)
     float distance_between = (line1.get_point_at(distance1) - line2.get_point_at(distance2)).norm();
     ASSERT_NEAR(distance_between, 1, 1e-6);
 }
+
+int main(int argc, char **argv)
+{
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}

@@ -7,9 +7,9 @@
 #include "frame.h"
 #include "debug_view.hpp"
 
-#define TEST_IMAGE_PATH "../test/data/sequence_01/imgs/00000.jpg"
+#define TEST_IMAGE_PATH PROJECT_SOURCE_DIR "/test/data/00000.jpg"
 
-#define RESULT_IMAGE_PATH "./result/edge_point_finder/"
+#define RESULT_IMAGE_PATH PROJECT_SOURCE_DIR "/test/result/"
 
 std::vector<EdgePoint> searchEveryArea(Frame frame, int edge_find_window_size, float angle) {
     std::vector<EdgePoint> edge_points;
@@ -222,3 +222,7 @@ TEST(WithCameraImg, TestEdgePointFinder) {
     }
 }
 
+int main(int argc, char **argv) {
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}

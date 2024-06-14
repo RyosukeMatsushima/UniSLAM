@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(MyCppProject)
+project(PolygonsSpace)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -22,12 +22,33 @@ find_package(OpenCV REQUIRED)
 # Find Eigen package
 find_package(Eigen3 REQUIRED)
 
-add_subdirectory(src/edges_space)
-add_subdirectory(src/polygons_space)
-add_subdirectory(src/frame_node)
-add_subdirectory(src/edge_space_dynamics)
-
-include_directories(
-  include
+add_library(
+    polygons_space
+    polygons_space.cpp
 )
+
+target_include_directories(
+    polygons_space
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${OpenCV_INCLUDE_DIRS}
+    ${EIGEN3_INCLUDE_DIR}
+)
+
+add_executable(
+    polygons_space_test
+    polygons_space_test.cpp
+)
+
+target_link_libraries(
+    polygons_space_test
+    PRIVATE
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+    Eigen3::Eigen
+    polygons_space
+)
+
+include(GoogleTest)
+gtest_discover_tests(polygons_space_test)
 

@@ -3,8 +3,6 @@
 
 #include <Eigen/Dense>
 
-#include <opencv2/opencv.hpp>
-
 class Line3D {
 public:
 

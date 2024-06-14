@@ -89,3 +89,9 @@ TEST(EgdePointTest, GetDiffToMatchedPoint)
     EXPECT_NEAR(edge_point.angleTo(new_edge_point), M_PI / 2, 1e-6);
 }
 
+int main(int argc, char **argv)
+{
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
+

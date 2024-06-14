@@ -9,6 +9,7 @@
 #define FRAME_POSE_ROTATE_GAIN 0.01
 
 #include <Eigen/Dense>
+#include <vector>
 
 #include "force_calculation.hpp"
 #include "edge_node.hpp"

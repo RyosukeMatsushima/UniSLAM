@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(MyCppProject)
+project(Edge)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -22,12 +22,35 @@ find_package(OpenCV REQUIRED)
 # Find Eigen package
 find_package(Eigen3 REQUIRED)
 
-add_subdirectory(src/edges_space)
-add_subdirectory(src/polygons_space)
-add_subdirectory(src/frame_node)
-add_subdirectory(src/edge_space_dynamics)
+add_subdirectory(edge_point)
 
-include_directories(
-  include
+add_library(edge edge.cpp edge.h)
+
+target_include_directories(edge PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_link_libraries(
+    edge
+    PRIVATE
+    edge_point
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+    Eigen3::Eigen
 )
 
+add_executable(
+    edge_test
+    edge_test.cpp
+)
+
+target_link_libraries(
+    edge_test
+    PRIVATE
+    edge
+    edge_point
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+    Eigen3::Eigen
+)
+
+include(GoogleTest)
+gtest_discover_tests(edge_test)

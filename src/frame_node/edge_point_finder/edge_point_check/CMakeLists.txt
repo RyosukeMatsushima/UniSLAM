@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(MyCppProject)
+project(EdgePointCheck)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -19,15 +19,31 @@ enable_testing()
 # Find OpenCV package
 find_package(OpenCV REQUIRED)
 
-# Find Eigen package
-find_package(Eigen3 REQUIRED)
-
-add_subdirectory(src/edges_space)
-add_subdirectory(src/polygons_space)
-add_subdirectory(src/frame_node)
-add_subdirectory(src/edge_space_dynamics)
-
-include_directories(
-  include
+add_library(
+    edge_point_check
+    edge_point_check.cpp
 )
+
+target_include_directories(
+    edge_point_check
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${OpenCV_INCLUDE_DIRS}
+)
+
+add_executable(
+    edge_point_check_test
+    edge_point_check_test.cpp
+)
+
+target_link_libraries(
+    edge_point_check_test
+    PRIVATE
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+    edge_point_check
+)
+
+include(GoogleTest)
+gtest_discover_tests(edge_point_check_test)
 
