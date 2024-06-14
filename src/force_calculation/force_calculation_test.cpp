@@ -188,3 +188,7 @@ TEST(ForceCalculationTest, force_should_be_zero_if_translation_direction_is_same
     compareTorques(force_to_edge, expected_torque_to_edge);
 }
 
+int main(int argc, char **argv) {
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}

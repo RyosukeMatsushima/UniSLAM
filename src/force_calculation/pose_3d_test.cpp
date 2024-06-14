@@ -136,3 +136,7 @@ TEST(Pose3DTest, GetCopy) {
     EXPECT_TRUE(poseClone.position.isApprox(pose.position + translation));
 }
 
+int main(int argc, char **argv) {
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}

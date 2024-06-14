@@ -22,52 +22,27 @@ find_package(OpenCV REQUIRED)
 # Find Eigen package
 find_package(Eigen3 REQUIRED)
 
-add_subdirectory(src/line_3d)
 add_subdirectory(src/edges_space)
 add_subdirectory(src/polygons_space)
 add_subdirectory(src/frame_node)
+add_subdirectory(src/force_calculation)
 
 include_directories(
   include
 )
 
 # Add the test executable
-add_executable(
-    pose_3d_test
-    test/pose_3d_test.cpp
-)
-
-target_link_libraries(
-    pose_3d_test
-    GTest::gtest_main
-    ${OpenCV_LIBS}
-    Eigen3::Eigen
-)
 
 add_executable(
     edge_space_dynamics_test
     test/edge_space_dynamics_test.cpp
     src/edge_space_dynamics.cpp
-    src/force_calculation.cpp
 )
 
 target_link_libraries(
     edge_space_dynamics_test
     line_3d
-    GTest::gtest_main
-    ${OpenCV_LIBS}
-    Eigen3::Eigen
-)
-
-add_executable(
-    force_calculation_test
-    test/force_calculation_test.cpp
-    src/force_calculation.cpp
-)
-
-target_link_libraries(
-    force_calculation_test
-    line_3d
+    force_calculation
     GTest::gtest_main
     ${OpenCV_LIBS}
     Eigen3::Eigen
