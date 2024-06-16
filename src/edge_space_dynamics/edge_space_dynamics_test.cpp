@@ -2,7 +2,7 @@
 
 #include "edge_space_dynamics.hpp"
 
-TEST(EdgeSpaceDynamics, getFramePose) {
+TEST(EdgeSpaceDynamics, calculateFramePose) {
 
     EdgeSpaceDynamics edge_space_dynamics;
 
@@ -51,7 +51,7 @@ TEST(EdgeSpaceDynamics, getFramePose) {
     frame_pose.translate(Eigen::Vector3f(0.0f, 0.0f, -1.2f));
     frame_pose.rotate(Eigen::Vector3f(0.1f, 0.0f, 0.0f));
 
-    bool result = edge_space_dynamics.get_frame_pose(edge_nodes, frame_pose);
+    bool result = edge_space_dynamics.calculate_frame_pose(edge_nodes, frame_pose);
 
     Eigen::Vector3f expected_position = Eigen::Vector3f(0.0, 0.0, -1.0);
     Eigen::Quaternionf expected_orientation = Eigen::Quaternionf::Identity();
@@ -73,7 +73,7 @@ TEST(EdgeSpaceDynamics, getFramePose) {
     EXPECT_NEAR(frame_pose.orientation.w(), expected_orientation.w(), rotate_error_threshold);
 }
 
-TEST(EdgeSpaceDynamics, getFramePoseHolizontalMoveTest) {
+TEST(EdgeSpaceDynamics, calculateFramePoseHolizontalMoveTest) {
 
     EdgeSpaceDynamics edge_space_dynamics;
 
@@ -122,7 +122,7 @@ TEST(EdgeSpaceDynamics, getFramePoseHolizontalMoveTest) {
     frame_pose.translate(Eigen::Vector3f(0.1f, 1.0f, -1.2f));
     frame_pose.rotate(Eigen::Vector3f(1.0f, -2.0f, 1.1f));
 
-    bool result = edge_space_dynamics.get_frame_pose(edge_nodes, frame_pose);
+    bool result = edge_space_dynamics.calculate_frame_pose(edge_nodes, frame_pose);
 
     Eigen::Vector3f expected_position = Eigen::Vector3f(0.0, 0.0, -1.0);
     Eigen::Quaternionf expected_orientation = Eigen::Quaternionf::Identity();
@@ -143,3 +143,4 @@ TEST(EdgeSpaceDynamics, getFramePoseHolizontalMoveTest) {
     EXPECT_NEAR(frame_pose.orientation.coeffs().z(), expected_orientation.coeffs().z(), rotate_error_threshold);
     EXPECT_NEAR(frame_pose.orientation.coeffs().w(), expected_orientation.coeffs().w(), rotate_error_threshold);
 }
+

@@ -59,6 +59,9 @@ public:
                    Eigen::Vector3f direction,
                    float length);
 
+    bool calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
+                              Pose3D& frame_pose);
+
 private:
 
     std::vector<Line3D> edges;
