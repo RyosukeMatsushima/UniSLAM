@@ -5,8 +5,6 @@ EdgeSpaceDynamics::EdgeSpaceDynamics() {
 
 bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode> edge_nodes,
                                        Pose3D& frame_pose) {
-    // use RANSAC to remove outliers
-
     return true;
 }
 
@@ -47,16 +45,16 @@ bool EdgeSpaceDynamics::calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
             EdgeNode edge_node = edge_nodes[j];
             Line3D edge = edges[edge_node.edge_id];
 
-            ForceCalculation force_calculation(edge,
-                                               edge_node,
-                                               current_frame_pose);
-            if (!force_calculation.calculate()) {
-                continue;
-            }
+            Force3D force_to_frame;
+            Force3D force_to_edge;
+            float torque_center_point_for_edge_line;
 
-            Force3D force_to_frame = force_calculation.getForceToFrame();
-            Force3D force_to_edge = force_calculation.getForceToEdge();
-            float torque_center_point_for_edge_line = force_calculation.getTorqueCenterPointForEdgeLine();
+            if (!get_force(edge,
+                           edge_node,
+                           frame_pose,
+                           force_to_frame,
+                           force_to_edge,
+                           torque_center_point_for_edge_line)) return false;
 
             force_to_frame_sum.add(force_to_frame);
             force_to_edge_sum.add(force_to_edge);
@@ -68,4 +66,19 @@ bool EdgeSpaceDynamics::calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
     return true;
 }
 
+bool EdgeSpaceDynamics::get_force(Line3D edge,
+                                  EdgeNode edge_node,
+                                  Pose3D frame_pose,
+                                  Force3D& force_to_frame,
+                                  Force3D& force_to_edge,
+                                  float& torque_center_point_for_edge_line) {
+    ForceCalculation force_calculation(edge,
+                                       edge_node,
+                                       frame_pose);
+    if (!force_calculation.calculate()) return false;
 
+    force_to_frame = force_calculation.getForceToFrame();
+    force_to_edge = force_calculation.getForceToEdge();
+    torque_center_point_for_edge_line = force_calculation.getTorqueCenterPointForEdgeLine();
+    return true;
+}

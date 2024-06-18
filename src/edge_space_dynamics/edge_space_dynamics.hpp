@@ -66,6 +66,14 @@ private:
 
     std::vector<Line3D> edges;
     std::vector<int> edge_ids;
+
+    bool get_force(Line3D edge,
+                   EdgeNode edge_node,
+                   Pose3D frame_pose,
+                   Force3D& force_to_frame,
+                   Force3D& force_to_edge,
+                   float& torque_center_point_for_edge_line);
+
 };
 
 #endif // EDGE_SPACE_DYNAMICS_HPP
