@@ -51,6 +51,11 @@ public:
         copy.orientation = this->orientation;
         return copy;
     }
+
+    void copy_to(Pose3D& other) const {
+        other.position = this->position;
+        other.orientation = this->orientation;
+    }
 };
 
 #endif // POSE_3D_HPP
