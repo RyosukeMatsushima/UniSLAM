@@ -1,15 +1,20 @@
 #ifndef EDGE_SPACE_DYNAMICS_HPP
 #define EDGE_SPACE_DYNAMICS_HPP
 
+#define EDGE_NUM_TO_GET_FRAME_POSE 4
+#define TRANSLATION_STRESS_THRESHOLD_GAIN 1.1f
+#define ROTATION_STRESS_THRESHOLD_GAIN 1.1f
+
 #define MAX_CAL_ITER 1000
 #define CAL_FINISH_FORCE_SIZE 0.0001
 #define CAL_FINISH_TORQUE_SIZE 0.0001
 
-#define FRAME_POSE_TRANSLATE_GAIN 0.8
-#define FRAME_POSE_ROTATE_GAIN 0.01
+#define FRAME_POSE_TRANSLATE_GAIN 1.8f
+#define FRAME_POSE_ROTATE_GAIN 0.1f
 
 #include <Eigen/Dense>
 #include <vector>
+#include <algorithm> // std::max_element
 
 #include "force_calculation.hpp"
 #include "edge_node.hpp"
@@ -30,7 +35,8 @@ public:
     // usecase1
     // Calculate the pose of the new frame
     // The new frame should be related to the calculated edges
-    bool get_frame_pose(std::vector<EdgeNode> edge_nodes,
+    bool get_frame_pose(std::vector<EdgeNode>& edge_nodes,
+                        const float valid_edge_nodes_ratio_threshold,
                         Pose3D& frame_pose);
 
     // usecase2
@@ -61,6 +67,11 @@ public:
 
     bool calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
                               Pose3D& frame_pose);
+
+    void get_stress(std::vector<EdgeNode> edge_nodes,
+                    Pose3D frame_pose,
+                    std::vector<float>& translation_stress,
+                    std::vector<float>& rotation_stress);
 
 private:
 

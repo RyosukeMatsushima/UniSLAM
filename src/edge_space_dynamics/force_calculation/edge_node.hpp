@@ -7,6 +7,7 @@ struct EdgeNode {
     int edge_id;
     Eigen::Vector3f direction_frame_to_edge;
     Eigen::Vector2f edge_direction;
+    bool is_valid = true;
 
     EdgeNode(const Eigen::Vector3f& direction_frame_to_edge,
              const Eigen::Vector2f& edge_direction,
