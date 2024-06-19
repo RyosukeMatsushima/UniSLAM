@@ -19,7 +19,8 @@ protected:
         return EdgeNode(Eigen::Vector3f(df_x, df_y, df_z), Eigen::Vector2f(ed_x, ed_y), edge_id);
     }
 
-    void addWrongEdgeNode() {
+    void addWrongEdgeNodeToBeginAndEnd() {
+        edge_nodes.insert(edge_nodes.begin(), createEdgeNode(1.0, 1.0, 1.0, 0.0, 1.0, edge_space_dynamics.set_edge3d(Eigen::Vector3f(1.0, -1.0, 0.0), Eigen::Vector3f(0.0, 3.0, 0.0), 1.0)));
         edge_nodes.push_back(createEdgeNode(1.0, 0.0, 2.0, 1.0, 1.0, edge_space_dynamics.set_edge3d(Eigen::Vector3f(1.2, 0.1, 2.0), Eigen::Vector3f(0.1, -1.0, 0.0), 1.0)));
     }
 
@@ -68,9 +69,9 @@ TEST_F(EdgeSpaceDynamicsTest, getFramePoseWithNoise) {
     frame_pose.translate(Eigen::Vector3f(0.1f, 1.0f, -1.2f));
     frame_pose.rotate(Eigen::Vector3f(1.0f, -2.0f, 1.1f));
 
-    addWrongEdgeNode();
+    addWrongEdgeNodeToBeginAndEnd();
 
-    const float valid_edge_nodes_ratio_threshold = 0.7;
+    const float valid_edge_nodes_ratio_threshold = 0.5;
 
     bool result = edge_space_dynamics.get_frame_pose(edge_nodes,
                                                      valid_edge_nodes_ratio_threshold,
@@ -82,9 +83,9 @@ TEST_F(EdgeSpaceDynamicsTest, getFramePoseWithNoise) {
     EXPECT_TRUE(result);
     checkFramePose(frame_pose, expected_position, expected_orientation);
 
-    // edge_node should be valid except for the last one
+    // edge_node should be valid except for the first and last edge_node
     for (int i = 0; i < edge_nodes.size(); i++) {
-        if (i == edge_nodes.size() - 1) {
+        if (i == 0 || i == edge_nodes.size() - 1) {
             EXPECT_FALSE(edge_nodes[i].is_valid);
         } else {
             EXPECT_TRUE(edge_nodes[i].is_valid);

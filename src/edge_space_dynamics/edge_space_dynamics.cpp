@@ -1,5 +1,6 @@
 #include "edge_space_dynamics.hpp"
 
+
 EdgeSpaceDynamics::EdgeSpaceDynamics() {
 }
 
@@ -11,6 +12,11 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
     if (edge_nodes.size() < EDGE_NUM_TO_GET_FRAME_POSE) {
         throw std::invalid_argument("edge_nodes.size() < EDGE_NUM_TO_GET_FRAME_POSE");
     }
+
+    bool frame_pose_is_valid = false;
+
+    float min_translation_stress = std::numeric_limits<float>::max();
+    float min_rotation_stress = std::numeric_limits<float>::max();
 
     for (int edge_pointer = 0; edge_pointer < edge_nodes.size() - EDGE_NUM_TO_GET_FRAME_POSE; edge_pointer++) {
 
@@ -30,10 +36,19 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
                    translation_stress_with_calculated_edges,
                    rotation_stress_with_calculated_edges);
 
-        float translation_stress_threshold = *std::max_element(translation_stress_with_calculated_edges.begin(),
-                                                               translation_stress_with_calculated_edges.end()) * TRANSLATION_STRESS_THRESHOLD_GAIN;
-        float rotation_stress_threshold = *std::max_element(rotation_stress_with_calculated_edges.begin(),
-                                                            rotation_stress_with_calculated_edges.end()) * ROTATION_STRESS_THRESHOLD_GAIN;
+        float current_max_translation_stress = *std::max_element(translation_stress_with_calculated_edges.begin(),
+                                                                 translation_stress_with_calculated_edges.end());
+        float current_max_rotation_stress = *std::max_element(rotation_stress_with_calculated_edges.begin(),
+                                                              rotation_stress_with_calculated_edges.end());
+
+        if (current_max_translation_stress > min_translation_stress ||
+            current_max_rotation_stress > min_rotation_stress) {
+            continue;
+        }
+
+
+        float translation_stress_threshold = current_max_translation_stress * TRANSLATION_STRESS_THRESHOLD_GAIN;
+        float rotation_stress_threshold = current_max_rotation_stress * ROTATION_STRESS_THRESHOLD_GAIN;
 
         // calculate the stress with the all of the edges
         std::vector<float> translation_stress_with_all_edges, rotation_stress_with_all_edges;
@@ -57,12 +72,14 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
         float valid_edge_nodes_ratio = (float)valid_edge_nodes_count / float(edge_nodes.size());
 
         if (valid_edge_nodes_ratio > valid_edge_nodes_ratio_threshold) {
+            min_translation_stress = current_max_translation_stress;
+            min_rotation_stress = current_max_rotation_stress;
             current_frame_pose.copy_to(frame_pose);
-            return true;
+            frame_pose_is_valid = true;
         }
     }
 
-    return false;
+    return frame_pose_is_valid;
 }
 
 bool EdgeSpaceDynamics::add_new_edge(Pose3D frame1_pose,
