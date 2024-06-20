@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "edge_space_dynamics.hpp"
 
-class EdgeSpaceDynamicsTest : public ::testing::Test {
+class GetFramePoseTest : public ::testing::Test {
 protected:
     EdgeSpaceDynamics edge_space_dynamics;
     std::vector<EdgeNode> edge_nodes;
@@ -36,7 +36,7 @@ protected:
     }
 };
 
-TEST_F(EdgeSpaceDynamicsTest, calculateFramePose) {
+TEST_F(GetFramePoseTest, calculateFramePose) {
     Pose3D frame_pose;
     frame_pose.translate(Eigen::Vector3f(0.0f, 0.0f, -1.2f));
     frame_pose.rotate(Eigen::Vector3f(0.1f, 0.0f, 0.0f));
@@ -50,7 +50,7 @@ TEST_F(EdgeSpaceDynamicsTest, calculateFramePose) {
     checkFramePose(frame_pose, expected_position, expected_orientation);
 }
 
-TEST_F(EdgeSpaceDynamicsTest, calculateFramePoseHorizontalMoveTest) {
+TEST_F(GetFramePoseTest, calculateFramePoseHorizontalMoveTest) {
     Pose3D frame_pose;
     frame_pose.translate(Eigen::Vector3f(0.1f, 1.0f, -1.2f));
     frame_pose.rotate(Eigen::Vector3f(1.0f, -2.0f, 1.1f));
@@ -64,7 +64,7 @@ TEST_F(EdgeSpaceDynamicsTest, calculateFramePoseHorizontalMoveTest) {
     checkFramePose(frame_pose, expected_position, expected_orientation);
 }
 
-TEST_F(EdgeSpaceDynamicsTest, getFramePoseWithNoise) {
+TEST_F(GetFramePoseTest, getFramePoseWithNoise) {
     Pose3D frame_pose;
     frame_pose.translate(Eigen::Vector3f(0.1f, 1.0f, -1.2f));
     frame_pose.rotate(Eigen::Vector3f(1.0f, -2.0f, 1.1f));
@@ -93,3 +93,7 @@ TEST_F(EdgeSpaceDynamicsTest, getFramePoseWithNoise) {
     }
 }
 
+int main(int argc, char **argv) {
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
