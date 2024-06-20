@@ -58,25 +58,28 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
                    rotation_stress_with_all_edges);
 
         // it's valid edge_nodes if the stress is less than the threshold
-        int valid_edge_nodes_count = 0;
+        std::vector<bool> is_valid_edge_nodes(edge_nodes.size());
+
         for (int i = 0; i < edge_nodes.size(); i++) {
-            if (translation_stress_with_all_edges[i] <= translation_stress_threshold &&
-                rotation_stress_with_all_edges[i] <= rotation_stress_threshold) {
-                edge_nodes[i].is_valid = true;
-                valid_edge_nodes_count++;
-            } else {
-                edge_nodes[i].is_valid = false;
-            }
+            is_valid_edge_nodes[i] = translation_stress_with_all_edges[i] <= translation_stress_threshold &&
+                                     rotation_stress_with_all_edges[i] <= rotation_stress_threshold;
         }
+
+        int valid_edge_nodes_count = std::count(is_valid_edge_nodes.begin(), is_valid_edge_nodes.end(), true);
 
         float valid_edge_nodes_ratio = (float)valid_edge_nodes_count / float(edge_nodes.size());
 
-        if (valid_edge_nodes_ratio > valid_edge_nodes_ratio_threshold) {
-            min_translation_stress = current_max_translation_stress;
-            min_rotation_stress = current_max_rotation_stress;
-            current_frame_pose.copy_to(frame_pose);
-            frame_pose_is_valid = true;
+        // update the frame_pose if the valid_edge_nodes_ratio is higher than the threshold
+        if (valid_edge_nodes_ratio < valid_edge_nodes_ratio_threshold) continue;
+
+        for (int i = 0; i < edge_nodes.size(); i++) {
+            edge_nodes[i].is_valid = is_valid_edge_nodes[i];
         }
+
+        min_translation_stress = current_max_translation_stress;
+        min_rotation_stress = current_max_rotation_stress;
+        current_frame_pose.copy_to(frame_pose);
+        frame_pose_is_valid = true;
     }
 
     return frame_pose_is_valid;
