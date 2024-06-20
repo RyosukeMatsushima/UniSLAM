@@ -22,9 +22,13 @@ public:
                                            float& distance1,
                                            float& distance2);
 
+    int id() const;
+
     Eigen::Vector3f start_point() const;
 
     Eigen::Vector3f direction() const;
+
+    float length() const;
 
 private:
     int id_;

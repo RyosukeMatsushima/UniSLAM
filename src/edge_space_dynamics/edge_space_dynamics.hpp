@@ -1,16 +1,24 @@
 #ifndef EDGE_SPACE_DYNAMICS_HPP
 #define EDGE_SPACE_DYNAMICS_HPP
 
+// for get_frame_pose
 #define EDGE_NUM_TO_GET_FRAME_POSE 4
 #define TRANSLATION_STRESS_THRESHOLD_GAIN 1.1f
 #define ROTATION_STRESS_THRESHOLD_GAIN 1.1f
 
-#define MAX_CAL_ITER 1000
-#define CAL_FINISH_FORCE_SIZE 0.0001
-#define CAL_FINISH_TORQUE_SIZE 0.0001
+// for add_new_edge
+#define INITIAL_EDGE_DISTANCE_FROM_FRAME1 0.1f
+#define EDGE_POSE_TRANSLATE_GAIN 0.1f
+#define EDGE_POSE_ROTATE_GAIN 0.1f
 
+// for calculate_frame_pose
+#define MAX_CAL_ITER 1000
 #define FRAME_POSE_TRANSLATE_GAIN 1.8f
 #define FRAME_POSE_ROTATE_GAIN 0.1f
+
+// TODO: use this value to stop the calculation
+#define CAL_FINISH_FORCE_SIZE 0.0001
+#define CAL_FINISH_TORQUE_SIZE 0.0001
 
 #include <Eigen/Dense>
 #include <vector>
@@ -43,10 +51,10 @@ public:
     // Add new edge
     // returns the edge pointer
     // returns -1 if the edge is not added
-    bool add_new_edge(Pose3D frame1_pose,
-                      Pose3D frame2_pose,
-                      EdgeNode frame1_edge_node,
-                      EdgeNode frame2_edge_node,
+    bool add_new_edge(const Pose3D frame1_pose,
+                      const Pose3D frame2_pose,
+                      const EdgeNode frame1_edge_node,
+                      const EdgeNode frame2_edge_node,
                       int& edge_id);
 
 
@@ -57,7 +65,7 @@ public:
                     std::vector<EdgeNode> edge_nodes);
 
     // usecase3
-    void get_edge3ds(std::vector<Line3D>& edge3ds);
+    std::vector<Line3D> get_edge3ds();
 
     // usecase4
     // returns id of the edge

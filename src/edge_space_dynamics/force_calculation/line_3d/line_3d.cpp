@@ -67,6 +67,11 @@ bool Line3D::get_closest_points_between(const Line3D& line1,
     return true;
 }
 
+int Line3D::id() const
+{
+    return id_;
+}
+
 Eigen::Vector3f Line3D::start_point() const
 {
     return start_point_;
@@ -75,4 +80,9 @@ Eigen::Vector3f Line3D::start_point() const
 Eigen::Vector3f Line3D::direction() const
 {
     return direction_;
+}
+
+float Line3D::length() const
+{
+    return length_;
 }

@@ -85,12 +85,63 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
     return frame_pose_is_valid;
 }
 
-bool EdgeSpaceDynamics::add_new_edge(Pose3D frame1_pose,
-                                     Pose3D frame2_pose,
-                                     EdgeNode frame1_edge_node,
-                                     EdgeNode frame2_edge_node,
+bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
+                                     const Pose3D frame2_pose,
+                                     const EdgeNode frame1_edge_node,
+                                     const EdgeNode frame2_edge_node,
                                      int& edge_id) {
-    return true;
+
+    Line3D edge(edges.size(),
+                frame1_pose.transformToWorld(frame1_edge_node.direction_frame_to_edge * INITIAL_EDGE_DISTANCE_FROM_FRAME1),
+                frame1_pose.rotateVectorToWorld(Eigen::Vector3f(frame1_edge_node.edge_direction[0], frame1_edge_node.edge_direction[1], 0)),
+                0);
+
+    bool cal_finish = false;
+    for (int i = 0; i < MAX_CAL_ITER; i++) {
+
+        Force3D force_to_frame_not_used;
+        Force3D force_to_edge_with_frame1;
+        float torque_center_point_for_edge_line_with_frame1;
+
+        if (!get_force(edge,
+                       frame1_edge_node,
+                       frame1_pose,
+                       force_to_frame_not_used,
+                       force_to_edge_with_frame1,
+                       torque_center_point_for_edge_line_with_frame1)) return false;
+
+        edge.add_force(force_to_edge_with_frame1.force * EDGE_POSE_TRANSLATE_GAIN,
+                       force_to_edge_with_frame1.torque * EDGE_POSE_ROTATE_GAIN,
+                       torque_center_point_for_edge_line_with_frame1);
+
+        Force3D force_to_edge_with_frame2;
+        float torque_center_point_for_edge_line_with_frame2;
+
+        if (!get_force(edge,
+                       frame2_edge_node,
+                       frame2_pose,
+                       force_to_frame_not_used,
+                       force_to_edge_with_frame2,
+                       torque_center_point_for_edge_line_with_frame2)) return false;
+
+        edge.add_force(force_to_edge_with_frame2.force * EDGE_POSE_TRANSLATE_GAIN,
+                       force_to_edge_with_frame2.torque * EDGE_POSE_ROTATE_GAIN,
+                       torque_center_point_for_edge_line_with_frame2);
+
+        if (force_to_edge_with_frame1.force.norm() < CAL_FINISH_FORCE_SIZE &&
+            force_to_edge_with_frame1.torque.norm() < CAL_FINISH_TORQUE_SIZE &&
+            force_to_edge_with_frame2.force.norm() < CAL_FINISH_FORCE_SIZE &&
+            force_to_edge_with_frame2.torque.norm() < CAL_FINISH_TORQUE_SIZE) {
+            cal_finish = true;
+            break;
+        }
+
+    }
+
+    edges.push_back(edge);
+    edge_ids.push_back(edge.id());
+    edge_id = edge.id();
+    return cal_finish;
 }
 
 Pose3D EdgeSpaceDynamics::optimize(Pose3D frame_pose,
@@ -98,7 +149,8 @@ Pose3D EdgeSpaceDynamics::optimize(Pose3D frame_pose,
     return frame_pose;
 }
 
-void EdgeSpaceDynamics::get_edge3ds(std::vector<Line3D>& edge3ds) {
+std::vector<Line3D> EdgeSpaceDynamics::get_edge3ds() {
+    return edges;
 }
 
 int EdgeSpaceDynamics::set_edge3d(Eigen::Vector3f start_point,
@@ -116,6 +168,7 @@ bool EdgeSpaceDynamics::calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
     for (int i = 0; i < MAX_CAL_ITER; i++) {
         Pose3D current_frame_pose = frame_pose.clone();
 
+        // TODO: remove force_to_edge_sum, it's not used
         Force3D force_to_frame_sum, force_to_edge_sum;
 
         for (int j = 0; j < edge_nodes.size(); j++) {
