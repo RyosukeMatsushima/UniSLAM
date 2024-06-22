@@ -71,7 +71,23 @@ target_link_libraries(
     Eigen3::Eigen
 )
 
+add_executable(
+    optimize_test
+    optimize_test.cpp
+)
+
+target_link_libraries(
+    optimize_test
+    PRIVATE
+    edge_space_dynamics
+    force_calculation
+    line_3d
+    GTest::gtest_main
+    Eigen3::Eigen
+)
+
 include(GoogleTest)
 gtest_discover_tests(add_new_edge_test)
 gtest_discover_tests(get_frame_pose_test)
+gtest_discover_tests(optimize_test)
 

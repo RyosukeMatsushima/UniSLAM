@@ -57,12 +57,11 @@ public:
                       const EdgeNode frame2_edge_node,
                       int& edge_id);
 
-
     // usecase5
-    // returns the optimized frame_pose
-    // optimize the 3d edge
-    Pose3D optimize(Pose3D frame_pose,
-                    std::vector<EdgeNode> edge_nodes);
+    // optimize the frame pose and edge pose
+    bool optimize(Pose3D& frame_pose,
+                  std::vector<EdgeNode>& edge_nodes,
+                  const bool update_frame_pose);
 
     // usecase3
     std::vector<Line3D> get_edge3ds();

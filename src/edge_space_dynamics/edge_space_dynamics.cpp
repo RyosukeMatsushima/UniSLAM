@@ -144,9 +144,11 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
     return cal_finish;
 }
 
-Pose3D EdgeSpaceDynamics::optimize(Pose3D frame_pose,
-                                   std::vector<EdgeNode> edge_nodes) {
-    return frame_pose;
+bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
+                                 std::vector<EdgeNode>& edge_nodes,
+                                 const bool update_frame_pose) {
+
+    return true;
 }
 
 std::vector<Line3D> EdgeSpaceDynamics::get_edge3ds() {
