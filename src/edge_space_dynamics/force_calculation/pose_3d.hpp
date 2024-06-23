@@ -11,6 +11,9 @@ public:
 
     Pose3D() : position(0.0f, 0.0f, 0.0f), orientation(Eigen::Quaternionf::Identity()) {}
 
+    Pose3D(Eigen::Vector3f position, Eigen::Quaternionf orientation)
+        : position(position), orientation(orientation) {}
+
     void translate(const Eigen::Vector3f& delta) {
         position += delta;
     }

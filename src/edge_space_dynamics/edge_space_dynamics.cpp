@@ -148,11 +148,46 @@ bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
                                  std::vector<EdgeNode>& edge_nodes,
                                  const bool update_frame_pose) {
 
+    Pose3D current_frame_pose = frame_pose.clone();
+
+    Force3D force_to_frame_sum, force_to_edge_sum;
+
+    for (int i = 0; i < edge_nodes.size(); i++) {
+        EdgeNode edge_node = edge_nodes[i];
+        Line3D edge = edges[edge_node.edge_id];
+
+        Force3D force_to_frame;
+        Force3D force_to_edge;
+        float torque_center_point_for_edge_line;
+
+        if (!get_force(edge,
+                       edge_node,
+                       current_frame_pose,
+                       force_to_frame,
+                       force_to_edge,
+                       torque_center_point_for_edge_line)) return false;
+
+        force_to_frame_sum.add(force_to_frame);
+        force_to_edge_sum.add(force_to_edge);
+        edges[edge_node.edge_id].add_force(force_to_edge.force * EDGE_POSE_TRANSLATE_GAIN,
+                                           force_to_edge.torque * EDGE_POSE_ROTATE_GAIN,
+                                           torque_center_point_for_edge_line);
+    }
+
+    if (update_frame_pose) {
+        frame_pose.translate(force_to_frame_sum.force * FRAME_POSE_TRANSLATE_GAIN / edge_nodes.size());
+        frame_pose.rotate(force_to_frame_sum.torque * FRAME_POSE_ROTATE_GAIN / edge_nodes.size());
+    }
+
     return true;
 }
 
 std::vector<Line3D> EdgeSpaceDynamics::get_edge3ds() {
     return edges;
+}
+
+Line3D EdgeSpaceDynamics::get_edge3d(int edge_id) {
+    return edges[edge_id];
 }
 
 int EdgeSpaceDynamics::set_edge3d(Eigen::Vector3f start_point,

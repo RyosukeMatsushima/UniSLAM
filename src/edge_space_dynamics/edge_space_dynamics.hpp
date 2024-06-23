@@ -66,6 +66,8 @@ public:
     // usecase3
     std::vector<Line3D> get_edge3ds();
 
+    Line3D get_edge3d(int edge_id);
+
     // usecase4
     // returns id of the edge
     int set_edge3d(Eigen::Vector3f start_point,

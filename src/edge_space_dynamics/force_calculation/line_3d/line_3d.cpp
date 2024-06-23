@@ -9,6 +9,7 @@ Line3D::Line3D(const int id,
       direction_(direction),
       length_(length)
 {
+    direction_ = direction_.normalized();
 }
 
 void Line3D::add_force(const Eigen::Vector3f force,
@@ -32,6 +33,7 @@ void Line3D::add_force(const Eigen::Vector3f force,
 
         // Rotate direction vector
         direction_ = updated_direction;
+        direction_ = direction_.normalized();
     }
 }
 
