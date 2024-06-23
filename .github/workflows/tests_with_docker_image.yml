@@ -1,0 +1,28 @@
+name: Tests with Docker Image
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  run-unittests-on-docker:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: docker compose up -d --build
+
+    - name: Build the project
+      run: docker compose exec app ./make.sh
+
+    - name: Run unittests
+      run: docker compose exec app ./run_ctest.sh
+
+    - name: Stop the Docker container
+      run: docker compose down
+
