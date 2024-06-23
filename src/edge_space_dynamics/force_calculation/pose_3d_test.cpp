@@ -136,6 +136,23 @@ TEST(Pose3DTest, GetCopy) {
     EXPECT_TRUE(poseClone.position.isApprox(pose.position + translation));
 }
 
+TEST(Pose3DTest, CopyTo) {
+    Pose3D pose;
+    pose.translate(Eigen::Vector3f(1.0f, 2.0f, 3.0f));
+    pose.rotate(Eigen::Vector3f(0.0f, 0.0f, 1.0f) * M_PI / 4); // 45 degrees in radians
+
+    Pose3D poseCopy;
+    pose.copy_to(poseCopy);
+
+    EXPECT_TRUE(pose.position.isApprox(poseCopy.position));
+    EXPECT_TRUE(pose.orientation.isApprox(poseCopy.orientation));
+
+    // translate the copy and check if the original is not affected
+    Eigen::Vector3f translation(1.0f, 2.0f, 3.0f);
+    poseCopy.translate(translation);
+    EXPECT_TRUE(poseCopy.position.isApprox(pose.position + translation));
+}
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

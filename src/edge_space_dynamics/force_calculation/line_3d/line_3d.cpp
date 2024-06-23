@@ -9,6 +9,7 @@ Line3D::Line3D(const int id,
       direction_(direction),
       length_(length)
 {
+    direction_ = direction_.normalized();
 }
 
 void Line3D::add_force(const Eigen::Vector3f force,
@@ -32,6 +33,7 @@ void Line3D::add_force(const Eigen::Vector3f force,
 
         // Rotate direction vector
         direction_ = updated_direction;
+        direction_ = direction_.normalized();
     }
 }
 
@@ -67,6 +69,11 @@ bool Line3D::get_closest_points_between(const Line3D& line1,
     return true;
 }
 
+int Line3D::id() const
+{
+    return id_;
+}
+
 Eigen::Vector3f Line3D::start_point() const
 {
     return start_point_;
@@ -75,4 +82,9 @@ Eigen::Vector3f Line3D::start_point() const
 Eigen::Vector3f Line3D::direction() const
 {
     return direction_;
+}
+
+float Line3D::length() const
+{
+    return length_;
 }

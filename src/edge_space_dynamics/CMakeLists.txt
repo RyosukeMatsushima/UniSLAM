@@ -42,12 +42,42 @@ target_link_libraries(
 )
 
 add_executable(
-    edge_space_dynamics_test
-    edge_space_dynamics_test.cpp
+    get_frame_pose_test
+    get_frame_pose_test.cpp
 )
 
 target_link_libraries(
-    edge_space_dynamics_test
+    get_frame_pose_test
+    PRIVATE
+    edge_space_dynamics
+    force_calculation
+    line_3d
+    GTest::gtest_main
+    Eigen3::Eigen
+)
+
+add_executable(
+    add_new_edge_test
+    add_new_edge_test.cpp
+)
+
+target_link_libraries(
+    add_new_edge_test
+    PRIVATE
+    edge_space_dynamics
+    force_calculation
+    line_3d
+    GTest::gtest_main
+    Eigen3::Eigen
+)
+
+add_executable(
+    optimize_test
+    optimize_test.cpp
+)
+
+target_link_libraries(
+    optimize_test
     PRIVATE
     edge_space_dynamics
     force_calculation
@@ -57,5 +87,7 @@ target_link_libraries(
 )
 
 include(GoogleTest)
-gtest_discover_tests(edge_space_dynamics_test)
+gtest_discover_tests(add_new_edge_test)
+gtest_discover_tests(get_frame_pose_test)
+gtest_discover_tests(optimize_test)
 
