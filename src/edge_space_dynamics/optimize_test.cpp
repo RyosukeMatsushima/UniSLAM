@@ -138,7 +138,5 @@ TEST_F(OptimizeTest, optimizeWithoutNoise) {
     checkEdgeData(edge1);
     checkEdgeData(edge2);
     checkEdgeData(edge3);
-
-    ASSERT_TRUE(false);
 }
 
