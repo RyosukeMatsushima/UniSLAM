@@ -23,9 +23,7 @@ find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 add_subdirectory(src/edges_space)
-add_subdirectory(src/polygons_space)
-add_subdirectory(src/frame_node)
-add_subdirectory(src/edge_space_dynamics)
+add_subdirectory(src/local_slam)
 
 include_directories(
   include
