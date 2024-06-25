@@ -3,13 +3,14 @@
 
 #include <opencv2/opencv.hpp>
 
+#include "frame_node.hpp"
 #include "edge_space_dynamics.hpp"
 
 class LocalSlam {
 public:
     LocalSlam();
 
-    bool set_first_key_frame(const cv::Mat& image);
+    bool multi_frame_init(const cv::Mat& image);
 
     // 1. make Frame instance
     // 2. find matching edges to the last key frame
@@ -24,7 +25,7 @@ public:
 private:
     EdgeSpaceDynamics edge_space_dynamics;
 
-    CameraModel camera_model;
+//TODO: add CameraModel    CameraModel camera_model;
 
     std::vector<FrameNode> key_frames;
 
