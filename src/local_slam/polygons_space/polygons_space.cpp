@@ -5,11 +5,11 @@ PolygonsSpace::PolygonsSpace()
 {
 }
 
+// TODO: support distorted camera image
 // return vector field as cv::Mat(image_size, CV_8UC3)
 cv::Mat PolygonsSpace::getImage(const cv::InputArray &rvec,
                                 const cv::InputArray &tvec,
                                 const cv::InputArray &camera_matrix,
-                                const cv::InputArray &dist_coeffs, 
                                 const cv::Size &image_size)
 {
     cv::Mat image = cv::Mat::zeros(image_size, CV_8UC3);
@@ -18,6 +18,7 @@ cv::Mat PolygonsSpace::getImage(const cv::InputArray &rvec,
     {
         // project 3D points to 2D image
         std::vector<cv::Point2f> projected_points;
+        cv::Mat dist_coeffs = cv::Mat::zeros(5, 1, CV_64F); // Assuming no lens distortion for now
         cv::projectPoints(polygon.points, rvec, tvec, camera_matrix, dist_coeffs, projected_points);
 
         std::vector<cv::Point> image_points;

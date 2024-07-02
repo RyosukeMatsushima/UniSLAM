@@ -49,6 +49,8 @@ target_link_libraries(
     polygons_space
 )
 
+target_compile_definitions(polygons_space_test PRIVATE PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
+
 include(GoogleTest)
 gtest_discover_tests(polygons_space_test)
 

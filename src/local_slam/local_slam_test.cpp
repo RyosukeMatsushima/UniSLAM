@@ -42,10 +42,6 @@ protected:
                                           0, 0, 1);
     }
 
-    cv::Mat getDistCoeffs() {
-        return (cv::Mat_<float>(5, 1) << 0, 0, 0, 0, 0);
-    }
-
     void movePosition(float x, float y, float z) {
         position.at<double>(0) += double(x);
         position.at<double>(1) += double(y);
@@ -53,12 +49,12 @@ protected:
     }
 
     bool doMultiFrameInit() {
-        cv::Mat current_image = polygons_space.getImage(rotation, position, getCameraMatrix(), getDistCoeffs(), cv::Size(img_width, img_height));
+        cv::Mat current_image = polygons_space.getImage(rotation, position, getCameraMatrix(), cv::Size(img_width, img_height));
         return local_slam.multi_frame_init(current_image);
     }
 
     bool doUpdate(Pose3D& pose) {
-        cv::Mat current_image = polygons_space.getImage(rotation, position, getCameraMatrix(), getDistCoeffs(), cv::Size(img_width, img_height));
+        cv::Mat current_image = polygons_space.getImage(rotation, position, getCameraMatrix(), cv::Size(img_width, img_height));
         return local_slam.update(current_image, pose);
     }
 };

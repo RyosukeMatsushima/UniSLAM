@@ -17,7 +17,6 @@ public:
     cv::Mat getImage(const cv::InputArray &rvec,
                      const cv::InputArray &tvec,
                      const cv::InputArray &camera_matrix,
-                     const cv::InputArray &dist_coeffs, 
                      const cv::Size &image_size);
 
     void setPolygon(const std::vector<cv::Point3f> &points,
