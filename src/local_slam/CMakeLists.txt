@@ -68,6 +68,42 @@ target_link_libraries(
     ${OpenCV_LIBS}
 )
 
+
+# Camera model
+add_library(
+    camera_model
+    camera_model.cpp
+)
+
+target_include_directories(
+    camera_model
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(
+    camera_model
+    PUBLIC
+    force_calculation
+    edge_point
+    Eigen3::Eigen
+    ${OpenCV_LIBS}
+)
+
+add_executable(
+    camera_model_test
+    camera_model_test.cpp
+)
+
+target_link_libraries(
+    camera_model_test
+    PRIVATE
+    camera_model
+    GTest::gtest_main
+)
+
+# Tests
 include(GoogleTest)
 gtest_discover_tests(local_slam_test)
+gtest_discover_tests(camera_model_test)
 
