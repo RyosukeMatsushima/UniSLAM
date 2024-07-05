@@ -24,6 +24,8 @@ public:
                                            float& distance1,
                                            float& distance2);
 
+    Line3D clone() const;
+
     int id() const;
 
     Eigen::Vector3f start_point() const;

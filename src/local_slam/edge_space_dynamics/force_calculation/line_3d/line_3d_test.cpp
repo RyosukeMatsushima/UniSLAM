@@ -63,6 +63,28 @@ TEST(Line3DTest, MoveStartPoint)
     ASSERT_EQ(direction(2), 0);
 }
 
+TEST(Line3DTest, Clone)
+{
+    Line3D line(0, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(1, 0, 0), 1.0);
+
+    Line3D line_clone = line.clone();
+
+    ASSERT_EQ(line.id(), line_clone.id());
+    ASSERT_EQ(line.start_point()(0), line_clone.start_point()(0));
+    ASSERT_EQ(line.start_point()(1), line_clone.start_point()(1));
+    ASSERT_EQ(line.start_point()(2), line_clone.start_point()(2));
+    ASSERT_EQ(line.direction()(0), line_clone.direction()(0));
+    ASSERT_EQ(line.direction()(1), line_clone.direction()(1));
+    ASSERT_EQ(line.direction()(2), line_clone.direction()(2));
+    ASSERT_EQ(line.length(), line_clone.length());
+
+    // check that the clone is a deep copy
+    line.move(Eigen::Vector3f(1, 1, 1));
+    ASSERT_NE(line.start_point()(0), line_clone.start_point()(0));
+    ASSERT_NE(line.start_point()(1), line_clone.start_point()(1));
+    ASSERT_NE(line.start_point()(2), line_clone.start_point()(2));
+}
+
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);

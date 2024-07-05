@@ -74,6 +74,11 @@ bool Line3D::get_closest_points_between(const Line3D& line1,
     return true;
 }
 
+Line3D Line3D::clone() const
+{
+    return Line3D(id_, start_point_, direction_, length_);
+}
+
 int Line3D::id() const
 {
     return id_;
