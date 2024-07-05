@@ -15,6 +15,8 @@ public:
                    const Eigen::Vector3f torque,
                    const float force_center_from_start);
 
+    void move(const Eigen::Vector3f delta);
+
     Eigen::Vector3f get_point_at(const float distance_from_start) const;
 
     static bool get_closest_points_between(const Line3D& line1,

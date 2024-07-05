@@ -44,6 +44,25 @@ TEST(Line3DTest, TestDistanceBetween)
     ASSERT_NEAR(distance_between, 1, 1e-6);
 }
 
+TEST(Line3DTest, MoveStartPoint)
+{
+    // Create an Line3D object
+    Line3D line(0, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(1, 0, 0), 1.0);
+
+    // Move the start point
+    line.move(Eigen::Vector3f(1, 1, 1));
+
+    Eigen::Vector3f start_point = line.start_point();
+    ASSERT_EQ(start_point(0), 1);
+    ASSERT_EQ(start_point(1), 1);
+    ASSERT_EQ(start_point(2), 1);
+
+    Eigen::Vector3f direction = line.direction();
+    ASSERT_EQ(direction(0), 1);
+    ASSERT_EQ(direction(1), 0);
+    ASSERT_EQ(direction(2), 0);
+}
+
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);

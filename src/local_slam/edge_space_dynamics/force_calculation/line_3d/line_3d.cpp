@@ -37,6 +37,11 @@ void Line3D::add_force(const Eigen::Vector3f force,
     }
 }
 
+void Line3D::move(const Eigen::Vector3f delta)
+{
+    start_point_ += delta;
+}
+
 Eigen::Vector3f Line3D::get_point_at(const float distance_from_start) const
 {
     return start_point_ + distance_from_start * direction_;
