@@ -135,8 +135,28 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
             cal_finish = true;
             break;
         }
-
     }
+
+    // check the edge is really fixed
+    // the edge is fixed if the force will increase when the edge is moved to direction_frame_to_edge
+
+    Line3D edge_moved = edge.clone();
+
+    edge_moved.move(frame1_pose.rotateVectorToWorld(frame1_edge_node.direction_frame_to_edge * DELTA_EDGE_POSITION_TO_CHECK));
+
+    Force3D force_to_edge_moved;
+    Force3D force_to_frame_not_used;
+    float torque_center_point_for_edge_line_moved;
+
+    if (!get_force(edge_moved,
+                   frame2_edge_node,
+                   frame2_pose,
+                   force_to_frame_not_used,
+                   force_to_edge_moved,
+                   torque_center_point_for_edge_line_moved)) return false;
+
+    if (force_to_edge_moved.force.norm() < CAL_FINISH_FORCE_SIZE &&
+        force_to_edge_moved.torque.norm() < CAL_FINISH_TORQUE_SIZE) return false;
 
     edges.push_back(edge);
     edge_ids.push_back(edge.id());

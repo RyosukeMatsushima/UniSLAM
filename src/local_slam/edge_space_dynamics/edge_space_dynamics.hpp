@@ -10,6 +10,7 @@
 #define INITIAL_EDGE_DISTANCE_FROM_FRAME1 0.1f
 #define EDGE_POSE_TRANSLATE_GAIN 0.1f
 #define EDGE_POSE_ROTATE_GAIN 0.1f
+#define DELTA_EDGE_POSITION_TO_CHECK 0.1f
 
 // for calculate_frame_pose
 #define MAX_CAL_ITER 1000
@@ -38,7 +39,7 @@ public:
     // usecase0
     // Initialize with first 2 frames
     // Returns the calculated edges pointer
-//    void double_frame_init(); // this should be same as add_new_edge
+    // bool double_frame_init(); // TODO: this will be needed with the devicewhich does not have imu or external pose sensor
 
     // usecase1
     // Calculate the pose of the new frame

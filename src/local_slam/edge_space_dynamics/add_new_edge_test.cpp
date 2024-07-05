@@ -5,17 +5,17 @@ TEST(AddNewEdgeTest, addVirticalNewEdge) {
 
     Pose3D frame1_pose;
     Pose3D frame2_pose;
-    
+
     frame1_pose.translate(Eigen::Vector3f(1, 0, 0));
     frame2_pose.translate(Eigen::Vector3f(-1, 0, 0));
 
     EdgeNode frame1_edge_node(Eigen::Vector3f(-1, 0, 1),
                               Eigen::Vector2f(0, 1),
-                              0);
+                              -1);
 
     EdgeNode frame2_edge_node(Eigen::Vector3f(1, 0, 1),
                               Eigen::Vector2f(0, 1),
-                              1);
+                              -1);
 
     EdgeSpaceDynamics edge_space_dynamics;
 
@@ -50,3 +50,74 @@ TEST(AddNewEdgeTest, addVirticalNewEdge) {
     EXPECT_NEAR(edges[0].direction()[1], expected_edge.direction()[1], threshold);
     EXPECT_NEAR(edges[0].direction()[2], expected_edge.direction()[2], threshold);
 }
+
+// add new edge with same pose
+// should return false
+TEST(AddNewEdgeTest, addEdgeWithSamePose) {
+
+    Pose3D frame1_pose;
+    Pose3D frame2_pose;
+
+    frame1_pose.translate(Eigen::Vector3f(1, 0, 0));
+    frame2_pose.translate(Eigen::Vector3f(1, 0, 0));
+
+    EdgeNode frame1_edge_node(Eigen::Vector3f(-1, 0, 1),
+                              Eigen::Vector2f(0, 1),
+                              -1);
+
+    EdgeNode frame2_edge_node(Eigen::Vector3f(-1, 0, 1),
+                              Eigen::Vector2f(0, 1),
+                              -1);
+
+    EdgeSpaceDynamics edge_space_dynamics;
+
+    int edge_id;
+
+    bool result = edge_space_dynamics.add_new_edge(frame1_pose,
+                                                   frame2_pose,
+                                                   frame1_edge_node,
+                                                   frame2_edge_node,
+                                                   edge_id);
+
+    // edge_id should be 0
+    EXPECT_EQ(edge_id, 0);
+
+    // result should be false
+    EXPECT_FALSE(result);
+}
+
+// add new edge in the case the direction of the edge and pose1 to pose2 is same
+// should return false
+TEST(AddNewEdgeTest, addEdgeWithSameDirection) {
+
+    Pose3D frame1_pose;
+    Pose3D frame2_pose;
+
+    frame1_pose.translate(Eigen::Vector3f(1, 0, 0));
+    frame2_pose.translate(Eigen::Vector3f(-1, 0, 0));
+
+    EdgeNode frame1_edge_node(Eigen::Vector3f(-1, 0, 1),
+                              Eigen::Vector2f(1, 0),
+                              -1);
+
+    EdgeNode frame2_edge_node(Eigen::Vector3f(1, 0, 1),
+                              Eigen::Vector2f(1, 0),
+                              -1);
+
+    EdgeSpaceDynamics edge_space_dynamics;
+
+    int edge_id;
+
+    bool result = edge_space_dynamics.add_new_edge(frame1_pose,
+                                                   frame2_pose,
+                                                   frame1_edge_node,
+                                                   frame2_edge_node,
+                                                   edge_id);
+
+    // edge_id should be 0
+    EXPECT_EQ(edge_id, 0);
+
+    // result should be false
+    EXPECT_FALSE(result);
+}
+
