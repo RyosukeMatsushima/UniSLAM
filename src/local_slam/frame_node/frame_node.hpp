@@ -26,7 +26,7 @@ public:
 
     bool matchWith(const FrameNode& other_frame_node, bool& is_key_frame);
 
-    std::vector<EdgePoint> findNewEdgePoints();
+    std::vector<EdgePoint> findNewEdgePoints() const;
 
     void addFixedEdgePoint(const EdgePoint& edge_point);
 

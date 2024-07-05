@@ -65,7 +65,7 @@ void FrameNode::addFixedEdgePoint(const EdgePoint& edge_point) {
     fixed_edge_distribution.at<uchar>(edge_point.point / window_size) += 1;
 }
 
-std::vector<EdgePoint> FrameNode::findNewEdgePoints() {
+std::vector<EdgePoint> FrameNode::findNewEdgePoints() const {
     std::vector<EdgePoint> new_edge_points;
 
     for (int i = 1; i < fixed_edge_distribution.rows; i++) {
