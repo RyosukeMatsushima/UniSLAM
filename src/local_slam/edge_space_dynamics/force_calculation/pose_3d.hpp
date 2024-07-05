@@ -9,10 +9,21 @@ public:
     Eigen::Vector3f position;
     Eigen::Quaternionf orientation;
 
+    Eigen::Vector3f external_position_data;
+    Eigen::Quaternionf external_orientation_data;
+    bool use_external_data{false};
+
     Pose3D() : position(0.0f, 0.0f, 0.0f), orientation(Eigen::Quaternionf::Identity()) {}
 
     Pose3D(Eigen::Vector3f position, Eigen::Quaternionf orientation)
         : position(position), orientation(orientation) {}
+
+    void addExternalData(const Eigen::Vector3f& external_position_data,
+                         const Eigen::Quaternionf& external_orientation_data) {
+        this->external_position_data = external_position_data;
+        this->external_orientation_data = external_orientation_data;
+        use_external_data = true;
+    }
 
     void translate(const Eigen::Vector3f& delta) {
         position += delta;

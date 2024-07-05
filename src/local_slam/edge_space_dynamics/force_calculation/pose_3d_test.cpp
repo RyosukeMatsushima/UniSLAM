@@ -153,6 +153,20 @@ TEST(Pose3DTest, CopyTo) {
     EXPECT_TRUE(poseCopy.position.isApprox(pose.position + translation));
 }
 
+TEST(Pose3DTest, addExternalPoseData) {
+    Pose3D pose;
+    pose.translate(Eigen::Vector3f(1.0f, 2.0f, 3.0f));
+    pose.rotate(Eigen::Vector3f(0.0f, 0.0f, 1.0f) * M_PI / 4); // 45 degrees in radians
+
+    Eigen::Vector3f external_position_data(1.0f, 2.0f, 3.0f);
+    Eigen::Quaternionf external_orientation_data(0.0f, 0.0f, 1.0f, 0.0f);
+    pose.addExternalData(external_position_data, external_orientation_data);
+
+    EXPECT_TRUE(pose.use_external_data);
+    EXPECT_TRUE(pose.external_position_data.isApprox(external_position_data));
+    EXPECT_TRUE(pose.external_orientation_data.isApprox(external_orientation_data));
+}
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
