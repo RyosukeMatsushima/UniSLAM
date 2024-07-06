@@ -58,6 +58,24 @@ public:
         return orientation.inverse() * vector;
     }
 
+    Eigen::Vector3f translationalDiffTo(const Pose3D& other) const {
+        return other.position - position;
+    }
+
+    Eigen::Vector3f rotationalDiffTo(const Pose3D& other) const {
+        Eigen::Quaternionf diff = other.orientation * orientation.inverse();
+        diff.normalize();
+
+        float angle = 2.0f * std::acos(diff.w());
+        Eigen::Vector3f axis(diff.x(), diff.y(), diff.z());
+
+        if (axis.norm() > 0.0f) {
+            axis.normalize();
+        }
+
+        return angle * axis;
+    }
+
     // Function to return a copy of this instance
     Pose3D clone() const {
         Pose3D copy;

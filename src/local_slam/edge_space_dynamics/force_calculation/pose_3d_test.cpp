@@ -171,3 +171,40 @@ int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
+
+TEST(Pose3DTest, translationalDiff) {
+
+    Pose3D pose1;
+    Pose3D pose2;
+
+    pose1.translate(Eigen::Vector3f(1.0f, 2.0f, 3.0f));
+    pose2.translate(Eigen::Vector3f(2.0f, 3.0f, 4.0f));
+
+    // translational diff is not related orientation, since the diff is calculated in world coordinate
+    pose1.rotate(Eigen::Vector3f(-2.0f, 0.2f, 1.0f));
+    pose2.rotate(Eigen::Vector3f(1.0f, 0.0f, -1.0f));
+
+    Eigen::Vector3f diff = pose1.translationalDiffTo(pose2);
+
+    Eigen::Vector3f expectedDiff(1.0f, 1.0f, 1.0f);
+
+    EXPECT_TRUE(diff.isApprox(expectedDiff));
+}
+
+TEST(Pose3DTest, RotationalDiff) {
+
+    Pose3D pose1;
+    Pose3D pose2;
+
+    Eigen::Vector3f axis(-0.3f, 1.0f, 0.2f);
+
+    pose1.rotate(axis * M_PI / 4);
+    pose2.rotate(-axis * M_PI / 4);
+
+    Eigen::Vector3f diff = pose1.rotationalDiffTo(pose2);
+
+    Eigen::Vector3f expectedDiff = -axis * M_PI / 2;
+
+    EXPECT_TRUE(diff.isApprox(expectedDiff));
+}
+
