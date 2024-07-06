@@ -17,6 +17,15 @@ EdgePoint::EdgePoint(const cv::Point2f& point,
     this->direction[1] = gradient[0] / magnitude;
 }
 
+EdgePoint::EdgePoint()
+{
+    this->point = cv::Point2f(0.0f, 0.0f);
+    this->angle = 0.0f;
+    this->magnitude = 0.0f;
+    this->gradient = cv::Vec2f(0.0f, 0.0f);
+    this->direction = cv::Vec2f(0.0f, 0.0f);
+}
+
 bool EdgePoint::isContinuous(const EdgePoint& new_point,
                              bool is_to_back) const
 {

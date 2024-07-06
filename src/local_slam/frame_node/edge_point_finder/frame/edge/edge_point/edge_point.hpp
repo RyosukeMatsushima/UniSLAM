@@ -17,6 +17,8 @@ struct EdgePoint {
     EdgePoint(const cv::Point2f& point,
               const cv::Vec2f& gradient);
 
+    EdgePoint();
+
     bool isContinuous(const EdgePoint& new_point,
                       bool is_to_back) const;
 

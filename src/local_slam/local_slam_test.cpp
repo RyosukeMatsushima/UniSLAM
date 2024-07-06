@@ -1,6 +1,10 @@
 #include <gtest/gtest.h>
+#include <opencv2/opencv.hpp>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include "local_slam.hpp"
 #include "polygons_space.hpp"
+#include "camera_model.hpp"
 
 class LocalSlamTest : public ::testing::Test {
 protected:
@@ -14,9 +18,9 @@ protected:
     cv::Mat rotation = (cv::Mat_<double>(3, 3) << 1, 0, 0,
                                                   0, 1, 0,
                                                   0, 0, 1);
+    LocalSlamTest() : local_slam(CameraModel(getCameraMatrix(), cv::Size(img_width, img_height))) {}
 
     void SetUp() override {
-
         // setup polygons_space
         cv::Point3f p1(-1, 1, 0);
         cv::Point3f p2(1, 1, 0);
@@ -33,7 +37,6 @@ protected:
 
         polygons_space.setPolygon(polygon1, cv::Scalar(0, 0, 255));
         polygons_space.setPolygon(polygon2, cv::Scalar(0, 255, 0));
-
     }
 
     cv::Mat getCameraMatrix() {
@@ -50,7 +53,22 @@ protected:
 
     bool doMultiFrameInit() {
         cv::Mat current_image = polygons_space.getImage(rotation, position, getCameraMatrix(), cv::Size(img_width, img_height));
-        return local_slam.multi_frame_init(current_image);
+        return local_slam.multi_frame_init(current_image, getPosition(), getOrientation());
+    }
+
+    Eigen::Vector3f getPosition() {
+        return Eigen::Vector3f(float(position.at<double>(0)), float(position.at<double>(1)), float(position.at<double>(2)));
+    }
+
+    Eigen::Quaternionf getOrientation() {
+        Eigen::Matrix3f rotation_matrix;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                rotation_matrix(i, j) = float(rotation.at<double>(i, j));
+            }
+        }
+        Eigen::Quaternionf q(rotation_matrix);
+        return q;
     }
 
     bool doUpdate(Pose3D& pose) {
@@ -76,7 +94,6 @@ TEST_F(LocalSlamTest, withSquareSpaceWithoutExternalPose) {
     // initialize should finish
     ASSERT_TRUE(doMultiFrameInit());
 
-
     // back to original position
     movePosition(-dxy_position, -dxy_position, 0);
     Pose3D pose;
@@ -96,7 +113,7 @@ TEST_F(LocalSlamTest, withSquareSpaceWithoutExternalPose) {
     ASSERT_NEAR(pose.orientation.z(), expected_orientation.z(), allowed_error);
     ASSERT_NEAR(pose.orientation.w(), expected_orientation.w(), allowed_error);
 
-    // TODO: check pose with more movement. Need to allow the position is scaled without extarnal pose data.
+    // TODO: check pose with more movement. Need to allow the position is scaled without external pose data.
 }
 
 int main(int argc, char **argv) {

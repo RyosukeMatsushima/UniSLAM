@@ -50,6 +50,7 @@ target_link_libraries(
     edge_space_dynamics
     force_calculation
     line_3d
+    camera_model
     Eigen3::Eigen
     ${OpenCV_LIBS}
 )
