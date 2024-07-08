@@ -31,26 +31,39 @@ target_include_directories(
     polygons_space
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${OpenCV_INCLUDE_DIRS}
-    ${EIGEN3_INCLUDE_DIR}
-)
-
-add_executable(
-    polygons_space_test
-    polygons_space_test.cpp
 )
 
 target_link_libraries(
-    polygons_space_test
-    PRIVATE
-    GTest::gtest_main
+    polygons_space
+    PUBLIC
     ${OpenCV_LIBS}
-    Eigen3::Eigen
+)
+
+add_library(
+    double_squares_space
+    double_squares_space.cpp
+)
+
+target_link_libraries(
+    double_squares_space
+    PUBLIC
     polygons_space
 )
 
-target_compile_definitions(polygons_space_test PRIVATE PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
+add_executable(
+    double_squares_space_test
+    double_squares_space_test.cpp
+)
+
+target_link_libraries(
+    double_squares_space_test
+    PRIVATE
+    double_squares_space
+    GTest::gtest_main
+)
+
+target_compile_definitions(double_squares_space_test PRIVATE PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 
 include(GoogleTest)
-gtest_discover_tests(polygons_space_test)
+gtest_discover_tests(double_squares_space_test)
 

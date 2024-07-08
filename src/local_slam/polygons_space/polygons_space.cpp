@@ -10,7 +10,7 @@ PolygonsSpace::PolygonsSpace()
 cv::Mat PolygonsSpace::getImage(const cv::InputArray &rvec,
                                 const cv::InputArray &tvec,
                                 const cv::InputArray &camera_matrix,
-                                const cv::Size &image_size)
+                                const cv::Size &image_size) const
 {
     cv::Mat image = cv::Mat::zeros(image_size, CV_8UC3);
 
