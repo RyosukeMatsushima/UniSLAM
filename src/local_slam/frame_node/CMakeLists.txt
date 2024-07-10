@@ -69,3 +69,4 @@ target_link_libraries(
 include(GoogleTest)
 gtest_discover_tests(frame_node_test)
 
+target_compile_definitions(frame_node_test PRIVATE PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")

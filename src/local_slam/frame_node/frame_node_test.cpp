@@ -3,7 +3,7 @@
 #include "frame_node.hpp"
 #include "debug_view.hpp"
 
-#define RESULT_IMAGE_PATH "./result/frame_node/"
+#define RESULT_IMAGE_PATH PROJECT_SOURCE_DIR "/test/result/"
 
 TEST(FrameNodeTest, MatchEdge) {
     int image_size = 1000;
