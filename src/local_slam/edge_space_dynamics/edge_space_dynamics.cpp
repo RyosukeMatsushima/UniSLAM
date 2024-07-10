@@ -1,6 +1,5 @@
 #include "edge_space_dynamics.hpp"
 
-
 EdgeSpaceDynamics::EdgeSpaceDynamics() {
 }
 
@@ -97,13 +96,16 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
                 0);
 
     bool cal_finish = false;
+
     for (int i = 0; i < MAX_CAL_ITER; i++) {
+
+        Line3D current_edge = edge.clone();
 
         Force3D force_to_frame_not_used;
         Force3D force_to_edge_with_frame1;
         float torque_center_point_for_edge_line_with_frame1;
 
-        if (!get_force(edge,
+        if (!get_force(current_edge,
                        frame1_edge_node,
                        frame1_pose,
                        force_to_frame_not_used,
@@ -117,7 +119,7 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
         Force3D force_to_edge_with_frame2;
         float torque_center_point_for_edge_line_with_frame2;
 
-        if (!get_force(edge,
+        if (!get_force(current_edge,
                        frame2_edge_node,
                        frame2_pose,
                        force_to_frame_not_used,
@@ -128,10 +130,11 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
                        force_to_edge_with_frame2.torque * EDGE_POSE_ROTATE_GAIN,
                        torque_center_point_for_edge_line_with_frame2);
 
-        if (force_to_edge_with_frame1.force.norm() < CAL_FINISH_FORCE_SIZE &&
-            force_to_edge_with_frame1.torque.norm() < CAL_FINISH_TORQUE_SIZE &&
-            force_to_edge_with_frame2.force.norm() < CAL_FINISH_FORCE_SIZE &&
-            force_to_edge_with_frame2.torque.norm() < CAL_FINISH_TORQUE_SIZE) {
+        Force3D force_sum;
+        force_sum.add(force_to_edge_with_frame1);
+        force_sum.add(force_to_edge_with_frame2);
+        if (force_sum.force.norm() < CAL_FINISH_FORCE_SIZE &&
+            force_sum.torque.norm() < CAL_FINISH_TORQUE_SIZE) {
             cal_finish = true;
             break;
         }
