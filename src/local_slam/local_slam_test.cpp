@@ -103,9 +103,9 @@ TEST_F(LocalSlamTest, withSquareSpaceWithoutExternalPose) {
 }
 
 TEST_F(LocalSlamTest, fixEdges) {
-    float dxy_position = 0.2;
+    float dxy_position = 0.03;
 
-    int window_size = 10;
+    int window_size = 20;
     float angle_resolution = 0.2f;
 
     cv::Mat image1 = getCurrentImage();

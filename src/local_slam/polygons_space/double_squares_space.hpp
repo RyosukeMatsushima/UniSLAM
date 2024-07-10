@@ -18,10 +18,10 @@ public:
 private:
     PolygonsSpace polygons_space;
 
-    cv::Size image_size = cv::Size(500, 500);
+    cv::Size image_size = cv::Size(1000, 1000);
 
-    cv::Mat K = (cv::Mat_<double>(3, 3) << 100, 0, image_size.width / 2,
-                                           0, 100, image_size.height / 2,
+    cv::Mat K = (cv::Mat_<double>(3, 3) << 300, 0, image_size.width / 2,
+                                           0, 300, image_size.height / 2,
                                            0, 0, 1);
 };
 
