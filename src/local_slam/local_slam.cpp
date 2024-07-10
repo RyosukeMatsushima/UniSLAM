@@ -14,34 +14,7 @@ bool LocalSlam::multi_frame_init(const cv::Mat& image,
         return false;
     }
 
-    std::vector<EdgePoint> edge_points = key_frames.back().first.findNewEdgePoints();
-
-    if (edge_points.size() < VALID_EDGEPOINT_NUM) {
-        // change the last key frame to the current frame
-        key_frames.pop_back();
-        key_frames.push_back(std::make_pair(frame_node, current_frame_pose));
-        return false;
-    }
-
-    for (auto& edge_point : edge_points) {
-        EdgePoint matched_edge_point;
-        if (!frame_node.matchEdge(edge_point, matched_edge_point)) continue;
-
-        int edge_id;
-        bool result = edge_space_dynamics.add_new_edge(key_frames.back().second,
-                                                       current_frame_pose,
-                                                       camera_model.getEdgeNode(edge_point),
-                                                       camera_model.getEdgeNode(matched_edge_point),
-                                                       edge_id);
-
-        if (!result) continue;
-
-        edge_point.edge_id = edge_id;
-        matched_edge_point.edge_id = edge_id;
-
-        key_frames.back().first.addFixedEdgePoint(edge_point);
-        frame_node.addFixedEdgePoint(matched_edge_point);
-    }
+    fix_edges(key_frames.back().first, frame_node, key_frames.back().second, current_frame_pose);
 
     // check initialization
     // try to calculate the pose of the current frame and the last key frame
@@ -82,6 +55,34 @@ bool LocalSlam::update(const cv::Mat& image,
 //    }
 //
     return true;
+}
+
+void LocalSlam::fix_edges(FrameNode& frame_node1,
+                          FrameNode& frame_node2,
+                          const Pose3D& pose_frame1,
+                          const Pose3D& pose_frame2) {
+
+    std::vector<EdgePoint> edge_points = frame_node1.findNewEdgePoints();
+
+    for (auto& edge_point : edge_points) {
+        EdgePoint matched_edge_point;
+        if (!frame_node2.matchEdge(edge_point, matched_edge_point)) continue;
+
+        int edge_id;
+        bool result = edge_space_dynamics.add_new_edge(pose_frame1,
+                                                       pose_frame2,
+                                                       camera_model.getEdgeNode(edge_point),
+                                                       camera_model.getEdgeNode(matched_edge_point),
+                                                       edge_id);
+
+        //if (!result) continue;
+
+        edge_point.edge_id = edge_id;
+        matched_edge_point.edge_id = edge_id;
+
+        frame_node1.addFixedEdgePoint(edge_point);
+        frame_node2.addFixedEdgePoint(matched_edge_point);
+    }
 }
 
 bool LocalSlam::get_pose(const FrameNode& frame_node,

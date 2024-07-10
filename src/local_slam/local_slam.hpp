@@ -1,7 +1,6 @@
 #ifndef LOCAL_SLAM_HPP
 #define LOCAL_SLAM_HPP
 
-#define VALID_EDGEPOINT_NUM 10
 #define VALID_TRANSLATIONAL_DIFF 0.1f // for initialization
 #define VALID_ROTATIONAL_DIFF 0.1f // for initialization
 
@@ -41,6 +40,11 @@ public:
     //             const Pose3D& external_pose_data);
 
     void optimize();
+
+    void fix_edges(FrameNode& frame_node1,
+                   FrameNode& frame_node2,
+                   const Pose3D& pose_frame1,
+                   const Pose3D& pose_frame2);
 
 private:
     EdgeSpaceDynamics edge_space_dynamics;

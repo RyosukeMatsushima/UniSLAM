@@ -3,7 +3,7 @@
 
 DebugView::DebugView(const cv::Mat& base_img) {
     base_img_ = base_img.clone();
-    cv::cvtColor(base_img_, base_img_, cv::COLOR_GRAY2BGR);
+    if (base_img_.type() == CV_8UC1) cv::cvtColor(base_img_, base_img_, cv::COLOR_GRAY2BGR);
 }
 
 void DebugView::drawEdgePoints(const std::vector<EdgePoint>& edge_points,

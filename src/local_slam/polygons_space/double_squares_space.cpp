@@ -23,11 +23,6 @@ DoubleSquaresSpace::DoubleSquaresSpace()
 cv::Mat DoubleSquaresSpace::getImage(const cv::InputArray &rvec,
                                      const cv::InputArray &tvec) const
 {
-    cv::Size image_size(500, 500);
-    cv::Mat K = (cv::Mat_<double>(3, 3) << 100, 0, image_size.width / 2,
-                                           0, 100, image_size.height / 2,
-                                           0, 0, 1);
-
     return polygons_space.getImage(rvec, tvec, K, image_size);
 }
 

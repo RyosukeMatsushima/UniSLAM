@@ -2,48 +2,26 @@
 #include <opencv2/opencv.hpp>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+
 #include "local_slam.hpp"
-#include "polygons_space.hpp"
+#include "double_squares_space.hpp"
 #include "camera_model.hpp"
+#include "debug_view.hpp"
+
+#define RESULT_IMAGE_PATH PROJECT_SOURCE_DIR "/test/result/"
 
 class LocalSlamTest : public ::testing::Test {
 protected:
+    DoubleSquaresSpace double_squares_space;
     LocalSlam local_slam;
-    PolygonsSpace polygons_space;
 
-    int img_width = 500;
-    int img_height = 500;
+   cv::Mat position = (cv::Mat_<double>(3, 1) << 0, 0, 0);
+   cv::Mat rotation = (cv::Mat_<double>(3, 3) << 1, 0, 0,
+                                                 0, 1, 0,
+                                                 0, 0, 1);
 
-    cv::Mat position = (cv::Mat_<double>(3, 1) << 0, 0, 0);
-    cv::Mat rotation = (cv::Mat_<double>(3, 3) << 1, 0, 0,
-                                                  0, 1, 0,
-                                                  0, 0, 1);
-    LocalSlamTest() : local_slam(CameraModel(getCameraMatrix(), cv::Size(img_width, img_height))) {}
-
-    void SetUp() override {
-        // setup polygons_space
-        cv::Point3f p1(-1, 1, 0);
-        cv::Point3f p2(1, 1, 0);
-        cv::Point3f p3(1, 1, 1);
-        cv::Point3f p4(-1, 1, 1);
-
-        cv::Point3f p5(-1, -1, 0);
-        cv::Point3f p6(1, -1, 0);
-        cv::Point3f p7(1, -1, 1);
-        cv::Point3f p8(-1, -1, 1);
-
-        std::vector<cv::Point3f> polygon1 = {p1, p2, p3, p4};
-        std::vector<cv::Point3f> polygon2 = {p5, p6, p7, p8};
-
-        polygons_space.setPolygon(polygon1, cv::Scalar(0, 0, 255));
-        polygons_space.setPolygon(polygon2, cv::Scalar(0, 255, 0));
-    }
-
-    cv::Mat getCameraMatrix() {
-        return (cv::Mat_<double>(3, 3) << 100, 0, double(img_width) / 2,
-                                          0, 100, double(img_height) / 2,
-                                          0, 0, 1);
-    }
+    LocalSlamTest() : double_squares_space(),
+                      local_slam(CameraModel(double_squares_space.getCameraMatrix(), double_squares_space.getImageSize())) {}
 
     void movePosition(float x, float y, float z) {
         position.at<double>(0) += double(x);
@@ -52,7 +30,7 @@ protected:
     }
 
     bool doMultiFrameInit() {
-        cv::Mat current_image = polygons_space.getImage(rotation, position, getCameraMatrix(), cv::Size(img_width, img_height));
+        cv::Mat current_image = getCurrentImage();
         return local_slam.multi_frame_init(current_image, getPosition(), getOrientation());
     }
 
@@ -71,8 +49,16 @@ protected:
         return q;
     }
 
+    cv::Mat getCurrentImage() {
+        return double_squares_space.getImage(rotation, position);
+    }
+
+    Pose3D getCurrentPose() {
+        return Pose3D(getPosition(), getOrientation());
+    }
+
     bool doUpdate(Pose3D& pose) {
-        cv::Mat current_image = polygons_space.getImage(rotation, position, getCameraMatrix(), cv::Size(img_width, img_height));
+        cv::Mat current_image = getCurrentImage();
         return local_slam.update(current_image, pose);
     }
 };
@@ -114,6 +100,44 @@ TEST_F(LocalSlamTest, withSquareSpaceWithoutExternalPose) {
     ASSERT_NEAR(pose.orientation.w(), expected_orientation.w(), allowed_error);
 
     // TODO: check pose with more movement. Need to allow the position is scaled without external pose data.
+}
+
+TEST_F(LocalSlamTest, fixEdges) {
+    float dxy_position = 0.2;
+
+    int window_size = 10;
+    float angle_resolution = 0.2f;
+
+    cv::Mat image1 = getCurrentImage();
+    FrameNode frame_node1(image1, window_size, angle_resolution);
+    Pose3D pose1 = getCurrentPose();
+
+    std::cout << "pose1: " << pose1.position.transpose() << std::endl;
+
+    movePosition(0, dxy_position, 0);
+    cv::Mat image2 = getCurrentImage();
+    FrameNode frame_node2(image2, window_size, angle_resolution);
+    Pose3D pose2 = getCurrentPose();
+
+    local_slam.fix_edges(frame_node1, frame_node2, pose1, pose2);
+
+    std::cout << "pose2: " << pose2.position.transpose() << std::endl;
+
+    std::cout << "image1.size(): " << image1.size() << std::endl;
+    std::cout << "image1.type(): " << image1.type() << std::endl;
+
+    DebugView debug_view(image1);
+
+    std::cout << "frame_node1.getFixedEdgePoints().size(): " << frame_node1.getFixedEdgePoints().size() << std::endl;
+    debug_view.drawEdgePoints(frame_node1.getFixedEdgePoints());
+    std::cout << "frame_node2.getFixedEdgePoints().size(): " << frame_node2.getFixedEdgePoints().size() << std::endl;
+    cv::imwrite(RESULT_IMAGE_PATH "fix_edges_from_pose1.png", debug_view.getDebugImage());
+
+
+
+    DebugView debug_view2(image2);
+    debug_view2.drawEdgePoints(frame_node2.getFixedEdgePoints());
+    cv::imwrite(RESULT_IMAGE_PATH "fix_edges_from_pose2.png", debug_view2.getDebugImage());
 }
 
 int main(int argc, char **argv) {

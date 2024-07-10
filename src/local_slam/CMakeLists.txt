@@ -64,7 +64,7 @@ target_link_libraries(
     local_slam_test
     PRIVATE
     local_slam
-    polygons_space
+    double_squares_space
     GTest::gtest_main
     ${OpenCV_LIBS}
 )
@@ -108,3 +108,4 @@ include(GoogleTest)
 gtest_discover_tests(local_slam_test)
 gtest_discover_tests(camera_model_test)
 
+target_compile_definitions(local_slam_test PRIVATE PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
