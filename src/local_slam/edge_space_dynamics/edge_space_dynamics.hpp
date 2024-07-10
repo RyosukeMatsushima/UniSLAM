@@ -18,8 +18,8 @@
 #define FRAME_POSE_ROTATE_GAIN 0.1f
 
 // TODO: use this value to stop the calculation
-#define CAL_FINISH_FORCE_SIZE 0.0001
-#define CAL_FINISH_TORQUE_SIZE 0.0001
+#define CAL_FINISH_FORCE_SIZE 0.001
+#define CAL_FINISH_TORQUE_SIZE 0.001
 
 #include <Eigen/Dense>
 #include <vector>

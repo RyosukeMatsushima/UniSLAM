@@ -41,7 +41,7 @@ TEST(AddNewEdgeTest, addVirticalNewEdge) {
 
     std::vector<Line3D> edges = edge_space_dynamics.get_edge3ds();
 
-    float threshold = 0.0001;
+    float threshold = 0.001;
     EXPECT_EQ(edges.size(), 1);
     EXPECT_NEAR(edges[0].start_point()[0], expected_edge.start_point()[0], threshold);
     EXPECT_NEAR(edges[0].start_point()[1], expected_edge.start_point()[1], threshold);

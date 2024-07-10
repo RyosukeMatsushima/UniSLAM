@@ -75,7 +75,7 @@ void LocalSlam::fix_edges(FrameNode& frame_node1,
                                                        camera_model.getEdgeNode(matched_edge_point),
                                                        edge_id);
 
-        //if (!result) continue;
+        if (!result) continue;
 
         edge_point.edge_id = edge_id;
         matched_edge_point.edge_id = edge_id;
