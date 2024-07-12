@@ -58,23 +58,41 @@ bool checkEdgePointAngle(std::vector<EdgePoint> edge_points, float angle, float 
     return true;
 }
 
-TEST(WithSimpleLine, TestEdgePointFinder) {
+cv::Mat createTestImageWithLine(int image_width, float line_angle, cv::Point offset = cv::Point(0, 0)) {
+    cv::Mat input_image = cv::Mat::zeros(image_width, image_width, CV_32F);
+
+    // Draw a line through the center of the image with a angle
+    int x = image_width / 2 * cos(line_angle);
+    int y = image_width / 2 * sin(line_angle);
+    cv::Point start(image_width / 2 - x, image_width / 2 - y);
+    cv::Point end(image_width / 2 + x, image_width / 2 + y);
+
+    cv::line(input_image, start + offset, end + offset, cv::Scalar(255), 5);
+
+    return input_image;
+}
+
+TEST(EdgePointFinderTests, createTestImageWithLine) {
+    int image_width = 200;
+    float line_angle = M_PI / 4;
+    cv::Mat input_image = createTestImageWithLine(image_width, line_angle);
+
+    cv::Mat input_image_with_offset = createTestImageWithLine(image_width, line_angle, cv::Point(15, 0));
+
+    cv::imwrite(RESULT_IMAGE_PATH "line.jpg", input_image);
+    cv::imwrite(RESULT_IMAGE_PATH "line_with_offset.jpg", input_image_with_offset);
+}
+
+TEST(EdgePointFinderTests, TestEdgePointFinderWithLine) {
     int image_width = 200;
     int edge_find_window_size = 30;
     float angle_resolution = M_PI / 12;
 
     for (float gradient_angle=0.0f; gradient_angle < 2 * M_PI; gradient_angle += angle_resolution) {
 
-        cv::Mat input_image = cv::Mat::zeros(image_width, image_width, CV_32F);
-
-        // Draw a line through the center of the image with a angle
         float line_angle = gradient_angle + M_PI / 2;
-        int x = image_width / 2 * cos(line_angle);
-        int y = image_width / 2 * sin(line_angle);
-        cv::Point start(image_width / 2 - x, image_width / 2 - y);
-        cv::Point end(image_width / 2 + x, image_width / 2 + y);
 
-        cv::line(input_image, start, end, cv::Scalar(255), 5);
+        cv::Mat input_image = createTestImageWithLine(image_width, line_angle);
 
         Frame frame(input_image,
                     0.2f); // TODO: change to angle_resolution
@@ -101,6 +119,47 @@ TEST(WithSimpleLine, TestEdgePointFinder) {
         ASSERT_TRUE(result);
         ASSERT_TRUE(checkEdgePointAngle({edge_point}, gradient_angle, angle_resolution));
 
+        // the edge point should be matched with the line with offset
+        // offset to line angle direction
+        float offset_size = edge_find_window_size / 2;
+        cv::Point offset = cv::Point(offset_size * cos(line_angle), offset_size * sin(line_angle));
+        cv::Mat input_image_with_offset_to_line_direction = createTestImageWithLine(image_width, line_angle, offset);
+        Frame frame_with_offset_to_line_direction(input_image_with_offset_to_line_direction,
+                                                  0.2f); // TODO: change to angle_resolution
+        EdgePoint edge_point_with_offset = edge_point_finder.find_key_edge_point(frame_with_offset_to_line_direction,
+                    
+                                                                                 edge_point.point,
+                                                                                 edge_point.angle,
+                                                                                 edge_find_window_size,
+                                                                                 result);
+        EXPECT_TRUE(result);
+        EXPECT_TRUE(checkEdgePointAngle({edge_point_with_offset}, gradient_angle, angle_resolution));
+
+        // Create a DebugView
+        DebugView debug_view_with_offset(input_image_with_offset_to_line_direction);
+        debug_view_with_offset.drawEdgePoints({edge_point_with_offset});
+        std::string img_name_with_offset = std::to_string((int)(line_angle * 180 / M_PI)) + "_line_with_offset_to_line_direction.jpg";
+        cv::imwrite(img_path + "edge_point_with_" + img_name_with_offset, debug_view_with_offset.getDebugImage());
+
+        // offset to the gradient angle direction
+        offset = cv::Point(offset_size * cos(gradient_angle), offset_size * sin(gradient_angle));
+        cv::Mat input_image_with_offset_to_gradient_direction = createTestImageWithLine(image_width, line_angle, offset);
+        Frame frame_with_offset_to_gradient_direction(input_image_with_offset_to_gradient_direction,
+                                                      0.2f); // TODO: change to angle_resolution
+        EdgePoint edge_point_with_offset_to_gradient = edge_point_finder.find_key_edge_point(frame_with_offset_to_gradient_direction,
+                                                                                             edge_point.point,
+                                                                                             edge_point.angle,
+                                                                                             edge_find_window_size,
+                                                                                             result);
+        EXPECT_TRUE(result);
+        EXPECT_TRUE(checkEdgePointAngle({edge_point_with_offset_to_gradient}, gradient_angle, angle_resolution));
+
+        // Create a DebugView
+        DebugView debug_view_with_offset_to_gradient(input_image_with_offset_to_gradient_direction);
+        debug_view_with_offset_to_gradient.drawEdgePoints({edge_point_with_offset_to_gradient});
+        std::string img_name_with_offset_to_gradient = std::to_string((int)(line_angle * 180 / M_PI)) + "_line_with_offset_to_gradient_direction.jpg";
+        cv::imwrite(img_path + "edge_point_with_" + img_name_with_offset_to_gradient, debug_view_with_offset_to_gradient.getDebugImage());
+
         // search every area
         std::vector<EdgePoint> edge_points = searchEveryArea(frame, edge_find_window_size, gradient_angle);
 
@@ -116,8 +175,7 @@ TEST(WithSimpleLine, TestEdgePointFinder) {
     }
 }
 
-
-TEST(WithTestImg, TestEdgePointFinder) {
+TEST(EdgePointFinderTests, TestEdgePointFinderWithShapes) {
 
     int window_size = 1000;
     int edge_find_window_size = 30;
@@ -157,7 +215,7 @@ TEST(WithTestImg, TestEdgePointFinder) {
     }
 }
 
-TEST(WithCircleImg, TestEdgePointFinder) {
+TEST(EdgePointFinderTests, TestEdgePointFinderWithCircle) {
 
     int window_size = 1000;
     int edge_find_window_size = 30;
@@ -190,7 +248,7 @@ TEST(WithCircleImg, TestEdgePointFinder) {
     }
 }
 
-TEST(WithCameraImg, TestEdgePointFinder) {
+TEST(EdgePointFinderTests, TestEdgePointFinderWithCameraImg) {
 
     cv::Mat test_image = cv::imread(TEST_IMAGE_PATH);
 
@@ -221,6 +279,9 @@ TEST(WithCameraImg, TestEdgePointFinder) {
         cv::imwrite(getFileName("edge_points_with_camera_img", angle), debug_view.getDebugImage());
     }
 }
+
+
+
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
