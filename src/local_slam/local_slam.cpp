@@ -77,8 +77,8 @@ void LocalSlam::fix_edges(FrameNode& frame_node1,
 
         if (!result) continue;
 
-        edge_point.edge_id = edge_id;
-        matched_edge_point.edge_id = edge_id;
+        edge_point.id = edge_id;
+        matched_edge_point.id = edge_id;
 
         frame_node1.addFixedEdgePoint(edge_point);
         frame_node2.addFixedEdgePoint(matched_edge_point);
@@ -119,8 +119,8 @@ bool LocalSlam::get_pose(const FrameNode& frame_node,
 //
 //        if (!result) return continue;
 //
-//        frame1_edge_point.edge_id = edge_id;
-//        frame2_edge_point.edge_id = edge_id;
+//        frame1_edge_point.id = edge_id;
+//        frame2_edge_point.id = edge_id;
 //
 //        last_key_frame.addFixedEdgePoint(frame1_edge_point);
 //        current_frame.addFixedEdgePoint(frame2_edge_point);

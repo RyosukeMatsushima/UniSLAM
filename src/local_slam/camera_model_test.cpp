@@ -30,7 +30,7 @@ TEST(CameraModelTest, getDirectionAndAngle) {
         cv::projectPoints(points_3d, rvec, tvec, camera_matrix, dist_coeffs, projected_points);
 
         EdgePoint edge_point(projected_points[0], cv::Vec2f(1, 0));
-        edge_point.edge_id = 1;
+        edge_point.id = 1;
 
         EdgeNode edge_node = camera_model.getEdgeNode(edge_point);
 

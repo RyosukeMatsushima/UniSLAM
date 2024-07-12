@@ -16,7 +16,7 @@ EdgeNode CameraModel::getEdgeNode(const EdgePoint& edge_point) const {
 
     Eigen::Vector2f edge_direction(edge_point.direction[0], edge_point.direction[1]);
 
-    return EdgeNode(direction_frame_to_edge, edge_direction, edge_point.edge_id);
+    return EdgeNode(direction_frame_to_edge, edge_direction, edge_point.id);
 }
 
 
