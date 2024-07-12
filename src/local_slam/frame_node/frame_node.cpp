@@ -20,6 +20,7 @@ bool FrameNode::matchEdge(const EdgePoint& edge_point,
                                                                edge_point.angle,
                                                                window_size,
                                                                is_valid);
+    matched_edge_point.id = edge_point.id;
     return is_valid;
 }
 

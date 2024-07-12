@@ -20,6 +20,9 @@ void DebugView::drawEdgePoints(const std::vector<EdgePoint>& edge_points,
 
         cv::arrowedLine(base_img_, edge_point.point, gradient_end, color, 2);
 
+        // draw id
+        cv::putText(base_img_, std::to_string(edge_point.id), edge_point.point, cv::FONT_HERSHEY_SIMPLEX, 0.5, color, 2);
+
     }
 }
 

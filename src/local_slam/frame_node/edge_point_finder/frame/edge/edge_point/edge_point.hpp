@@ -7,7 +7,7 @@
 #define CONTINUOUS_DISTANCE_THRESHOLD 1.7f
 
 struct EdgePoint {
-    int edge_id{-1};  // -1 means not assigned
+    int id{-1};  // -1 means not assigned
     cv::Point2f point;
     float angle;
     float magnitude;

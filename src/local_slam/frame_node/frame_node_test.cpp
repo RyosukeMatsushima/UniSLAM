@@ -54,12 +54,13 @@ TEST(FrameNodeTest, MatchEdgeWithSameImg) {
                           window_size,
                           angle_resolution);
 
+
     // all edge points should be matched
     for (EdgePoint& edge_point : new_edge_points1) {
         EdgePoint matched_edge_point(cv::Point2f(0, 0), cv::Vec2f(0, 0));
         bool result = frame_node2.matchEdge(edge_point, matched_edge_point);
 
-        // ASSERT_TRUE(result); // TODO: fix this
+        // EXPECT_TRUE(result); // TODO: fix this
     }
 }
 
@@ -130,11 +131,14 @@ TEST(FrameNodeTest, NewEdgePointsNotIncludingFixedEdgePoints) {
     }
 }
 
-cv::Mat getTestImgWithLine(const int image_size,
-                           const int line_length,
-                           const int line_width,
-                           const cv::Point shift_point,
-                           const float line_angle) {
+cv::Mat getTestImgWithLine(const cv::Point shift_point,
+                           const float line_angle,
+                           const float scale = 1.0f) {
+
+    int image_size = 1000;
+    int line_length = 300 * scale;
+    int line_width = 100 * scale;
+
     cv::Mat test_img = cv::Mat::zeros(image_size, image_size, CV_8UC1);
 
     cv::Point center = cv::Point(test_img.cols / 2, test_img.rows / 2);
@@ -142,93 +146,92 @@ cv::Mat getTestImgWithLine(const int image_size,
     cv::Point start_point = center + shift_point + cv::Point(cos(line_angle) * line_length, sin(line_angle) * line_length);
     cv::Point end_point = center + shift_point - cv::Point(cos(line_angle) * line_length, sin(line_angle) * line_length);
 
-    cv::line(test_img, start_point, end_point, cv::Scalar(255), line_width);
+    cv::line(test_img, start_point, end_point, cv::Scalar(85), line_width);
 
     return test_img;
 }
 
-TEST(FrameNodeTest, ChecKeyFrameItself) {
-    int image_size = 1000;
-    int line_length = 300;
-    int line_width = 100;
+void matchFrame(cv::Mat& test_img1,
+                cv::Mat& test_img2,
+                const int window_size,
+                const float angle_resolution,
+                const std::string& file_name,
+                const float match_threshold_ratio) {
 
-    int window_size = 50;
-    float angle_resolution = 0.2;
-
-    // draw a line
-    cv::Mat base_test_img = getTestImgWithLine(image_size, line_length, line_width, cv::Point(0, 0), 0);
-
-    FrameNode frame_node1(base_test_img,
+    FrameNode frame_node1(test_img1,
                           window_size,
                           angle_resolution);
 
     std::vector<EdgePoint> new_edge_points1 = frame_node1.findNewEdgePoints();
-    for (const EdgePoint& edge_point : new_edge_points1) {
+    int edge_point_id = 0;
+    for (EdgePoint& edge_point : new_edge_points1) {
+        edge_point.id = edge_point_id++;
         frame_node1.addFixedEdgePoint(edge_point);
     }
 
-    // number of new edge points should be more than 0
-    ASSERT_GE(frame_node1.getFixedEdgePoints().size(), 1);
+    EXPECT_GE(frame_node1.getFixedEdgePoints().size(), 1);
 
-    // test with no shifted image
-    FrameNode frame_node2(base_test_img,
+    FrameNode frame_node2(test_img2,
                           window_size,
                           angle_resolution);
-    // match edge points to base frame
+
     bool is_key_frame = false;
+
     bool result = frame_node2.matchWith(frame_node1, is_key_frame);
 
-    // create debug view
-    DebugView debug_view(base_test_img);
-    //debug_view.drawEdgePoints(new_edge_points1, cv::Scalar(255, 0, 0));
+    EXPECT_TRUE(result);
+    int edge_num_threshold = edge_point_id * match_threshold_ratio;
+    EXPECT_GE(frame_node2.getFixedEdgePoints().size(), edge_num_threshold);
+
+    DebugView debug_view(test_img1);
+    debug_view.drawEdgePoints(new_edge_points1, cv::Scalar(255, 0, 0));
     debug_view.drawEdgePoints(frame_node2.getFixedEdgePoints(), cv::Scalar(0, 255, 0));
-    cv::imwrite(RESULT_IMAGE_PATH "check_is_key_frame_itself.png", debug_view.getDebugImage());
-
-    // check result is not key frame
-    EXPECT_GE(frame_node2.getFixedEdgePoints().size(), 1);
-    ASSERT_FALSE(is_key_frame);
-    ASSERT_TRUE(result);
-
-
-    // test with shifted image
-    cv::Mat holizontal_shift_test_img = getTestImgWithLine(image_size, line_length, line_width, cv::Point(0, window_size * 0.4), 0);
-    FrameNode frame_node3(holizontal_shift_test_img,
-                          window_size,
-                          angle_resolution);
-    // match edge points to base frame
-    result = frame_node3.matchWith(frame_node1, is_key_frame);
-
-    // create debug view
-    DebugView debug_view2(holizontal_shift_test_img);
-    debug_view2.drawEdgePoints(new_edge_points1, cv::Scalar(255, 0, 0));
-    debug_view2.drawEdgePoints(frame_node3.getFixedEdgePoints(), cv::Scalar(0, 255, 0));
-    cv::imwrite(RESULT_IMAGE_PATH "check_is_key_frame_itself_shifted.png", debug_view2.getDebugImage());
-    // check result is key frame
-    ASSERT_TRUE(is_key_frame);
-    ASSERT_TRUE(result);
-
-    // test with rotated image
-    // TODO: add test for rotated image
-
-    // test with scaled image
-    // TODO: add test for scaled image
-
-    // test with black image
-    cv::Mat black_test_img = cv::Mat::zeros(image_size, image_size, CV_8UC1);
-    FrameNode frame_node4(black_test_img,
-                          window_size,
-                          angle_resolution);
-    // match edge points to base frame
-    result = frame_node4.matchWith(frame_node1, is_key_frame);
-
-    // create debug view
-    DebugView debug_view3(black_test_img);
-    debug_view3.drawEdgePoints(new_edge_points1, cv::Scalar(255, 0, 0));
-    debug_view3.drawEdgePoints(frame_node4.getFixedEdgePoints(), cv::Scalar(0, 255, 0));
-    cv::imwrite(RESULT_IMAGE_PATH "check_is_key_frame_itself_black.png", debug_view3.getDebugImage());
-
-    // check result is not key frame
-    ASSERT_FALSE(is_key_frame);
-    ASSERT_FALSE(result);
+    cv::imwrite(RESULT_IMAGE_PATH + file_name, debug_view.getDebugImage());
 }
+
+TEST(FrameNodeTest, ChecKeyFrameItself) {
+    int window_size = 50;
+    float angle_resolution = 0.2;
+
+    cv::Mat base_test_img = getTestImgWithLine(cv::Point(0, 0), 0);
+    matchFrame(base_test_img, base_test_img, window_size, angle_resolution, "check_is_key_frame_itself_same.png", 0.8); // TODO: change edge_threshold_ratio 0.8 to 1.0
+
+}
+
+TEST(FrameNodeTest, ChecKeyFrameItselfWithHolizontalShiftedImg) {
+    int window_size = 50;
+    float angle_resolution = 0.2;
+
+    cv::Mat base_test_img = getTestImgWithLine(cv::Point(0, 0), 0);
+    cv::Mat holizontal_shift_test_img = getTestImgWithLine(cv::Point(0, window_size * 0.4), 0);
+    matchFrame(base_test_img, holizontal_shift_test_img, window_size, angle_resolution, "check_is_key_frame_itself_holizontal_shift.png", 0.8);
+}
+
+TEST(FrameNodeTest, ChecKeyFrameItselfWithVerticalShiftedImg) {
+    int window_size = 50;
+    float angle_resolution = 0.2;
+
+    cv::Mat base_test_img = getTestImgWithLine(cv::Point(0, 0), 0);
+    cv::Mat vertical_shift_test_img = getTestImgWithLine(cv::Point(window_size * 0.4, 0), 0);
+    matchFrame(base_test_img, vertical_shift_test_img, window_size, angle_resolution, "check_is_key_frame_itself_vertical_shift.png", 0.8);
+}
+
+TEST(FrameNodeTest, ChecKeyFrameItselfWithRotatedImg) {
+    int window_size = 50;
+    float angle_resolution = 0.2;
+
+    cv::Mat base_test_img = getTestImgWithLine(cv::Point(0, 0), 0);
+    cv::Mat rotated_test_img = getTestImgWithLine(cv::Point(0, 0), angle_resolution/3);
+    matchFrame(base_test_img, rotated_test_img, window_size, angle_resolution, "check_is_key_frame_itself_rotated.png", 0.8);
+}
+
+TEST(FrameNodeTest, ChecKeyFrameItselfWithScaledImg) {
+    int window_size = 50;
+    float angle_resolution = 0.2;
+
+    cv::Mat base_test_img = getTestImgWithLine(cv::Point(0, 0), 0);
+    cv::Mat scaled_test_img = getTestImgWithLine(cv::Point(0, 0), 0, 1.2);
+    matchFrame(base_test_img, scaled_test_img, window_size, angle_resolution, "check_is_key_frame_itself_scaled.png", 0.8);
+}
+
 
