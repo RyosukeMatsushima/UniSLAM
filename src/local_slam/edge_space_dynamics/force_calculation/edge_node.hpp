@@ -9,6 +9,12 @@ struct EdgeNode {
     Eigen::Vector2f edge_direction;
     bool is_valid = true;
 
+    EdgeNode() {
+        direction_frame_to_edge = Eigen::Vector3f::Zero();
+        edge_direction = Eigen::Vector2f::Zero();
+        edge_id = -1;
+    }
+
     EdgeNode(const Eigen::Vector3f& direction_frame_to_edge,
              const Eigen::Vector2f& edge_direction,
              const int& edge_id)

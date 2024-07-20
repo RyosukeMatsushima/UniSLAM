@@ -188,6 +188,65 @@ TEST(ForceCalculationTest, force_should_be_zero_if_translation_direction_is_same
     compareTorques(force_to_edge, expected_torque_to_edge);
 }
 
+// Helper functions
+void setupPosesAndNodes(float baseline_length, Pose3D& pose1, Pose3D& pose2, EdgeNode& edge_node1, EdgeNode& edge_node2) {
+    pose1.translate(Eigen::Vector3f(0, baseline_length / 2.0f, 0));
+    pose2.translate(Eigen::Vector3f(0, -baseline_length / 2.0f, 0));
+    edge_node1 = EdgeNode(Eigen::Vector3f(0, -baseline_length / 2.0f, 1), Eigen::Vector2f(1, 0), 0);
+    edge_node2 = EdgeNode(Eigen::Vector3f(0, baseline_length / 2.0f, 1), Eigen::Vector2f(1, 0), 0);
+}
+
+void checkForceZero(ForceCalculation& force_calculation) {
+    ASSERT_TRUE(force_calculation.calculate());
+    compareForces(force_calculation.getForceToEdge(), Eigen::Vector3f(0, 0, 0));
+}
+
+TEST(ForceCalculationTest, checkForceZero) {
+    float baseline_length = 0.1;
+
+    Pose3D pose1, pose2;
+    EdgeNode edge_node1, edge_node2;
+    setupPosesAndNodes(baseline_length, pose1, pose2, edge_node1, edge_node2);
+
+    Line3D edge(0, Eigen::Vector3f(0, 0, 1), Eigen::Vector3f(1, 0, 0), 0);
+    ForceCalculation force_calculation1(edge, edge_node1, pose1);
+    ForceCalculation force_calculation2(edge, edge_node2, pose2);
+
+    checkForceZero(force_calculation1);
+    checkForceZero(force_calculation2);
+}
+
+TEST(ForceCalculationTest, checkForceSymmetry) {
+    float baseline_length = 0.1;
+
+    Pose3D pose1, pose2;
+    EdgeNode edge_node1, edge_node2;
+    setupPosesAndNodes(baseline_length, pose1, pose2, edge_node1, edge_node2);
+
+    Line3D edge(0, Eigen::Vector3f(0, 0, 0.1), Eigen::Vector3f(1, 0, 0), 1);
+    ForceCalculation force_calculation1(edge, edge_node1, pose1);
+    ForceCalculation force_calculation2(edge, edge_node2, pose2);
+
+    ASSERT_TRUE(force_calculation1.calculate());
+    ASSERT_TRUE(force_calculation2.calculate());
+
+    Force3D force_to_edge1 = force_calculation1.getForceToEdge();
+    Force3D force_to_edge2 = force_calculation2.getForceToEdge();
+
+    // check the force and torque are symmetric about x-z plane
+    EXPECT_EQ(force_to_edge1.force(0), force_to_edge2.force(0));
+    EXPECT_EQ(force_to_edge1.force(1), -force_to_edge2.force(1));
+    EXPECT_EQ(force_to_edge1.force(2), force_to_edge2.force(2));
+
+    EXPECT_EQ(force_to_edge1.torque(0), force_to_edge2.torque(0));
+    EXPECT_EQ(force_to_edge1.torque(1), -force_to_edge2.torque(1));
+    EXPECT_EQ(force_to_edge1.torque(2), force_to_edge2.torque(2));
+
+    EXPECT_EQ(force_to_edge1.force(0), 0);
+    EXPECT_GT(force_to_edge1.force(2), 0);
+}
+
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

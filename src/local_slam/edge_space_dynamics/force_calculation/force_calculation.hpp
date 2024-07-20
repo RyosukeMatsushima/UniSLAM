@@ -24,6 +24,10 @@ struct Force3D {
         this->force += force.force;
         this->torque += force.torque;
     }
+
+    Force3D clone() const {
+        return Force3D(force, torque);
+    }
 };
 
 class ForceCalculation {
