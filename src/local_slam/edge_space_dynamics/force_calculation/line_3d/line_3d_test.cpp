@@ -85,6 +85,29 @@ TEST(Line3DTest, Clone)
     ASSERT_NE(line.start_point()(2), line_clone.start_point()(2));
 }
 
+TEST(Line3DTest, Connect) {
+    Line3D line(0, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(1, 0, 0), 0.0);
+    Line3D line_connect(1, Eigen::Vector3f(1, 0, 0), Eigen::Vector3f(1, 0, 0), 0.0);
+
+    bool result = line.connect(line_connect);
+
+    Line3D expected_line(0, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(1, 0, 0), 1.0);
+
+    ASSERT_TRUE(result);
+    ASSERT_EQ(line.id(), expected_line.id());
+    ASSERT_EQ(line.start_point()(0), expected_line.start_point()(0));
+    ASSERT_EQ(line.start_point()(1), expected_line.start_point()(1));
+    ASSERT_EQ(line.start_point()(2), expected_line.start_point()(2));
+    ASSERT_EQ(line.direction()(0), expected_line.direction()(0));
+    ASSERT_EQ(line.direction()(1), expected_line.direction()(1));
+    ASSERT_EQ(line.direction()(2), expected_line.direction()(2));
+    ASSERT_EQ(line.length(), expected_line.length());
+
+    Line3D line_not_connect(2, Eigen::Vector3f(1, 0, 0), Eigen::Vector3f(-1, 0, 0), 0.0);
+    result = line.connect(line_not_connect);
+    ASSERT_FALSE(result);
+}
+
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);

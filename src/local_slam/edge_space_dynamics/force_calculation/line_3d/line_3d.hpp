@@ -1,6 +1,9 @@
 #ifndef LINE_3D_HPP
 #define LINE_3D_HPP
 
+#define CONNECTION_ANGLE_THRESHOLD 0.02f // 1.15 degrees
+#define CONNECTION_DISTANCE_THRESHOLD 1.0f
+
 #include <Eigen/Dense>
 
 class Line3D {
@@ -25,6 +28,8 @@ public:
                                            float& distance2);
 
     Line3D clone() const;
+
+    bool connect(const Line3D& other);
 
     int id() const;
 

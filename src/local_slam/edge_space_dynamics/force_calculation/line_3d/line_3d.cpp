@@ -79,6 +79,32 @@ Line3D Line3D::clone() const
     return Line3D(id_, start_point_, direction_, length_);
 }
 
+bool Line3D::connect(const Line3D& other)
+{
+    Eigen::Vector3f vector_between = other.start_point_ - start_point_;
+
+    bool reverse = false;
+    if (direction_.dot(vector_between) < 0) {
+        vector_between = -vector_between;
+        reverse = true;
+    }
+
+    float angle_between = std::acos(direction_.dot(vector_between));
+    float angle_between_other = std::acos(other.direction_.dot(vector_between));
+
+    if (angle_between > CONNECTION_ANGLE_THRESHOLD || angle_between_other > CONNECTION_ANGLE_THRESHOLD) {
+        return false;
+    }
+
+    if (reverse) {
+        start_point_ = other.start_point_;
+        direction_ = -other.direction_;
+    }
+    length_ = vector_between.norm() + other.length_;
+
+    return true;
+}
+
 int Line3D::id() const
 {
     return id_;
