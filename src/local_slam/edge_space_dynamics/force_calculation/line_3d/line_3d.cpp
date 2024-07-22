@@ -1,5 +1,6 @@
 #include "line_3d.hpp"
 
+
 Line3D::Line3D(const int id,
                const Eigen::Vector3f start_point,
                const Eigen::Vector3f direction,
@@ -81,28 +82,57 @@ Line3D Line3D::clone() const
 
 bool Line3D::connect(const Line3D& other)
 {
-    Eigen::Vector3f vector_between = other.start_point_ - start_point_;
 
-    bool reverse = false;
-    if (direction_.dot(vector_between) < 0) {
-        vector_between = -vector_between;
-        reverse = true;
-    }
-
-    float angle_between = std::acos(direction_.dot(vector_between));
-    float angle_between_other = std::acos(other.direction_.dot(vector_between));
-
-    if (angle_between > CONNECTION_ANGLE_THRESHOLD || angle_between_other > CONNECTION_ANGLE_THRESHOLD) {
+    // Check if the lines are parallel
+    if (std::acos(direction_.dot(other.direction_)) > CONNECTION_ANGLE_THRESHOLD) {
         return false;
     }
 
-    if (reverse) {
-        start_point_ = other.start_point_;
-        direction_ = -other.direction_;
+    // Check if the start points are close enough
+    float closest_point_to_other_start_line = get_closest_point_to(other.start_point_);
+
+    if (closest_point_to_other_start_line > length_ + CONNECTION_MAX_START_POINT_DISTANCE) {
+        return false;
     }
-    length_ = vector_between.norm() + other.length_;
+
+    if (closest_point_to_other_start_line < -(other.length_ + CONNECTION_MAX_START_POINT_DISTANCE)) {
+        return false;
+    }
+
+    // Check if the other line is close enough
+    float distance_to_other_start_line = (get_point_at(closest_point_to_other_start_line) - other.start_point_).norm();
+
+    if (distance_to_other_start_line > CONNECTION_DISTANCE_THRESHOLD) {
+        return false;
+    }
+
+    // Update the line
+    Eigen::Vector3f new_start_point = start_point_;
+    Eigen::Vector3f new_direction = direction_;
+    float new_length = length_;
+
+    // use other if other start point is behind the start point of this line
+    if (closest_point_to_other_start_line < 0) {
+        new_start_point = other.start_point_;
+    }
+
+    // use other if other end point is over the end point of this line
+    float distance_to_end_point = (get_point_at(length_) - new_start_point).norm();
+    float distance_to_other_end_point = (other.get_point_at(other.length_) - new_start_point).norm();
+
+    new_length = std::max(distance_to_end_point, distance_to_other_end_point);
+
+    start_point_ = new_start_point;
+    direction_ = new_direction;
+    length_ = new_length;
 
     return true;
+}
+
+float Line3D::get_closest_point_to(const Eigen::Vector3f point) const
+{
+    Eigen::Vector3f w = point - start_point_;
+    return w.dot(direction_.normalized());
 }
 
 int Line3D::id() const

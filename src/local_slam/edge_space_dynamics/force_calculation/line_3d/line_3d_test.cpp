@@ -85,13 +85,8 @@ TEST(Line3DTest, Clone)
     ASSERT_NE(line.start_point()(2), line_clone.start_point()(2));
 }
 
-TEST(Line3DTest, Connect) {
-    Line3D line(0, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(1, 0, 0), 0.0);
-    Line3D line_connect(1, Eigen::Vector3f(1, 0, 0), Eigen::Vector3f(1, 0, 0), 0.0);
-
+void check_connection(Line3D& line, Line3D& line_connect, Line3D& expected_line) {
     bool result = line.connect(line_connect);
-
-    Line3D expected_line(0, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(1, 0, 0), 1.0);
 
     ASSERT_TRUE(result);
     ASSERT_EQ(line.id(), expected_line.id());
@@ -102,10 +97,42 @@ TEST(Line3DTest, Connect) {
     ASSERT_EQ(line.direction()(1), expected_line.direction()(1));
     ASSERT_EQ(line.direction()(2), expected_line.direction()(2));
     ASSERT_EQ(line.length(), expected_line.length());
+}
 
-    Line3D line_not_connect(2, Eigen::Vector3f(1, 0, 0), Eigen::Vector3f(-1, 0, 0), 0.0);
-    result = line.connect(line_not_connect);
+TEST(Line3DTest, Connect) {
+    Line3D line(0, Eigen::Vector3f(0, 1, 1), Eigen::Vector3f(1, 0, 0), 0.8);
+    Line3D line_connect(1, Eigen::Vector3f(1, 1, 1), Eigen::Vector3f(1, 0, 0), 0.0);
+
+    Line3D expected_line(0, Eigen::Vector3f(0, 1, 1), Eigen::Vector3f(1, 0, 0), 1.0);
+    
+    check_connection(line, line_connect, expected_line);
+}
+
+TEST(Line3DTest, ConnectToCloseLine) {
+    Line3D line(0, Eigen::Vector3f(0, 1, 1), Eigen::Vector3f(1, 0, 0), 1.0);
+    Line3D line_connect(1, Eigen::Vector3f(-0.1, 1.009, 1), Eigen::Vector3f(1, 0, 0), 2.0);
+    Line3D expected_line(0, Eigen::Vector3f(-0.1, 1.009, 1), Eigen::Vector3f(1, 0, 0), 2.0);
+
+    check_connection(line, line_connect, expected_line);
+}
+
+TEST(Line3DTest, NotConnectToDifferentDirection) {
+    Line3D line(0, Eigen::Vector3f(0, 1, 1), Eigen::Vector3f(1, 0, 0), 1.0);
+    Line3D line_connect(1, Eigen::Vector3f(1, 1, 1), Eigen::Vector3f(0, 1, 0), 0.0);
+
+    bool result = line.connect(line_connect);
+
     ASSERT_FALSE(result);
+}
+
+TEST(Line3DTest, GetClosestPoint) {
+    Line3D line(0, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(1, 0, 0), 1.0);
+
+    Eigen::Vector3f point(0.5, 0.5, 0.5);
+
+    float closest_point_distance = line.get_closest_point_to(point);
+
+    EXPECT_EQ(closest_point_distance, 0.5);
 }
 
 int main(int argc, char **argv)
