@@ -91,7 +91,8 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
                                      int& edge_id) {
 
     Line3D edge(edges.size(),
-                frame1_pose.transformToWorld(frame1_edge_node.direction_frame_to_edge * INITIAL_EDGE_DISTANCE_FROM_FRAME1),
+                (frame1_pose.transformToWorld(frame1_edge_node.direction_frame_to_edge * INITIAL_EDGE_DISTANCE_FROM_FRAME)
+                + frame2_pose.transformToWorld(frame2_edge_node.direction_frame_to_edge * INITIAL_EDGE_DISTANCE_FROM_FRAME)) / 2.0f,
                 frame1_pose.rotateVectorToWorld(Eigen::Vector3f(frame1_edge_node.edge_direction[0], frame1_edge_node.edge_direction[1], 0)),
                 0);
 
@@ -101,6 +102,7 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
 
         Line3D current_edge = edge.clone();
 
+        // TODO: refactor this part. double same code
         Force3D force_to_frame_not_used;
         Force3D force_to_edge_with_frame1;
         float torque_center_point_for_edge_line_with_frame1;
@@ -112,8 +114,12 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
                        force_to_edge_with_frame1,
                        torque_center_point_for_edge_line_with_frame1)) return false;
 
-        edge.add_force(force_to_edge_with_frame1.force * EDGE_POSE_TRANSLATE_GAIN,
-                       force_to_edge_with_frame1.torque * EDGE_POSE_ROTATE_GAIN,
+        force_to_edge_with_frame1.force = force_to_edge_with_frame1.force * EDGE_POSE_TRANSLATE_GAIN;
+        force_to_edge_with_frame1.torque = force_to_edge_with_frame1.torque * EDGE_POSE_ROTATE_GAIN;
+
+        // TODO: remove this line
+        edge.add_force(Eigen::Vector3f(0, 0, 0),
+                       force_to_edge_with_frame1.torque,
                        torque_center_point_for_edge_line_with_frame1);
 
         Force3D force_to_edge_with_frame2;
@@ -126,13 +132,24 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
                        force_to_edge_with_frame2,
                        torque_center_point_for_edge_line_with_frame2)) return false;
 
-        edge.add_force(force_to_edge_with_frame2.force * EDGE_POSE_TRANSLATE_GAIN,
-                       force_to_edge_with_frame2.torque * EDGE_POSE_ROTATE_GAIN,
+        force_to_edge_with_frame2.force = force_to_edge_with_frame2.force * EDGE_POSE_TRANSLATE_GAIN;
+        force_to_edge_with_frame2.torque = force_to_edge_with_frame2.torque * EDGE_POSE_ROTATE_GAIN;
+
+        // TODO: remove this line
+        edge.add_force(Eigen::Vector3f(0, 0, 0),
+                       force_to_edge_with_frame2.torque,
                        torque_center_point_for_edge_line_with_frame2);
 
+
+        // TODO: add force_sum to the edge.
         Force3D force_sum;
         force_sum.add(force_to_edge_with_frame1);
         force_sum.add(force_to_edge_with_frame2);
+
+        edge.add_force(force_sum.force,
+                       Eigen::Vector3f(0, 0, 0),
+                       0.0f);
+
         if (force_sum.force.norm() < CAL_FINISH_FORCE_SIZE &&
             force_sum.torque.norm() < CAL_FINISH_TORQUE_SIZE) {
             cal_finish = true;

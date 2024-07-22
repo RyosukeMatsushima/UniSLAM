@@ -7,8 +7,8 @@
 #define ROTATION_STRESS_THRESHOLD_GAIN 1.1f
 
 // for add_new_edge
-#define INITIAL_EDGE_DISTANCE_FROM_FRAME1 0.1f
-#define EDGE_POSE_TRANSLATE_GAIN 0.1f
+#define INITIAL_EDGE_DISTANCE_FROM_FRAME 1.1f
+#define EDGE_POSE_TRANSLATE_GAIN 0.9f
 #define EDGE_POSE_ROTATE_GAIN 0.1f
 #define DELTA_EDGE_POSITION_TO_CHECK 0.1f
 
@@ -18,8 +18,8 @@
 #define FRAME_POSE_ROTATE_GAIN 0.1f
 
 // TODO: use this value to stop the calculation
-#define CAL_FINISH_FORCE_SIZE 0.001
-#define CAL_FINISH_TORQUE_SIZE 0.002
+#define CAL_FINISH_FORCE_SIZE 0.00001
+#define CAL_FINISH_TORQUE_SIZE 0.00001
 
 #include <Eigen/Dense>
 #include <vector>

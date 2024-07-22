@@ -46,7 +46,7 @@ bool ForceCalculation::calculateClosestPoints(const Line3D &observed_line, float
 }
 
 Eigen::Vector3f ForceCalculation::calculateForce(const Line3D &observed_line, float distance_edge, float distance_observed_line) const {
-    return (edge.get_point_at(distance_edge) - observed_line.get_point_at(distance_observed_line)) / distance_observed_line;
+    return edge.get_point_at(distance_edge) - observed_line.get_point_at(distance_observed_line);
 }
 
 Eigen::Vector3f ForceCalculation::calculateTorque(const Line3D &observed_line, float distance_edge) const {
