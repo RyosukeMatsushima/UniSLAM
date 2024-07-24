@@ -177,3 +177,58 @@ TEST(AddNewEdgeTest, addEdgeWithCloseFrames) {
 
 }
 
+TEST(AddNewEdgeTest, addEdgeWithCloseFramesAsymmetrical) {
+
+    Line3D expected_edge(0,
+                         Eigen::Vector3f(0, 1, 1),
+                         Eigen::Vector3f(1, 0, 0),
+                         0);
+
+    Pose3D frame1_pose;
+    Pose3D frame2_pose;
+
+    float baseline = 0.1;
+
+    frame1_pose.translate(Eigen::Vector3f(0, 0, 0));
+    frame2_pose.translate(Eigen::Vector3f(0, baseline, 0));
+
+    EdgeNode frame1_edge_node(Eigen::Vector3f(0.3, 1, 1),
+                              Eigen::Vector2f(1, 0),
+                              -1);
+
+    EdgeNode frame2_edge_node(Eigen::Vector3f(0, 1 - baseline, 1),
+                              Eigen::Vector2f(1, 0),
+                              -1);
+
+    EdgeSpaceDynamics edge_space_dynamics;
+
+    int edge_id;
+
+    bool result = edge_space_dynamics.add_new_edge(frame1_pose,
+                                                   frame2_pose,
+                                                   frame1_edge_node,
+                                                   frame2_edge_node,
+                                                   edge_id);
+
+    // edge_id should be 0
+    EXPECT_EQ(edge_id, 0);
+
+    // result should be false
+    EXPECT_TRUE(result);
+
+    // check added edge
+    ASSERT_EQ(edge_space_dynamics.get_edge3ds().size(), 1);
+    Line3D edge = edge_space_dynamics.get_edge3ds()[0];
+
+    EXPECT_TRUE(expected_edge.connect(edge));
+
+    float threshold = 0.01;
+    EXPECT_NEAR(edge.start_point()[1], expected_edge.start_point()[1], threshold);
+    EXPECT_NEAR(edge.start_point()[2], expected_edge.start_point()[2], threshold);
+
+    EXPECT_NEAR(edge.direction()[0], expected_edge.direction()[0], threshold);
+    EXPECT_NEAR(edge.direction()[1], expected_edge.direction()[1], threshold);
+    EXPECT_NEAR(edge.direction()[2], expected_edge.direction()[2], threshold);
+
+}
+

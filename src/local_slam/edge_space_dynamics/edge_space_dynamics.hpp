@@ -13,12 +13,12 @@
 #define DELTA_EDGE_POSITION_TO_CHECK 0.1f
 
 // for calculate_frame_pose
-#define MAX_CAL_ITER 1000
+#define MAX_CAL_ITER 2000
 #define FRAME_POSE_TRANSLATE_GAIN 1.8f
 #define FRAME_POSE_ROTATE_GAIN 0.1f
 
 // TODO: use this value to stop the calculation
-#define CAL_FINISH_FORCE_SIZE 0.00001
+#define CAL_FINISH_FORCE_SIZE 0.000015
 #define CAL_FINISH_TORQUE_SIZE 0.00001
 
 #include <Eigen/Dense>

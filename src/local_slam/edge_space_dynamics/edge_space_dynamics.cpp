@@ -157,6 +157,8 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
         }
     }
 
+    if (!cal_finish) return false;
+
     // check the edge is really fixed
     // the edge is fixed if the force will increase when the edge is moved to direction_frame_to_edge
 
@@ -181,7 +183,7 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
     edges.push_back(edge);
     edge_ids.push_back(edge.id());
     edge_id = edge.id();
-    return cal_finish;
+    return true;
 }
 
 bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
