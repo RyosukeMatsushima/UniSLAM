@@ -1,6 +1,24 @@
 #include "edge_space_dynamics.hpp"
 
-EdgeSpaceDynamics::EdgeSpaceDynamics() {
+EdgeSpaceDynamics::EdgeSpaceDynamics(const std::string& config_file) {
+    load_config(config_file);
+}
+
+void EdgeSpaceDynamics::load_config(const std::string& config_file) {
+    YAML::Node config = YAML::LoadFile(config_file);
+
+    EDGE_NUM_TO_GET_FRAME_POSE = config["EDGE_NUM_TO_GET_FRAME_POSE"].as<int>();
+    TRANSLATION_STRESS_THRESHOLD_GAIN = config["TRANSLATION_STRESS_THRESHOLD_GAIN"].as<float>();
+    ROTATION_STRESS_THRESHOLD_GAIN = config["ROTATION_STRESS_THRESHOLD_GAIN"].as<float>();
+    INITIAL_EDGE_DISTANCE_FROM_FRAME = config["INITIAL_EDGE_DISTANCE_FROM_FRAME"].as<float>();
+    EDGE_POSE_TRANSLATE_GAIN = config["EDGE_POSE_TRANSLATE_GAIN"].as<float>();
+    EDGE_POSE_ROTATE_GAIN = config["EDGE_POSE_ROTATE_GAIN"].as<float>();
+    DELTA_EDGE_POSITION_TO_CHECK = config["DELTA_EDGE_POSITION_TO_CHECK"].as<float>();
+    MAX_CAL_ITER = config["MAX_CAL_ITER"].as<int>();
+    FRAME_POSE_TRANSLATE_GAIN = config["FRAME_POSE_TRANSLATE_GAIN"].as<float>();
+    FRAME_POSE_ROTATE_GAIN = config["FRAME_POSE_ROTATE_GAIN"].as<float>();
+    CAL_FINISH_FORCE_SIZE = config["CAL_FINISH_FORCE_SIZE"].as<float>();
+    CAL_FINISH_TORQUE_SIZE = config["CAL_FINISH_TORQUE_SIZE"].as<float>();
 }
 
 // it's better if edge_nodes is suffuled before calling this function

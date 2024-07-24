@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include "edge_space_dynamics.hpp"
 
+#define CONFIG_YAML_PATH PROJECT_SOURCE_DIR "/config_for_test.yaml"
+
 TEST(AddNewEdgeTest, addVirticalNewEdge) {
 
     Pose3D frame1_pose;
@@ -17,7 +19,7 @@ TEST(AddNewEdgeTest, addVirticalNewEdge) {
                               Eigen::Vector2f(0, 1),
                               -1);
 
-    EdgeSpaceDynamics edge_space_dynamics;
+    EdgeSpaceDynamics edge_space_dynamics(CONFIG_YAML_PATH);
 
     int edge_id;
 
@@ -73,7 +75,7 @@ TEST(AddNewEdgeTest, addHorizontalNewEdge) {
                               Eigen::Vector2f(1, 0),
                               -1);
 
-    EdgeSpaceDynamics edge_space_dynamics;
+    EdgeSpaceDynamics edge_space_dynamics(CONFIG_YAML_PATH);
 
     int edge_id;
 
@@ -120,7 +122,7 @@ TEST(AddNewEdgeTest, addEdgeWithSamePose) {
                               Eigen::Vector2f(0, 1),
                               -1);
 
-    EdgeSpaceDynamics edge_space_dynamics;
+    EdgeSpaceDynamics edge_space_dynamics(CONFIG_YAML_PATH);
 
     int edge_id;
 
@@ -155,7 +157,7 @@ TEST(AddNewEdgeTest, addEdgeWithSameDirection) {
                               Eigen::Vector2f(1, 0),
                               -1);
 
-    EdgeSpaceDynamics edge_space_dynamics;
+    EdgeSpaceDynamics edge_space_dynamics(CONFIG_YAML_PATH);
 
     int edge_id;
 
@@ -198,7 +200,7 @@ TEST(AddNewEdgeTest, addEdgeWithCloseFrames) {
                               Eigen::Vector2f(1, 0),
                               -1);
 
-    EdgeSpaceDynamics edge_space_dynamics;
+    EdgeSpaceDynamics edge_space_dynamics(CONFIG_YAML_PATH);
 
     int edge_id;
 
@@ -251,7 +253,7 @@ TEST(AddNewEdgeTest, addEdgeWithCloseFramesAsymmetrical) {
                               Eigen::Vector2f(1, 0),
                               -1);
 
-    EdgeSpaceDynamics edge_space_dynamics;
+    EdgeSpaceDynamics edge_space_dynamics(CONFIG_YAML_PATH);
 
     int edge_id;
 

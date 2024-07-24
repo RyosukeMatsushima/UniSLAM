@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include "edge_space_dynamics.hpp"
 
+#define CONFIG_YAML_PATH PROJECT_SOURCE_DIR "/config_for_test.yaml"
+
 class FrameData {
 public:
     Pose3D pose;
@@ -46,7 +48,8 @@ protected:
     EdgeData edge3;
 
     OptimizeTest()
-        : frame0(Pose3D(), {
+        : edge_space_dynamics(CONFIG_YAML_PATH),
+          frame0(Pose3D(), {
             EdgeNode(Eigen::Vector3f(1.0, 0.0, 1.0), Eigen::Vector2f(0.0, 1.0), 0),
             EdgeNode(Eigen::Vector3f(-1.0, 0.0, 1.0), Eigen::Vector2f(0.0, 1.0), 1),
             EdgeNode(Eigen::Vector3f(0.0, 1.0, 1.0), Eigen::Vector2f(1.0, 0.0), 2),

@@ -1,10 +1,14 @@
 #include <gtest/gtest.h>
 #include "edge_space_dynamics.hpp"
 
+#define CONFIG_YAML_PATH PROJECT_SOURCE_DIR "/config_for_test.yaml"
+
 class GetFramePoseTest : public ::testing::Test {
 protected:
     EdgeSpaceDynamics edge_space_dynamics;
     std::vector<EdgeNode> edge_nodes;
+
+    GetFramePoseTest() : edge_space_dynamics(CONFIG_YAML_PATH) {}
 
     void SetUp() override {
         edge_nodes = {
