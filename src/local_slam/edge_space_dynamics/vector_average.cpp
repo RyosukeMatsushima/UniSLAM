@@ -21,3 +21,21 @@ Eigen::Vector3f VectorAverage::get_average() const {
     return current_sum_ / static_cast<float>(vectors_.size());
 }
 
+bool VectorAverage::is_filled() const {
+    return vectors_.size() == stock_size_;
+}
+
+Eigen::Vector3f VectorAverage::get_variance() const {
+    if (vectors_.empty()) {
+        return Eigen::Vector3f::Zero();
+    }
+
+    Eigen::Vector3f average = get_average();
+    Eigen::Vector3f variance = Eigen::Vector3f::Zero();
+
+    for (const Eigen::Vector3f& vec : vectors_) {
+        variance += (vec - average).cwiseAbs2();
+    }
+
+    return variance / static_cast<float>(vectors_.size());
+}

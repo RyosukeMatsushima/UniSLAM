@@ -10,6 +10,8 @@ public:
 
     void add_vector(const Eigen::Vector3f& vec);
     Eigen::Vector3f get_average() const;
+    bool is_filled() const;
+    Eigen::Vector3f get_variance() const;
 
 private:
     int stock_size_;
