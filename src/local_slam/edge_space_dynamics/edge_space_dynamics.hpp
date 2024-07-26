@@ -10,6 +10,7 @@
 #include "edge_node.hpp"
 #include "pose_3d.hpp"
 #include "line_3d.hpp"
+#include "vector_average.hpp"
 
 class EdgeSpaceDynamics {
 public:
@@ -43,6 +44,8 @@ public:
                     std::vector<float>& translation_stress,
                     std::vector<float>& rotation_stress);
 
+    void clear_edges();
+
 private:
     std::vector<Line3D> edges;
     std::vector<int> edge_ids;
@@ -60,10 +63,15 @@ private:
     int EDGE_NUM_TO_GET_FRAME_POSE;
     float TRANSLATION_STRESS_THRESHOLD_GAIN;
     float ROTATION_STRESS_THRESHOLD_GAIN;
+
     float INITIAL_EDGE_DISTANCE_FROM_FRAME;
     float EDGE_POSE_TRANSLATE_GAIN;
     float EDGE_POSE_ROTATE_GAIN;
+    float EDGE_MIN_TRANSLATE_FORCE;
     float DELTA_EDGE_POSITION_TO_CHECK;
+    float CAL_FINISH_TRANSLATE_VARIANCE;
+    float CAL_FINISH_ROTATE_VARIANCE;
+
     int MAX_CAL_ITER;
     float FRAME_POSE_TRANSLATE_GAIN;
     float FRAME_POSE_ROTATE_GAIN;
