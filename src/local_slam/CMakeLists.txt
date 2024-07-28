@@ -14,6 +14,15 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+# Fetch yaml-cpp
+FetchContent_Declare(
+  yaml-cpp
+  URL https://github.com/jbeder/yaml-cpp/archive/refs/tags/yaml-cpp-0.6.3.zip
+)
+# Disable tests for yaml-cpp to avoid conflict
+set(YAML_CPP_BUILD_TESTS OFF CACHE INTERNAL "")
+FetchContent_MakeAvailable(yaml-cpp)
+
 enable_testing()
 
 # Find OpenCV package
@@ -53,6 +62,7 @@ target_link_libraries(
     camera_model
     Eigen3::Eigen
     ${OpenCV_LIBS}
+    yaml-cpp
 )
 
 add_executable(
@@ -69,6 +79,26 @@ target_link_libraries(
     ${OpenCV_LIBS}
 )
 
+add_executable(
+    matching_edge_test
+    matching_edge_test.cpp
+)
+
+target_link_libraries(
+    matching_edge_test
+    PRIVATE
+    frame_node
+    edge
+    frame
+    line_3d
+    edge_point_check
+    edge_point_finder
+    discrete_angle_edge_intensity
+    camera_model
+    polygons_space
+    GTest::gtest_main
+    ${OpenCV_LIBS}
+)
 
 # Camera model
 add_library(
@@ -106,6 +136,9 @@ target_link_libraries(
 # Tests
 include(GoogleTest)
 gtest_discover_tests(local_slam_test)
+gtest_discover_tests(matching_edge_test)
 gtest_discover_tests(camera_model_test)
 
+
 target_compile_definitions(local_slam_test PRIVATE PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
+target_compile_definitions(matching_edge_test PRIVATE PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
