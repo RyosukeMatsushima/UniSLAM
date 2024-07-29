@@ -96,6 +96,7 @@ target_link_libraries(
     discrete_angle_edge_intensity
     camera_model
     polygons_space
+    local_slam
     GTest::gtest_main
     ${OpenCV_LIBS}
 )

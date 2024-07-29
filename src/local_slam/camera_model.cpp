@@ -1,6 +1,5 @@
 #include "camera_model.hpp"
 
-#include <iostream>
 
 CameraModel::CameraModel(const cv::Mat& camera_matrix,
                          const cv::Size& img_size) :

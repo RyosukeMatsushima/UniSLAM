@@ -6,8 +6,10 @@
 #include "frame_node.hpp"
 #include "line_3d.hpp"
 #include "debug_view.hpp"
+#include "local_slam.hpp"
 
 #define RESULT_IMAGE_PATH PROJECT_SOURCE_DIR "/test/result/"
+#define CONFIG_FILE_PATH PROJECT_SOURCE_DIR "/config_for_test/"
 
 class MatchingEdgeTest : public ::testing::Test {
 protected:
@@ -24,6 +26,7 @@ protected:
                                                       0, 0, 1);
     
     CameraModel camera_model;
+    LocalSlam local_slam;
 
     float square_size = 0.5;
     Eigen::Vector3f p1 = Eigen::Vector3f(-square_size, -square_size, 1);
@@ -33,7 +36,8 @@ protected:
 
     MatchingEdgeTest() :
         polygons_space(),
-        camera_model(camera_matrix, image_size) {
+        camera_model(camera_matrix, image_size),
+        local_slam(camera_model, CONFIG_FILE_PATH "edge_space_dynamics.yaml") {
 
         std::vector<cv::Point3f> polygon = {cv::Point3f(p1.x(), p1.y(), p1.z()),
                                             cv::Point3f(p2.x(), p2.y(), p2.z()),
@@ -59,6 +63,17 @@ protected:
 
     Eigen::Vector3f getPosition() const {
         return Eigen::Vector3f(float(position.at<double>(0)), float(position.at<double>(1)), float(position.at<double>(2)));
+    }
+
+    Eigen::Quaternionf getOrientation() const {
+        Eigen::Matrix3f rotation_matrix;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                rotation_matrix(i, j) = float(rotation.at<double>(i, j));
+            }
+        }
+        Eigen::Quaternionf q(rotation_matrix);
+        return q;
     }
 
     // max acceptable error is 1 pixel
@@ -109,13 +124,14 @@ protected:
 };
 
 TEST_F(MatchingEdgeTest, matching_edge) {
-    float dxy_position = 0.05f;
-    int window_size = 100;
+    float dxy_position = 0.1f;
+    int window_size = 200;
     float angle_resolution = 0.2f;
 
     cv::Mat image1 = polygons_space.getImage(rotation, position, camera_matrix, image_size);
     FrameNode frame_node1(image1, window_size, angle_resolution);
     std::vector<EdgePoint> edge_points = frame_node1.findNewEdgePoints();
+    Pose3D pose1 = Pose3D(getPosition(), getOrientation());
 
     // Check edge points
     for (const auto& edge_point : edge_points) {
@@ -129,6 +145,8 @@ TEST_F(MatchingEdgeTest, matching_edge) {
     FrameNode frame_node2(image2, window_size, angle_resolution);
 
     std::vector<EdgePoint> edge_points2 = frame_node2.findNewEdgePoints();
+    Pose3D pose2 = Pose3D(getPosition(), getOrientation());
+
     // Check edge points in frame_node2
     for (const auto& edge_point : edge_points2) {
         EdgeNode edge_node = camera_model.getEdgeNode(edge_point);
@@ -155,5 +173,21 @@ TEST_F(MatchingEdgeTest, matching_edge) {
 
     cv::imwrite(RESULT_IMAGE_PATH "matching_edge.png", debug_view.getDebugImage());
     cv::imwrite(RESULT_IMAGE_PATH "matching_edge2.png", debug_view2.getDebugImage());
+
+    // check edge pose calculation
+    local_slam.fix_edges(frame_node1, frame_node2, pose1, pose2);
+
+    DebugView debug_view_calculate_edge(image1);
+    debug_view_calculate_edge.drawEdgePoints(frame_node1.getFixedEdgePoints(), cv::Scalar(0, 225, 255));
+    debug_view_calculate_edge.drawEdgePoints(frame_node2.getFixedEdgePoints(), cv::Scalar(225, 255, 0));
+    cv::imwrite(RESULT_IMAGE_PATH "calculate_edge_from_pose1.png", debug_view_calculate_edge.getDebugImage());
+
+    for (const auto& edge_line: local_slam.get_fixed_edges()) {
+        std::cout << "" << std::endl;
+        std::cout << "id: " << edge_line.id() << std::endl;
+        std::cout << "start_point: " << edge_line.start_point().transpose() << std::endl;
+        std::cout << "direction: " << edge_line.direction().transpose() << std::endl;
+        std::cout << "length: " << edge_line.length() << std::endl;
+    }
 }
 

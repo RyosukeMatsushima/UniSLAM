@@ -5,7 +5,7 @@
 #define VALID_ROTATIONAL_DIFF 0.1f // for initialization
 
 // for frame_node
-#define WINDOW_SIZE 50
+#define WINDOW_SIZE 100
 #define ANGLE_RESOLUTION 0.2f
 
 // for edge_space_dynamics
@@ -19,7 +19,8 @@
 
 class LocalSlam {
 public:
-    LocalSlam(const CameraModel& camera_model);
+    LocalSlam(const CameraModel& camera_model,
+              const std::string& edge_space_dynamics_config_file);
 
     bool multi_frame_init(const cv::Mat& image,
                           const Eigen::Vector3f& external_position_data,
@@ -46,6 +47,7 @@ public:
                    const Pose3D& pose_frame1,
                    const Pose3D& pose_frame2);
 
+    std::vector<Line3D> get_fixed_edges();
 private:
     EdgeSpaceDynamics edge_space_dynamics;
 
