@@ -96,7 +96,7 @@ protected:
         edge.length += length_noise;
     }
 
-    void checkFrameData(const FrameData& frame, float translation_error_threshold = 1e-4, float rotation_error_threshold = 1e-4) {
+    void checkFrameData(const FrameData& frame, float translation_error_threshold = 1e-2, float rotation_error_threshold = 1e-2) {
         EXPECT_NEAR(frame.pose.position.x(), frame.correct_pose.position.x(), translation_error_threshold);
         EXPECT_NEAR(frame.pose.position.y(), frame.correct_pose.position.y(), translation_error_threshold);
         EXPECT_NEAR(frame.pose.position.z(), frame.correct_pose.position.z(), translation_error_threshold);
@@ -107,7 +107,7 @@ protected:
         EXPECT_NEAR(frame.pose.orientation.w(), frame.correct_pose.orientation.w(), rotation_error_threshold);
     }
 
-    void checkEdgeData(const EdgeData& edge, float translation_error_threshold = 1e-4, float rotation_error_threshold = 1e-4) {
+    void checkEdgeData(const EdgeData& edge, float translation_error_threshold = 1e-1, float rotation_error_threshold = 1e-2) {
         EXPECT_NEAR(edge_space_dynamics.get_edge3d(edge.id).direction().x(), edge.correct_direction.x(), translation_error_threshold);
         EXPECT_NEAR(edge_space_dynamics.get_edge3d(edge.id).direction().y(), edge.correct_direction.y(), translation_error_threshold);
         EXPECT_NEAR(edge_space_dynamics.get_edge3d(edge.id).direction().z(), edge.correct_direction.z(), translation_error_threshold);

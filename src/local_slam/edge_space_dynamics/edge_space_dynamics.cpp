@@ -141,9 +141,9 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
 
     bool cal_finish = false;
 
-    VectorAverage translation_force_average(20); // TODO: set parameter
-    VectorAverage edge_start_point_average(20); // TODO: set parameter
-    VectorAverage edge_direction_average(20); // TODO: set parameter
+    VectorAverage translation_force_average(1); // TODO: set parameter
+    VectorAverage edge_start_point_average(10); // TODO: set parameter
+    VectorAverage edge_direction_average(10); // TODO: set parameter
     int cal_finish_count = 0;
     for (int i = 0; i < MAX_CAL_ITER; i++) {
 
@@ -237,7 +237,10 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
                    force_to_edge_moved,
                    torque_center_point_for_edge_line_moved)) return false;
 
-    if (force_to_edge_moved.force.norm() < EDGE_MIN_TRANSLATE_FORCE) return false;
+    if ((force_to_edge_moved.force * EDGE_POSE_TRANSLATE_GAIN).cwiseAbs2().sum() < CAL_FINISH_FORCE_SIZE &&
+        (force_to_edge_moved.torque * EDGE_POSE_ROTATE_GAIN).cwiseAbs2().sum() < CAL_FINISH_TORQUE_SIZE) {
+        return false;
+    }
 
     edges.push_back(edge);
     edge_ids.push_back(edge.id());
