@@ -19,7 +19,10 @@ cv::Mat PolygonsSpace::getImage(const cv::InputArray &rvec,
         // project 3D points to 2D image
         std::vector<cv::Point2f> projected_points;
         cv::Mat dist_coeffs = cv::Mat::zeros(5, 1, CV_64F); // Assuming no lens distortion for now
-        cv::projectPoints(polygon.points, rvec, tvec, camera_matrix, dist_coeffs, projected_points);
+        // flip rvec and tvec
+        cv::Mat inverted_rvec = rvec.getMat().inv();
+        cv::Mat flipped_tvec = -tvec.getMat();
+        cv::projectPoints(polygon.points, inverted_rvec, flipped_tvec, camera_matrix, dist_coeffs, projected_points);
 
         std::vector<cv::Point> image_points;
         for (const auto &point: projected_points)
