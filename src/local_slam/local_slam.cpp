@@ -19,7 +19,8 @@ bool LocalSlam::multi_frame_init(const cv::Mat& image,
 
     fix_edges(key_frames.back().first, frame_node, key_frames.back().second, current_frame_pose);
 
-    // TODO: shuffling fixed edge points in frame_node. It is necessary for edge_space_dynamics.get_frame_pose for now.
+    // shuffle fixed edge points for edge space dynamics pose calculation
+    frame_node.shuffleFixedEdgePoints();
 
     // check initialization
     // try to calculate the pose of the current frame and the last key frame

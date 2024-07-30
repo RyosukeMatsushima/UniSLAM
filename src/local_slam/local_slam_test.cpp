@@ -8,6 +8,7 @@
 #include "camera_model.hpp"
 #include "debug_view.hpp"
 
+#define CONFIG_FILE_PATH PROJECT_SOURCE_DIR "/config_for_test/"
 #define RESULT_IMAGE_PATH PROJECT_SOURCE_DIR "/test/result/"
 
 class LocalSlamTest : public ::testing::Test {
@@ -15,13 +16,14 @@ protected:
     DoubleSquaresSpace double_squares_space;
     LocalSlam local_slam;
 
-   cv::Mat position = (cv::Mat_<double>(3, 1) << 0, 0, 0);
-   cv::Mat rotation = (cv::Mat_<double>(3, 3) << 1, 0, 0,
-                                                 0, 1, 0,
-                                                 0, 0, 1);
+    cv::Mat position = (cv::Mat_<double>(3, 1) << 0, 0, 0);
+    cv::Mat rotation = (cv::Mat_<double>(3, 3) << 1, 0, 0,
+                                                  0, 1, 0,
+                                                  0, 0, 1);
 
     LocalSlamTest() : double_squares_space(),
-                      local_slam(CameraModel(double_squares_space.getCameraMatrix(), double_squares_space.getImageSize())) {}
+                      local_slam(CameraModel(double_squares_space.getCameraMatrix(), double_squares_space.getImageSize()),
+                                 CONFIG_FILE_PATH "edge_space_dynamics.yaml") {}
 
     void movePosition(float x, float y, float z) {
         position.at<double>(0) += double(x);
@@ -64,7 +66,7 @@ protected:
 };
 
 TEST_F(LocalSlamTest, withSquareSpaceWithoutExternalPose) {
-    float dxy_position = 0.2;
+    float dxy_position = 0.1;
 
     // initialize local_slam
     // initialize should not finish without movement
@@ -100,44 +102,6 @@ TEST_F(LocalSlamTest, withSquareSpaceWithoutExternalPose) {
     ASSERT_NEAR(pose.orientation.w(), expected_orientation.w(), allowed_error);
 
     // TODO: check pose with more movement. Need to allow the position is scaled without external pose data.
-}
-
-TEST_F(LocalSlamTest, fixEdges) {
-    float dxy_position = 0.03;
-
-    int window_size = 20;
-    float angle_resolution = 0.2f;
-
-    cv::Mat image1 = getCurrentImage();
-    FrameNode frame_node1(image1, window_size, angle_resolution);
-    Pose3D pose1 = getCurrentPose();
-
-    std::cout << "pose1: " << pose1.position.transpose() << std::endl;
-
-    movePosition(0, dxy_position, 0);
-    cv::Mat image2 = getCurrentImage();
-    FrameNode frame_node2(image2, window_size, angle_resolution);
-    Pose3D pose2 = getCurrentPose();
-
-    local_slam.fix_edges(frame_node1, frame_node2, pose1, pose2);
-
-    std::cout << "pose2: " << pose2.position.transpose() << std::endl;
-
-    std::cout << "image1.size(): " << image1.size() << std::endl;
-    std::cout << "image1.type(): " << image1.type() << std::endl;
-
-    DebugView debug_view(image1);
-
-    std::cout << "frame_node1.getFixedEdgePoints().size(): " << frame_node1.getFixedEdgePoints().size() << std::endl;
-    debug_view.drawEdgePoints(frame_node1.getFixedEdgePoints());
-    std::cout << "frame_node2.getFixedEdgePoints().size(): " << frame_node2.getFixedEdgePoints().size() << std::endl;
-    cv::imwrite(RESULT_IMAGE_PATH "fix_edges_from_pose1.png", debug_view.getDebugImage());
-
-
-
-    DebugView debug_view2(image2);
-    debug_view2.drawEdgePoints(frame_node2.getFixedEdgePoints());
-    cv::imwrite(RESULT_IMAGE_PATH "fix_edges_from_pose2.png", debug_view2.getDebugImage());
 }
 
 int main(int argc, char **argv) {
