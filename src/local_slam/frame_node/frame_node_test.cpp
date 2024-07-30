@@ -234,4 +234,33 @@ TEST(FrameNodeTest, ChecKeyFrameItselfWithScaledImg) {
     matchFrame(base_test_img, scaled_test_img, window_size, angle_resolution, "check_is_key_frame_itself_scaled.png", 0.8);
 }
 
+TEST(FrameNodeTest, ShuffleFixedEdges) {
+    cv::Mat test_img = cv::Mat::zeros(1000, 1000, CV_8UC1);
+    FrameNode frame_node(test_img, 50, 0.2);
 
+    // add fixed edge points
+    int id = 0;
+
+    for (int i = 0; i < 10; i++) {
+        EdgePoint edge_point(cv::Point2f(i, i), cv::Vec2f(0, 0));
+        edge_point.id = id++;
+        frame_node.addFixedEdgePoint(edge_point);
+    }
+
+    // shuffle fixed edge points
+    frame_node.shuffleFixedEdgePoints();
+
+    // check if the order is changed
+    int same_order_count = 0;
+    for (int i = 0; i < frame_node.getFixedEdgePoints().size(); i++) {
+        EdgePoint edge_point(cv::Point2f(i, i), cv::Vec2f(0, 0));
+        edge_point.id = i;
+        if (frame_node.getFixedEdgePoints()[i].id == edge_point.id) {
+            same_order_count++;
+        }
+    }
+
+    int same_order_threshold = frame_node.getFixedEdgePoints().size() * 0.8;
+
+    ASSERT_LT(same_order_count, same_order_threshold);
+}

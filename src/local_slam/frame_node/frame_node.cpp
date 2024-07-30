@@ -95,3 +95,9 @@ std::vector<EdgePoint> FrameNode::getFixedEdgePoints() const {
     return fixed_edge_points;
 }
 
+void FrameNode::shuffleFixedEdgePoints() {
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(fixed_edge_points.begin(), fixed_edge_points.end(), g);
+}
+

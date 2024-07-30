@@ -8,6 +8,7 @@
 #define MIN_EDGEPOINT_NUM 1
 
 #include <opencv2/opencv.hpp>
+#include <random>
 
 #include "frame.h"
 #include "edge.h"
@@ -31,6 +32,8 @@ public:
     void addFixedEdgePoint(const EdgePoint& edge_point);
 
     std::vector<EdgePoint> getFixedEdgePoints() const;
+
+    void shuffleFixedEdgePoints();
 
 private:
 
