@@ -101,3 +101,19 @@ void FrameNode::shuffleFixedEdgePoints() {
     std::shuffle(fixed_edge_points.begin(), fixed_edge_points.end(), g);
 }
 
+FrameNode& FrameNode::operator=(const FrameNode& other_frame_node) {
+
+    // check window_size and angle_resolution
+    if (window_size != other_frame_node.window_size) {
+        throw std::invalid_argument("window_size is different");
+    }
+    if (angle_resolution != other_frame_node.angle_resolution) {
+        throw std::invalid_argument("angle_resolution is different");
+    }
+
+    frame_2d = other_frame_node.frame_2d;
+    fixed_edge_points = other_frame_node.fixed_edge_points;
+    fixed_edge_distribution = other_frame_node.fixed_edge_distribution.clone();
+    return *this;
+}
+

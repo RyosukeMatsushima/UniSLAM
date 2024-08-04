@@ -35,6 +35,8 @@ public:
 
     void shuffleFixedEdgePoints();
 
+    FrameNode& operator=(const FrameNode& other_frame_node);
+
 private:
 
     const int window_size;

@@ -264,3 +264,32 @@ TEST(FrameNodeTest, ShuffleFixedEdges) {
 
     ASSERT_LT(same_order_count, same_order_threshold);
 }
+
+TEST(FrameNodeTest, OperatorEqual) {
+    cv::Mat test_img = cv::Mat::zeros(1000, 1000, CV_8UC1);
+    int window_size = 50;
+    float angle_resolution = 0.2;
+    FrameNode frame_node1(test_img, window_size, angle_resolution);
+    FrameNode frame_node2(test_img, window_size, angle_resolution);
+    FrameNode frame_node_wrong_param(test_img, window_size, angle_resolution + 0.1);
+
+    // add fixed edge points
+    int id = 0;
+
+    for (int i = 0; i < 10; i++) {
+        EdgePoint edge_point(cv::Point2f(i, i), cv::Vec2f(0, 0));
+        edge_point.id = id++;
+        frame_node1.addFixedEdgePoint(edge_point);
+    }
+
+    frame_node2 = frame_node1;
+
+    // check if the fixed edge points are same
+    for (int i = 0; i < frame_node1.getFixedEdgePoints().size(); i++) {
+        ASSERT_EQ(frame_node1.getFixedEdgePoints()[i].id, frame_node2.getFixedEdgePoints()[i].id);
+    }
+
+    // return error if the window size is different
+    ASSERT_THROW(frame_node_wrong_param = frame_node1, std::invalid_argument);
+}
+
