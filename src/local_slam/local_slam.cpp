@@ -46,20 +46,26 @@ bool LocalSlam::multi_frame_init(const cv::Mat& image,
 bool LocalSlam::update(const cv::Mat& image,
                        Pose3D& pose) {
 
-//    FrameNode current_frame_node(image);
-//
-//    bool success_to_get_pose = get_pose(current_frame_node, pose);
-//
-//    if (!success_to_get_pose) return false;
-//
-//    // if the current frame is a key frame, add the frame to the key frames
-//    if (current_frame_node.isKeyFrame()) {
-//
-//        calculate_first_matched_edges(key_frames.back(), current_frame_node);
-//        key_frames.push_back(current_frame_node);
-//    
-//    }
-//
+    FrameNode current_frame_node(image, WINDOW_SIZE, ANGLE_RESOLUTION);
+
+    bool is_key_frame;
+    if (!current_frame_node.matchWith(key_frames.back().first, is_key_frame)) {
+        std::cout << "Failed to match with the last key frame" << std::endl;
+        return false;
+    }
+
+    current_frame_node.shuffleFixedEdgePoints();
+    if (!get_pose(current_frame_node, pose)) {
+        std::cout << "Failed to get pose" << std::endl;
+        return false;
+    }
+
+    if (!is_key_frame) return true;
+
+    fix_edges(key_frames.back().first, current_frame_node, key_frames.back().second, pose);
+
+    key_frames.push_back(std::make_pair(current_frame_node, pose));
+
     return true;
 }
 
@@ -83,14 +89,6 @@ void LocalSlam::fix_edges(FrameNode& frame_node1,
                                                        matched_edge_node,
                                                        edge_id);
 
-        if (true) {
-            if (result) {
-
-                Line3D edge3d = edge_space_dynamics.get_edge3d(edge_id);
-
-            } else {
-            }
-        }
         if (!result) continue;
 
         edge_point.id = edge_id;
@@ -114,7 +112,7 @@ bool LocalSlam::get_pose(const FrameNode& frame_node,
                                                          VALID_EDGE_NODES_RATIO_THRESHOLD,
                                                          pose);
 
-
+        // TODO: move valid edge point to the biginning of the vector in frame_node
         return result;
     } catch (const std::exception& e) {
         std::cout << "Failed to get pose" << std::endl;

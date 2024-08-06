@@ -63,6 +63,20 @@ protected:
         cv::Mat current_image = getCurrentImage();
         return local_slam.update(current_image, pose);
     }
+
+    void checkPose(Pose3D& estimated_pose) {
+        Pose3D current_pose = getCurrentPose();
+
+        float allowed_error = 0.001;
+        ASSERT_NEAR(estimated_pose.position.x(), current_pose.position.x(), allowed_error);
+        ASSERT_NEAR(estimated_pose.position.y(), current_pose.position.y(), allowed_error);
+        ASSERT_NEAR(estimated_pose.position.z(), current_pose.position.z(), allowed_error);
+
+        ASSERT_NEAR(estimated_pose.orientation.x(), current_pose.orientation.x(), allowed_error);
+        ASSERT_NEAR(estimated_pose.orientation.y(), current_pose.orientation.y(), allowed_error);
+        ASSERT_NEAR(estimated_pose.orientation.z(), current_pose.orientation.z(), allowed_error);
+        ASSERT_NEAR(estimated_pose.orientation.w(), current_pose.orientation.w(), allowed_error);
+    }
 };
 
 TEST_F(LocalSlamTest, withSquareSpaceWithoutExternalPose) {
@@ -82,24 +96,16 @@ TEST_F(LocalSlamTest, withSquareSpaceWithoutExternalPose) {
     // initialize should finish
     ASSERT_TRUE(doMultiFrameInit());
 
+    // check getPose
+    Pose3D pose;
+    EXPECT_TRUE(doUpdate(pose));
+    checkPose(pose);
+
     // back to original position
     movePosition(-dxy_position, -dxy_position, 0);
-    Pose3D pose;
+    pose = Pose3D(Eigen::Vector3f(0.01, 0.01, 0), Eigen::Quaternionf::Identity());
     ASSERT_TRUE(doUpdate(pose));
-
-    // check the pose
-    Eigen::Vector3f expected_position(0, 0, 0);
-    Eigen::Quaternionf expected_orientation(1, 0, 0, 0);
-
-    float allowed_error = 0.001;
-    ASSERT_NEAR(pose.position.x(), expected_position.x(), allowed_error);
-    ASSERT_NEAR(pose.position.y(), expected_position.y(), allowed_error);
-    ASSERT_NEAR(pose.position.z(), expected_position.z(), allowed_error);
-
-    ASSERT_NEAR(pose.orientation.x(), expected_orientation.x(), allowed_error);
-    ASSERT_NEAR(pose.orientation.y(), expected_orientation.y(), allowed_error);
-    ASSERT_NEAR(pose.orientation.z(), expected_orientation.z(), allowed_error);
-    ASSERT_NEAR(pose.orientation.w(), expected_orientation.w(), allowed_error);
+    checkPose(pose);
 
     // TODO: check pose with more movement. Need to allow the position is scaled without external pose data.
 }
