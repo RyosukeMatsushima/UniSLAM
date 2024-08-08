@@ -14,8 +14,8 @@ TEST(DoubleSquaresSpaceTest, getImage)
   DoubleSquaresSpace double_squares_space;
 
   cv::Mat R1 = (cv::Mat_<double>(3, 3) << 1, 0, 0,
-                                         0, 1, 0,
-                                         0, 0, 1);
+                                          0, 1, 0,
+                                          0, 0, 1);
 
   // R2 as a 15 degree rotation around the x-axis
   cv::Mat R2 = (cv::Mat_<double>(3, 3) << 1, 0, 0,
@@ -23,9 +23,10 @@ TEST(DoubleSquaresSpaceTest, getImage)
                                          0, sin(15 * CV_PI / 180), cos(15 * CV_PI / 180));
 
   cv::Mat t_1 = (cv::Mat_<double>(3, 1) << 0, 0, 0);
-  cv::Mat t_2 = (cv::Mat_<double>(3, 1) << 0.5, 0, 0);
+  cv::Mat t_2 = (cv::Mat_<double>(3, 1) << 0.1, 0, 0);
+  cv::Mat t_3 = (cv::Mat_<double>(3, 1) << 0, 0.1, 0);
 
-  std::vector<cv::Mat> t = {t_1, t_2};
+  std::vector<cv::Mat> t = {t_1, t_2, t_3};
 
   for (auto &tvec: t)
   {

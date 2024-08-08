@@ -2,8 +2,8 @@
 
 DoubleSquaresSpace::DoubleSquaresSpace()
 {
-    float square_size = 0.05;
-    float base_z = 0.05;
+    float square_size = 0.4;
+    float base_z = 0.4;
     // draw square in x-z plane
     cv::Point3f p1(-square_size, square_size, base_z);
     cv::Point3f p2(square_size, square_size, base_z);

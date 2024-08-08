@@ -33,7 +33,6 @@ bool LocalSlam::multi_frame_init(const cv::Mat& image,
 
     if (!get_pose(current_frame_node, restored_pose)) return false;
 
-
     // check restored_pose
     if (restored_pose.translationalDiffTo(current_frame_pose).norm() > VALID_TRANSLATIONAL_DIFF ||
         restored_pose.rotationalDiffTo(current_frame_pose).norm() > VALID_ROTATIONAL_DIFF) {
@@ -158,7 +157,6 @@ std::vector<Line3D> LocalSlam::get_fixed_edges() {
 void LocalSlam::save_log(const std::string& path_to_dir) {
     DebugView debug_view(current_frame_node.getImg());
 
-    std::cout << "type of base_img: " << key_frames.back().first.getImg().type() << std::endl;
     debug_view.drawEdgePoints(key_frames.back().first.getFixedEdgePoints(), cv::Scalar(0, 0, 255));
     debug_view.drawEdgePoints(current_frame_node.getFixedEdgePoints(), cv::Scalar(0, 255, 0));
 
