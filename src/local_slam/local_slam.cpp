@@ -3,24 +3,26 @@
 LocalSlam::LocalSlam(const CameraModel& camera_model,
                      const std::string& edge_space_dynamics_config_file)
     : camera_model(camera_model),
-      edge_space_dynamics(edge_space_dynamics_config_file) {}
+      edge_space_dynamics(edge_space_dynamics_config_file),
+      current_frame_node(cv::Mat::zeros(10, 10, CV_8UC1), WINDOW_SIZE, ANGLE_RESOLUTION) {}
 
 bool LocalSlam::multi_frame_init(const cv::Mat& image,
                                  const Eigen::Vector3f& external_position_data,
                                  const Eigen::Quaternionf& external_orientation_data) {
 
-    FrameNode frame_node(image, WINDOW_SIZE, ANGLE_RESOLUTION);
+    frame_count++;
+    current_frame_node = FrameNode(image, WINDOW_SIZE, ANGLE_RESOLUTION);
     Pose3D current_frame_pose(external_position_data, external_orientation_data);
 
     if (key_frames.empty()) {
-        key_frames.push_back(std::make_pair(frame_node, current_frame_pose));
+        key_frames.push_back(std::make_pair(current_frame_node, current_frame_pose));
         return false;
     }
 
-    fix_edges(key_frames.back().first, frame_node, key_frames.back().second, current_frame_pose);
+    fix_edges(key_frames.back().first, current_frame_node, key_frames.back().second, current_frame_pose);
 
     // shuffle fixed edge points for edge space dynamics pose calculation
-    frame_node.shuffleFixedEdgePoints();
+    current_frame_node.shuffleFixedEdgePoints();
 
     // check initialization
     // try to calculate the pose of the current frame and the last key frame
@@ -29,7 +31,8 @@ bool LocalSlam::multi_frame_init(const cv::Mat& image,
     // move the initial pose to the z-axis direction of current_frame_pose
     restored_pose.translate(current_frame_pose.rotateVectorToWorld(Eigen::Vector3f(0.0f, 0.0f, 1.0f)));
 
-    if (!get_pose(frame_node, restored_pose)) return false;
+    if (!get_pose(current_frame_node, restored_pose)) return false;
+
 
     // check restored_pose
     if (restored_pose.translationalDiffTo(current_frame_pose).norm() > VALID_TRANSLATIONAL_DIFF ||
@@ -46,7 +49,8 @@ bool LocalSlam::multi_frame_init(const cv::Mat& image,
 bool LocalSlam::update(const cv::Mat& image,
                        Pose3D& pose) {
 
-    FrameNode current_frame_node(image, WINDOW_SIZE, ANGLE_RESOLUTION);
+    frame_count++;
+    current_frame_node = FrameNode(image, WINDOW_SIZE, ANGLE_RESOLUTION);
 
     bool is_key_frame;
     if (!current_frame_node.matchWith(key_frames.back().first, is_key_frame)) {
@@ -151,3 +155,12 @@ std::vector<Line3D> LocalSlam::get_fixed_edges() {
 //    }
 //}
 
+void LocalSlam::save_log(const std::string& path_to_dir) {
+    DebugView debug_view(current_frame_node.getImg());
+
+    std::cout << "type of base_img: " << key_frames.back().first.getImg().type() << std::endl;
+    debug_view.drawEdgePoints(key_frames.back().first.getFixedEdgePoints(), cv::Scalar(0, 0, 255));
+    debug_view.drawEdgePoints(current_frame_node.getFixedEdgePoints(), cv::Scalar(0, 255, 0));
+
+    cv::imwrite(path_to_dir + "frame" + std::to_string(frame_count) + ".png", debug_view.getDebugImage());
+}

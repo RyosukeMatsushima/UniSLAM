@@ -16,6 +16,7 @@
 #include "frame_node.hpp"
 #include "edge_space_dynamics.hpp"
 #include "camera_model.hpp"
+#include "debug_view.hpp"
 
 class LocalSlam {
 public:
@@ -48,12 +49,21 @@ public:
                    const Pose3D& pose_frame2);
 
     std::vector<Line3D> get_fixed_edges();
+
+    void save_log(const std::string& path_to_dir);
+
 private:
+    int frame_count = 0;
+
     EdgeSpaceDynamics edge_space_dynamics;
 
     CameraModel camera_model;
 
     std::vector<std::pair<FrameNode, Pose3D>> key_frames;
+
+    FrameNode current_frame_node;
+
+    void update_latest_n_frame_nodes(const FrameNode& frame_node);
 
     bool get_pose(const FrameNode& frame_node,
                   Pose3D& pose);

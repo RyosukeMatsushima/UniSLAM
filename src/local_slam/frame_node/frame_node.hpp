@@ -37,6 +37,8 @@ public:
 
     FrameNode& operator=(const FrameNode& other_frame_node);
 
+    cv::Mat getImg() const;
+
 private:
 
     const int window_size;

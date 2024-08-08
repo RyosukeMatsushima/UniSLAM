@@ -117,3 +117,7 @@ FrameNode& FrameNode::operator=(const FrameNode& other_frame_node) {
     return *this;
 }
 
+cv::Mat FrameNode::getImg() const {
+    return frame_2d.getGrayImage();
+}
+

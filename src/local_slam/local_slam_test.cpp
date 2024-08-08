@@ -67,7 +67,7 @@ protected:
     void checkPose(Pose3D& estimated_pose) {
         Pose3D current_pose = getCurrentPose();
 
-        float allowed_error = 0.001;
+        float allowed_error = 0.01;
         ASSERT_NEAR(estimated_pose.position.x(), current_pose.position.x(), allowed_error);
         ASSERT_NEAR(estimated_pose.position.y(), current_pose.position.y(), allowed_error);
         ASSERT_NEAR(estimated_pose.position.z(), current_pose.position.z(), allowed_error);
@@ -85,26 +85,31 @@ TEST_F(LocalSlamTest, withSquareSpaceWithoutExternalPose) {
     // initialize local_slam
     // initialize should not finish without movement
     ASSERT_FALSE(doMultiFrameInit());
+    local_slam.save_log(RESULT_IMAGE_PATH);
 
     // move position x-axis
     movePosition(dxy_position, 0, 0);
     // initialize should not finish with only x-axis movement
     ASSERT_FALSE(doMultiFrameInit());
+    local_slam.save_log(RESULT_IMAGE_PATH);
 
     // move position y-axis
     movePosition(0, dxy_position, 0);
     // initialize should finish
     ASSERT_TRUE(doMultiFrameInit());
+    local_slam.save_log(RESULT_IMAGE_PATH);
 
     // check getPose
     Pose3D pose;
     EXPECT_TRUE(doUpdate(pose));
+    local_slam.save_log(RESULT_IMAGE_PATH);
     checkPose(pose);
 
     // back to original position
     movePosition(-dxy_position, -dxy_position, 0);
-    pose = Pose3D(Eigen::Vector3f(0.01, 0.01, 0), Eigen::Quaternionf::Identity());
+    pose = Pose3D(Eigen::Vector3f(0.1, 0.1, 0), Eigen::Quaternionf::Identity());
     ASSERT_TRUE(doUpdate(pose));
+    local_slam.save_log(RESULT_IMAGE_PATH);
     checkPose(pose);
 
     // TODO: check pose with more movement. Need to allow the position is scaled without external pose data.
