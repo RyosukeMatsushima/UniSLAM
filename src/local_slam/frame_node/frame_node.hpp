@@ -31,7 +31,11 @@ public:
 
     void addFixedEdgePoint(const EdgePoint& edge_point);
 
+    void removeFixedEdgePoint(const int edge_point_id);
+
     std::vector<EdgePoint> getFixedEdgePoints() const;
+
+    EdgePoint getFixedEdgePoint(const int edge_point_id) const;
 
     void shuffleFixedEdgePoints();
 
@@ -46,6 +50,9 @@ private:
     const float angle_resolution;
 
     std::vector<EdgePoint> fixed_edge_points;
+    std::vector<int> fixed_edge_point_ids;
+
+    int getEdgePointIndex(const int edge_point_id) const;
 
     Frame frame_2d; //TODO: rename to Frame2D
 
