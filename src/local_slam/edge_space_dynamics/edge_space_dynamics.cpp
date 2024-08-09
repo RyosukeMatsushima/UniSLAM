@@ -25,6 +25,8 @@ void EdgeSpaceDynamics::load_config(const std::string& config_file) {
         MAX_CAL_ITER = config["MAX_CAL_ITER"].as<int>();
         FRAME_POSE_TRANSLATE_GAIN = config["FRAME_POSE_TRANSLATE_GAIN"].as<float>();
         FRAME_POSE_ROTATE_GAIN = config["FRAME_POSE_ROTATE_GAIN"].as<float>();
+        FRAME_POSE_CAL_FINISH_TRANSLATE_VARIANCE = config["FRAME_POSE_CAL_FINISH_TRANSLATE_VARIANCE"].as<float>();
+
         CAL_FINISH_FORCE_SIZE = config["CAL_FINISH_FORCE_SIZE"].as<float>();
         CAL_FINISH_TORQUE_SIZE = config["CAL_FINISH_TORQUE_SIZE"].as<float>();
     } catch (YAML::Exception& e) {
@@ -38,6 +40,8 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
                                        const float valid_edge_nodes_ratio_threshold,
                                        Pose3D& frame_pose) {
 
+    std::cout << "get_frame_pose" << std::endl;
+
     if (edge_nodes.size() < EDGE_NUM_TO_GET_FRAME_POSE) {
         throw std::invalid_argument("edge_nodes.size() < EDGE_NUM_TO_GET_FRAME_POSE");
     }
@@ -48,6 +52,8 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
     float min_rotation_stress = std::numeric_limits<float>::max();
 
     for (int edge_pointer = 0; edge_pointer < edge_nodes.size() - EDGE_NUM_TO_GET_FRAME_POSE; edge_pointer++) {
+
+        std::cout << "frame_pose.position: " << frame_pose.position.transpose() << std::endl;
 
         // get EDGE_NUM_TO_GET_FRAME_POSE edges to calculate frame_pose
         std::vector<EdgeNode> edge_nodes_to_calculate;
@@ -74,7 +80,6 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
             current_max_rotation_stress > min_rotation_stress) {
             continue;
         }
-
 
         float translation_stress_threshold = current_max_translation_stress * TRANSLATION_STRESS_THRESHOLD_GAIN;
         float rotation_stress_threshold = current_max_rotation_stress * ROTATION_STRESS_THRESHOLD_GAIN;
@@ -109,6 +114,13 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
         min_rotation_stress = current_max_rotation_stress;
         current_frame_pose.copy_to(frame_pose);
         frame_pose_is_valid = true;
+
+        // if the stress is less than the threshold, the frame_pose is valid
+        if (current_max_translation_stress < CAL_FINISH_FORCE_SIZE &&
+            current_max_rotation_stress < CAL_FINISH_TORQUE_SIZE) {
+            std::cout << "frame_pose is valid" << std::endl;
+            break;
+        }
     }
 
     return frame_pose_is_valid;
@@ -141,7 +153,7 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
 
     bool cal_finish = false;
 
-    VectorAverage translation_force_average(1); // TODO: set parameter
+    VectorAverage translation_force_average(1); // TODO: remove this line
     VectorAverage edge_start_point_average(10); // TODO: set parameter
     VectorAverage edge_direction_average(10); // TODO: set parameter
     int cal_finish_count = 0;
@@ -237,6 +249,7 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
                    force_to_edge_moved,
                    torque_center_point_for_edge_line_moved)) return false;
 
+    // TODO: change the condition no to use CAL_FINISH_FORCE_SIZE and CAL_FINISH_TORQUE_SIZE
     if ((force_to_edge_moved.force * EDGE_POSE_TRANSLATE_GAIN).cwiseAbs2().sum() < CAL_FINISH_FORCE_SIZE &&
         (force_to_edge_moved.torque * EDGE_POSE_ROTATE_GAIN).cwiseAbs2().sum() < CAL_FINISH_TORQUE_SIZE) {
         return false;
@@ -306,6 +319,9 @@ int EdgeSpaceDynamics::set_edge3d(Eigen::Vector3f start_point,
 
 bool EdgeSpaceDynamics::calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
                                              Pose3D& frame_pose) {
+
+    VectorAverage position_average(10); // TODO: set parameter
+    // TODO: reconsider add rotation_average or not
     for (int i = 0; i < MAX_CAL_ITER; i++) {
         Pose3D current_frame_pose = frame_pose.clone();
 
@@ -334,9 +350,15 @@ bool EdgeSpaceDynamics::calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
         frame_pose.translate(force_to_frame_sum.force * FRAME_POSE_TRANSLATE_GAIN / edge_nodes.size());
         frame_pose.rotate(force_to_frame_sum.torque * FRAME_POSE_ROTATE_GAIN / edge_nodes.size());
 
-        // TODO: add cal_finish condition
+        // check if the frame_pose is fixed
+        position_average.add_vector(frame_pose.position);
+        if (!position_average.is_filled()) continue;
+        if (position_average.get_variance().norm() < FRAME_POSE_CAL_FINISH_TRANSLATE_VARIANCE) {
+            std::cout << "calculation count: " << i << std::endl;
+            return true;
+        }
     }
-    return true;
+    return false;
 }
 
 void EdgeSpaceDynamics::get_stress(std::vector<EdgeNode> edge_nodes,
