@@ -26,6 +26,8 @@ void EdgeSpaceDynamics::load_config(const std::string& config_file) {
         FRAME_POSE_TRANSLATE_GAIN = config["FRAME_POSE_TRANSLATE_GAIN"].as<float>();
         FRAME_POSE_ROTATE_GAIN = config["FRAME_POSE_ROTATE_GAIN"].as<float>();
         FRAME_POSE_CAL_FINISH_TRANSLATE_VARIANCE = config["FRAME_POSE_CAL_FINISH_TRANSLATE_VARIANCE"].as<float>();
+        FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA = config["FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA"].as<float>();
+        FRAME_POSE_CAL_FINISH_ROTATIONAL_DELTA = config["FRAME_POSE_CAL_FINISH_ROTATIONAL_DELTA"].as<float>();
 
         CAL_FINISH_FORCE_SIZE = config["CAL_FINISH_FORCE_SIZE"].as<float>();
         CAL_FINISH_TORQUE_SIZE = config["CAL_FINISH_TORQUE_SIZE"].as<float>();
@@ -71,6 +73,13 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
                    translation_stress_with_calculated_edges,
                    rotation_stress_with_calculated_edges);
 
+        if (frame_pose.translationalDiffTo(current_frame_pose).norm() < FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA &&
+            frame_pose.rotationalDiffTo(current_frame_pose).norm() < FRAME_POSE_CAL_FINISH_ROTATIONAL_DELTA) {
+            current_frame_pose.copy_to(frame_pose);
+            std::cout << "finish cal with small delta" << std::endl;
+            break;
+        }
+
         float current_max_translation_stress = *std::max_element(translation_stress_with_calculated_edges.begin(),
                                                                  translation_stress_with_calculated_edges.end());
         float current_max_rotation_stress = *std::max_element(rotation_stress_with_calculated_edges.begin(),
@@ -112,15 +121,9 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
 
         min_translation_stress = current_max_translation_stress;
         min_rotation_stress = current_max_rotation_stress;
-        current_frame_pose.copy_to(frame_pose);
         frame_pose_is_valid = true;
 
-        // if the stress is less than the threshold, the frame_pose is valid
-        if (current_max_translation_stress < CAL_FINISH_FORCE_SIZE &&
-            current_max_rotation_stress < CAL_FINISH_TORQUE_SIZE) {
-            std::cout << "frame_pose is valid" << std::endl;
-            break;
-        }
+        current_frame_pose.copy_to(frame_pose);
     }
 
     return frame_pose_is_valid;
