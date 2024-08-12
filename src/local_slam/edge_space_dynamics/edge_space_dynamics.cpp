@@ -258,8 +258,7 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
         return false;
     }
 
-    edges.push_back(edge);
-    edge_ids.push_back(edge.id());
+    add_edge(edge);
     edge_id = edge.id();
     return true;
 }
@@ -307,6 +306,7 @@ std::vector<Line3D> EdgeSpaceDynamics::get_edge3ds() {
 }
 
 Line3D EdgeSpaceDynamics::get_edge3d(int edge_id) {
+    // TODO: fix this. index and edge_id are different
     return edges[edge_id];
 }
 
@@ -315,8 +315,7 @@ int EdgeSpaceDynamics::set_edge3d(Eigen::Vector3f start_point,
                                   float length) {
     int edge_id = edges.size();
     Line3D edge3d(edge_id, start_point, direction, length);
-    edges.push_back(edge3d);
-    edge_ids.push_back(edge_id);
+    add_edge(edge3d);
     return edge_id;
 }
 
@@ -397,6 +396,11 @@ void EdgeSpaceDynamics::get_stress(std::vector<EdgeNode> edge_nodes,
 void EdgeSpaceDynamics::clear_edges() {
     edges.clear();
     edge_ids.clear();
+}
+
+void EdgeSpaceDynamics::add_edge(const Line3D edge) {
+    edges.push_back(edge);
+    edge_ids.push_back(edge.id());
 }
 
 bool EdgeSpaceDynamics::get_force(Line3D edge,

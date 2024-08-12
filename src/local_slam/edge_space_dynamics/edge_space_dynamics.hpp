@@ -50,6 +50,8 @@ private:
     std::vector<Line3D> edges;
     std::vector<int> edge_ids;
 
+    void add_edge(const Line3D edge);
+
     bool get_force(Line3D edge,
                    EdgeNode edge_node,
                    Pose3D frame_pose,
