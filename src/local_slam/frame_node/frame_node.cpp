@@ -117,9 +117,25 @@ std::vector<EdgePoint> FrameNode::getFixedEdgePoints() const {
 }
 
 void FrameNode::shuffleFixedEdgePoints() {
+    std::vector<size_t> indices(fixed_edge_points.size());
+    for (size_t i = 0; i < indices.size(); i++) {
+        indices[i] = i;
+    }
+
     std::random_device rd;
     std::mt19937 g(rd());
-    std::shuffle(fixed_edge_points.begin(), fixed_edge_points.end(), g);
+    std::shuffle(indices.begin(), indices.end(), g);
+
+    std::vector<EdgePoint> shuffled_fixed_edge_points;
+    std::vector<int> shuffled_fixed_edge_point_ids;
+
+    for (size_t i = 0; i < indices.size(); i++) {
+        shuffled_fixed_edge_points.push_back(fixed_edge_points[indices[i]]);
+        shuffled_fixed_edge_point_ids.push_back(fixed_edge_point_ids[indices[i]]);
+    }
+
+    fixed_edge_points = std::move(shuffled_fixed_edge_points);
+    fixed_edge_point_ids = std::move(shuffled_fixed_edge_point_ids);
 }
 
 FrameNode& FrameNode::operator=(const FrameNode& other_frame_node) {
@@ -134,8 +150,8 @@ FrameNode& FrameNode::operator=(const FrameNode& other_frame_node) {
 
     // TODO: it is possible to miss some variables
     frame_2d = other_frame_node.frame_2d;
-    fixed_edge_points = other_frame_node.fixed_edge_points;
-    fixed_edge_point_ids = other_frame_node.fixed_edge_point_ids;
+    fixed_edge_points = std::move(other_frame_node.fixed_edge_points);
+    fixed_edge_point_ids = std::move(other_frame_node.fixed_edge_point_ids);
     fixed_edge_distribution = other_frame_node.fixed_edge_distribution.clone();
     return *this;
 }
@@ -145,9 +161,12 @@ cv::Mat FrameNode::getImg() const {
 }
 
 int FrameNode::getEdgePointIndex(const int edge_point_id) const {
+
     auto it = std::find(fixed_edge_point_ids.begin(), fixed_edge_point_ids.end(), edge_point_id);
     if (it == fixed_edge_point_ids.end()) {
-        throw std::invalid_argument("edge_point_id is not found");
+
+
+        throw std::invalid_argument("edge_point_id is not found id: " + std::to_string(edge_point_id));
     }
 
     return std::distance(fixed_edge_point_ids.begin(), it);

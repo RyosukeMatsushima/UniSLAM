@@ -262,6 +262,11 @@ TEST(FrameNodeTest, ShuffleFixedEdges) {
         }
     }
 
+    // check getFixedEdgePoints works correctly
+    for (int i = 0; i < frame_node.getFixedEdgePoints().size(); i++) {
+        ASSERT_EQ(frame_node.getFixedEdgePoint(i).id, i);
+    }
+
     int same_order_threshold = frame_node.getFixedEdgePoints().size() * 0.8;
 
     ASSERT_LT(same_order_count, same_order_threshold);
