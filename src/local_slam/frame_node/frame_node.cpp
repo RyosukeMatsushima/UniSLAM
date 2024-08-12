@@ -132,8 +132,10 @@ FrameNode& FrameNode::operator=(const FrameNode& other_frame_node) {
         throw std::invalid_argument("angle_resolution is different");
     }
 
+    // TODO: it is possible to miss some variables
     frame_2d = other_frame_node.frame_2d;
     fixed_edge_points = other_frame_node.fixed_edge_points;
+    fixed_edge_point_ids = other_frame_node.fixed_edge_point_ids;
     fixed_edge_distribution = other_frame_node.fixed_edge_distribution.clone();
     return *this;
 }

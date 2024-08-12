@@ -291,6 +291,11 @@ TEST(FrameNodeTest, OperatorEqual) {
         ASSERT_EQ(frame_node1.getFixedEdgePoints()[i].id, frame_node2.getFixedEdgePoints()[i].id);
     }
 
+    // check edge_point_ids
+    for (int i = 0; i < frame_node1.getFixedEdgePoints().size(); i++) {
+        ASSERT_EQ(frame_node2.getFixedEdgePoint(frame_node1.getFixedEdgePoints()[i].id).id, frame_node1.getFixedEdgePoints()[i].id);
+    }
+
     // return error if the window size is different
     ASSERT_THROW(frame_node_wrong_param = frame_node1, std::invalid_argument);
 }
