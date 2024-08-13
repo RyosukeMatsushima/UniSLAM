@@ -378,3 +378,34 @@ TEST(FrameNodeTest, GetFixedEdgePointById) {
     ASSERT_THROW(frame_node.getFixedEdgePoint(invalid_id), std::invalid_argument);
 }
 
+TEST(FrameNodeTest, moveFixedEdgePointToBack) {
+    cv::Mat test_img = cv::Mat::zeros(1000, 1000, CV_8UC1);
+    FrameNode frame_node(test_img, 50, 0.2);
+
+    // add fixed edge points
+    for (int i = 0; i < 10; i++) {
+        EdgePoint edge_point(cv::Point2f(i, i), cv::Vec2f(0, 0));
+        edge_point.id = i;
+        frame_node.addFixedEdgePoint(edge_point);
+    }
+
+    // move fixed edge point to back
+    int move_id = 5;
+    frame_node.moveFixedEdgePointToBack(move_id);
+
+    // check if the fixed edge points are moved to back
+    for (int i = 0; i < frame_node.getFixedEdgePoints().size(); i++) {
+        if (i < move_id) {
+            ASSERT_EQ(frame_node.getFixedEdgePoints()[i].id, i);
+        } else if (i == frame_node.getFixedEdgePoints().size() - 1) {
+            ASSERT_EQ(frame_node.getFixedEdgePoints()[i].id, move_id);
+        } else {
+            ASSERT_EQ(frame_node.getFixedEdgePoints()[i].id, i + 1);
+        }
+    }
+
+    // check getFixedEdgePoints works correctly
+    for (int i = 0; i < frame_node.getFixedEdgePoints().size(); i++) {
+        ASSERT_EQ(frame_node.getFixedEdgePoint(i).id, i);
+    }
+}

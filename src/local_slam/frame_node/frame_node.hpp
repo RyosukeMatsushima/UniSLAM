@@ -39,6 +39,8 @@ public:
 
     void shuffleFixedEdgePoints();
 
+    void moveFixedEdgePointToBack(const int edge_point_id);
+
     FrameNode& operator=(const FrameNode& other_frame_node);
 
     cv::Mat getImg() const;

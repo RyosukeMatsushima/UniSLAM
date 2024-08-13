@@ -138,6 +138,16 @@ void FrameNode::shuffleFixedEdgePoints() {
     fixed_edge_point_ids = std::move(shuffled_fixed_edge_point_ids);
 }
 
+void FrameNode::moveFixedEdgePointToBack(const int edge_point_id) {
+    int index = getEdgePointIndex(edge_point_id);
+
+    fixed_edge_points.push_back(fixed_edge_points[index]);
+    fixed_edge_point_ids.push_back(fixed_edge_point_ids[index]);
+
+    fixed_edge_points.erase(fixed_edge_points.begin() + index);
+    fixed_edge_point_ids.erase(fixed_edge_point_ids.begin() + index);
+}
+
 FrameNode& FrameNode::operator=(const FrameNode& other_frame_node) {
 
     // check window_size and angle_resolution
