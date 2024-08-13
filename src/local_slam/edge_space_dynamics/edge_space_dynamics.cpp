@@ -42,7 +42,6 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
                                        const float valid_edge_nodes_ratio_threshold,
                                        Pose3D& frame_pose) {
 
-    std::cout << "get_frame_pose" << std::endl;
 
     if (edge_nodes.size() < EDGE_NUM_TO_GET_FRAME_POSE) {
         throw std::invalid_argument("edge_nodes.size() < EDGE_NUM_TO_GET_FRAME_POSE");
@@ -54,8 +53,6 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
     float min_rotation_stress = std::numeric_limits<float>::max();
 
     for (int edge_pointer = 0; edge_pointer < edge_nodes.size() - EDGE_NUM_TO_GET_FRAME_POSE; edge_pointer++) {
-
-        std::cout << "frame_pose.position: " << frame_pose.position.transpose() << std::endl;
 
         // get EDGE_NUM_TO_GET_FRAME_POSE edges to calculate frame_pose
         std::vector<EdgeNode> edge_nodes_to_calculate;
@@ -76,7 +73,6 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
         if (frame_pose.translationalDiffTo(current_frame_pose).norm() < FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA &&
             frame_pose.rotationalDiffTo(current_frame_pose).norm() < FRAME_POSE_CAL_FINISH_ROTATIONAL_DELTA) {
             current_frame_pose.copy_to(frame_pose);
-            std::cout << "finish cal with small delta" << std::endl;
             break;
         }
 
@@ -356,7 +352,6 @@ bool EdgeSpaceDynamics::calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
         position_average.add_vector(frame_pose.position);
         if (!position_average.is_filled()) continue;
         if (position_average.get_variance().norm() < FRAME_POSE_CAL_FINISH_TRANSLATE_VARIANCE) {
-            std::cout << "calculation count: " << i << std::endl;
             return true;
         }
     }

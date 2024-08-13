@@ -116,6 +116,11 @@ bool LocalSlam::get_pose(const FrameNode& frame_node,
                                                          pose);
 
         // TODO: move valid edge point to the biginning of the vector in frame_node
+
+        for (const auto& edge_node : edge_nodes) {
+            key_frames.back().first.moveFixedEdgePointToBack(edge_node.edge_id);
+        }
+
         return result;
     } catch (const std::exception& e) {
         std::cout << "Failed to get pose" << std::endl;
