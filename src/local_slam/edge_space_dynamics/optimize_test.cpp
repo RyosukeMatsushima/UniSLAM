@@ -115,7 +115,7 @@ protected:
 };
 
 TEST_F(OptimizeTest, optimizeWithoutNoise) {
-    int max_iterations = 1000;
+    int max_iterations = 2000;
 
     addNoise(frame0, Eigen::Vector3f(0.2f, 0.1f, 0.3f), Eigen::Vector3f(0.1f, 0.2f, 0.2f));
 

@@ -50,10 +50,11 @@ bool FrameNode::matchWith(const FrameNode& other_frame_node, bool& is_key_frame)
 
     int keyframe_edgepoint_num_threshold = other_frame_node.getFixedEdgePoints().size() * KEYFRAME_EDGEPOINT_NUM_RATIO;
 
-    if (matched_points_num <= MIN_EDGEPOINT_NUM) { //TODO: reconsider this
-        is_key_frame = false;
-        return false;
-    }
+//    if (matched_points_num <= MIN_EDGEPOINT_NUM) { //TODO: reconsider this
+//        is_key_frame = false;
+//        std::cout << "Not enough matched points" << std::endl;
+//        return false;
+//    }
 
     is_key_frame = healthy_points_num <= keyframe_edgepoint_num_threshold;
 
@@ -61,9 +62,24 @@ bool FrameNode::matchWith(const FrameNode& other_frame_node, bool& is_key_frame)
 }
 
 void FrameNode::addFixedEdgePoint(const EdgePoint& edge_point) {
+    // check id is assigned
+    if (edge_point.id == -1) {
+        throw std::invalid_argument("id is not assigned");
+    }
+
     fixed_edge_points.push_back(edge_point);
+    fixed_edge_point_ids.push_back(edge_point.id);
 
     fixed_edge_distribution.at<uchar>(edge_point.point / window_size) += 1;
+}
+
+void FrameNode::removeFixedEdgePoint(const int edge_point_id) {
+    int index = getEdgePointIndex(edge_point_id);
+
+    fixed_edge_distribution.at<uchar>(fixed_edge_points[index].point / window_size) -= 1;
+
+    fixed_edge_points.erase(fixed_edge_points.begin() + index);
+    fixed_edge_point_ids.erase(fixed_edge_point_ids.begin() + index);
 }
 
 std::vector<EdgePoint> FrameNode::findNewEdgePoints() const {
@@ -91,14 +107,45 @@ std::vector<EdgePoint> FrameNode::findNewEdgePoints() const {
     return new_edge_points;
 }
 
+EdgePoint FrameNode::getFixedEdgePoint(const int edge_point_id) const {
+    int index = getEdgePointIndex(edge_point_id);
+    return fixed_edge_points[index];
+}
+
 std::vector<EdgePoint> FrameNode::getFixedEdgePoints() const {
     return fixed_edge_points;
 }
 
 void FrameNode::shuffleFixedEdgePoints() {
+    std::vector<size_t> indices(fixed_edge_points.size());
+    for (size_t i = 0; i < indices.size(); i++) {
+        indices[i] = i;
+    }
+
     std::random_device rd;
     std::mt19937 g(rd());
-    std::shuffle(fixed_edge_points.begin(), fixed_edge_points.end(), g);
+    std::shuffle(indices.begin(), indices.end(), g);
+
+    std::vector<EdgePoint> shuffled_fixed_edge_points;
+    std::vector<int> shuffled_fixed_edge_point_ids;
+
+    for (size_t i = 0; i < indices.size(); i++) {
+        shuffled_fixed_edge_points.push_back(fixed_edge_points[indices[i]]);
+        shuffled_fixed_edge_point_ids.push_back(fixed_edge_point_ids[indices[i]]);
+    }
+
+    fixed_edge_points = std::move(shuffled_fixed_edge_points);
+    fixed_edge_point_ids = std::move(shuffled_fixed_edge_point_ids);
+}
+
+void FrameNode::moveFixedEdgePointToBack(const int edge_point_id) {
+    int index = getEdgePointIndex(edge_point_id);
+
+    fixed_edge_points.push_back(fixed_edge_points[index]);
+    fixed_edge_point_ids.push_back(fixed_edge_point_ids[index]);
+
+    fixed_edge_points.erase(fixed_edge_points.begin() + index);
+    fixed_edge_point_ids.erase(fixed_edge_point_ids.begin() + index);
 }
 
 FrameNode& FrameNode::operator=(const FrameNode& other_frame_node) {
@@ -111,13 +158,27 @@ FrameNode& FrameNode::operator=(const FrameNode& other_frame_node) {
         throw std::invalid_argument("angle_resolution is different");
     }
 
+    // TODO: it is possible to miss some variables
     frame_2d = other_frame_node.frame_2d;
-    fixed_edge_points = other_frame_node.fixed_edge_points;
+    fixed_edge_points = std::move(other_frame_node.fixed_edge_points);
+    fixed_edge_point_ids = std::move(other_frame_node.fixed_edge_point_ids);
     fixed_edge_distribution = other_frame_node.fixed_edge_distribution.clone();
     return *this;
 }
 
 cv::Mat FrameNode::getImg() const {
     return frame_2d.getGrayImage();
+}
+
+int FrameNode::getEdgePointIndex(const int edge_point_id) const {
+
+    auto it = std::find(fixed_edge_point_ids.begin(), fixed_edge_point_ids.end(), edge_point_id);
+    if (it == fixed_edge_point_ids.end()) {
+
+
+        throw std::invalid_argument("edge_point_id is not found id: " + std::to_string(edge_point_id));
+    }
+
+    return std::distance(fixed_edge_point_ids.begin(), it);
 }
 

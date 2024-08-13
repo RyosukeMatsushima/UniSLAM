@@ -50,6 +50,8 @@ private:
     std::vector<Line3D> edges;
     std::vector<int> edge_ids;
 
+    void add_edge(const Line3D edge);
+
     bool get_force(Line3D edge,
                    EdgeNode edge_node,
                    Pose3D frame_pose,
@@ -75,6 +77,10 @@ private:
     int MAX_CAL_ITER;
     float FRAME_POSE_TRANSLATE_GAIN;
     float FRAME_POSE_ROTATE_GAIN;
+    float FRAME_POSE_CAL_FINISH_TRANSLATE_VARIANCE;
+    float FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA;
+    float FRAME_POSE_CAL_FINISH_ROTATIONAL_DELTA;
+
     float CAL_FINISH_FORCE_SIZE;
     float CAL_FINISH_TORQUE_SIZE;
 };

@@ -25,6 +25,10 @@ void EdgeSpaceDynamics::load_config(const std::string& config_file) {
         MAX_CAL_ITER = config["MAX_CAL_ITER"].as<int>();
         FRAME_POSE_TRANSLATE_GAIN = config["FRAME_POSE_TRANSLATE_GAIN"].as<float>();
         FRAME_POSE_ROTATE_GAIN = config["FRAME_POSE_ROTATE_GAIN"].as<float>();
+        FRAME_POSE_CAL_FINISH_TRANSLATE_VARIANCE = config["FRAME_POSE_CAL_FINISH_TRANSLATE_VARIANCE"].as<float>();
+        FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA = config["FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA"].as<float>();
+        FRAME_POSE_CAL_FINISH_ROTATIONAL_DELTA = config["FRAME_POSE_CAL_FINISH_ROTATIONAL_DELTA"].as<float>();
+
         CAL_FINISH_FORCE_SIZE = config["CAL_FINISH_FORCE_SIZE"].as<float>();
         CAL_FINISH_TORQUE_SIZE = config["CAL_FINISH_TORQUE_SIZE"].as<float>();
     } catch (YAML::Exception& e) {
@@ -37,6 +41,7 @@ void EdgeSpaceDynamics::load_config(const std::string& config_file) {
 bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
                                        const float valid_edge_nodes_ratio_threshold,
                                        Pose3D& frame_pose) {
+
 
     if (edge_nodes.size() < EDGE_NUM_TO_GET_FRAME_POSE) {
         throw std::invalid_argument("edge_nodes.size() < EDGE_NUM_TO_GET_FRAME_POSE");
@@ -65,6 +70,12 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
                    translation_stress_with_calculated_edges,
                    rotation_stress_with_calculated_edges);
 
+        if (frame_pose.translationalDiffTo(current_frame_pose).norm() < FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA &&
+            frame_pose.rotationalDiffTo(current_frame_pose).norm() < FRAME_POSE_CAL_FINISH_ROTATIONAL_DELTA) {
+            current_frame_pose.copy_to(frame_pose);
+            break;
+        }
+
         float current_max_translation_stress = *std::max_element(translation_stress_with_calculated_edges.begin(),
                                                                  translation_stress_with_calculated_edges.end());
         float current_max_rotation_stress = *std::max_element(rotation_stress_with_calculated_edges.begin(),
@@ -74,7 +85,6 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
             current_max_rotation_stress > min_rotation_stress) {
             continue;
         }
-
 
         float translation_stress_threshold = current_max_translation_stress * TRANSLATION_STRESS_THRESHOLD_GAIN;
         float rotation_stress_threshold = current_max_rotation_stress * ROTATION_STRESS_THRESHOLD_GAIN;
@@ -107,8 +117,9 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
 
         min_translation_stress = current_max_translation_stress;
         min_rotation_stress = current_max_rotation_stress;
-        current_frame_pose.copy_to(frame_pose);
         frame_pose_is_valid = true;
+
+        current_frame_pose.copy_to(frame_pose);
     }
 
     return frame_pose_is_valid;
@@ -141,7 +152,7 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
 
     bool cal_finish = false;
 
-    VectorAverage translation_force_average(1); // TODO: set parameter
+    VectorAverage translation_force_average(1); // TODO: remove this line
     VectorAverage edge_start_point_average(10); // TODO: set parameter
     VectorAverage edge_direction_average(10); // TODO: set parameter
     int cal_finish_count = 0;
@@ -237,13 +248,13 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
                    force_to_edge_moved,
                    torque_center_point_for_edge_line_moved)) return false;
 
+    // TODO: change the condition no to use CAL_FINISH_FORCE_SIZE and CAL_FINISH_TORQUE_SIZE
     if ((force_to_edge_moved.force * EDGE_POSE_TRANSLATE_GAIN).cwiseAbs2().sum() < CAL_FINISH_FORCE_SIZE &&
         (force_to_edge_moved.torque * EDGE_POSE_ROTATE_GAIN).cwiseAbs2().sum() < CAL_FINISH_TORQUE_SIZE) {
         return false;
     }
 
-    edges.push_back(edge);
-    edge_ids.push_back(edge.id());
+    add_edge(edge);
     edge_id = edge.id();
     return true;
 }
@@ -291,6 +302,7 @@ std::vector<Line3D> EdgeSpaceDynamics::get_edge3ds() {
 }
 
 Line3D EdgeSpaceDynamics::get_edge3d(int edge_id) {
+    // TODO: fix this. index and edge_id are different
     return edges[edge_id];
 }
 
@@ -299,13 +311,15 @@ int EdgeSpaceDynamics::set_edge3d(Eigen::Vector3f start_point,
                                   float length) {
     int edge_id = edges.size();
     Line3D edge3d(edge_id, start_point, direction, length);
-    edges.push_back(edge3d);
-    edge_ids.push_back(edge_id);
+    add_edge(edge3d);
     return edge_id;
 }
 
 bool EdgeSpaceDynamics::calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
                                              Pose3D& frame_pose) {
+
+    VectorAverage position_average(10); // TODO: set parameter
+    // TODO: reconsider add rotation_average or not
     for (int i = 0; i < MAX_CAL_ITER; i++) {
         Pose3D current_frame_pose = frame_pose.clone();
 
@@ -334,9 +348,14 @@ bool EdgeSpaceDynamics::calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
         frame_pose.translate(force_to_frame_sum.force * FRAME_POSE_TRANSLATE_GAIN / edge_nodes.size());
         frame_pose.rotate(force_to_frame_sum.torque * FRAME_POSE_ROTATE_GAIN / edge_nodes.size());
 
-        // TODO: add cal_finish condition
+        // check if the frame_pose is fixed
+        position_average.add_vector(frame_pose.position);
+        if (!position_average.is_filled()) continue;
+        if (position_average.get_variance().norm() < FRAME_POSE_CAL_FINISH_TRANSLATE_VARIANCE) {
+            return true;
+        }
     }
-    return true;
+    return false;
 }
 
 void EdgeSpaceDynamics::get_stress(std::vector<EdgeNode> edge_nodes,
@@ -372,6 +391,11 @@ void EdgeSpaceDynamics::get_stress(std::vector<EdgeNode> edge_nodes,
 void EdgeSpaceDynamics::clear_edges() {
     edges.clear();
     edge_ids.clear();
+}
+
+void EdgeSpaceDynamics::add_edge(const Line3D edge) {
+    edges.push_back(edge);
+    edge_ids.push_back(edge.id());
 }
 
 bool EdgeSpaceDynamics::get_force(Line3D edge,
