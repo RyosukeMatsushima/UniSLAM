@@ -16,7 +16,7 @@
 #include "frame_node.hpp"
 #include "edge_space_dynamics.hpp"
 #include "camera_model.hpp"
-#include "debug_view.hpp"
+#include "vslam_debug_view.hpp"
 
 class LocalSlam {
 public:
@@ -62,6 +62,8 @@ private:
     std::vector<std::pair<FrameNode, Pose3D>> key_frames;
 
     FrameNode current_frame_node;
+
+    Pose3D current_frame_pose;
 
     void update_latest_n_frame_nodes(const FrameNode& frame_node);
 

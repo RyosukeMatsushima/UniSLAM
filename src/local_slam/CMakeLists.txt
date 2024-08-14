@@ -38,6 +38,7 @@ add_subdirectory(polygons_space)
 add_library(
     local_slam
     local_slam.cpp
+    vslam_debug_view.cpp
 )
 
 target_include_directories(
