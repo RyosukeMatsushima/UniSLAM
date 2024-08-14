@@ -61,10 +61,6 @@ private:
 
     std::vector<std::pair<FrameNode, Pose3D>> key_frames;
 
-    FrameNode current_frame_node;
-
-    Pose3D current_frame_pose;
-
     void update_latest_n_frame_nodes(const FrameNode& frame_node);
 
     bool get_pose(const FrameNode& frame_node,
@@ -72,6 +68,13 @@ private:
 
     bool calculate_first_matched_edges(const FrameNode& last_key_frame,
                                  const FrameNode& current_frame);
+
+
+    FrameNode current_frame_node; // for debug view
+
+    std::vector<std::pair<EdgePoint, EdgePoint>> rejected_edge_points; // for debug view
+
+    std::vector<EdgePoint> unmatched_edge_points; // for debug view
 };
 
 #endif // LOCAL_SLAM_HPP

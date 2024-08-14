@@ -79,9 +79,15 @@ void LocalSlam::fix_edges(FrameNode& frame_node1,
 
     std::vector<EdgePoint> edge_points = frame_node1.findNewEdgePoints();
 
+    rejected_edge_points.clear();
+    unmatched_edge_points.clear();
+
     for (auto& edge_point : edge_points) {
         EdgePoint matched_edge_point;
-        if (!frame_node2.matchEdge(edge_point, matched_edge_point)) continue;
+        if (!frame_node2.matchEdge(edge_point, matched_edge_point)) {
+            unmatched_edge_points.push_back(edge_point);
+            continue;
+        }
 
         int edge_id;
         EdgeNode edge_node = camera_model.getEdgeNode(edge_point);
@@ -92,7 +98,10 @@ void LocalSlam::fix_edges(FrameNode& frame_node1,
                                                        matched_edge_node,
                                                        edge_id);
 
-        if (!result) continue;
+        if (!result) {
+            rejected_edge_points.push_back(std::make_pair(edge_point, matched_edge_point));
+            continue;
+        }
 
         edge_point.id = edge_id;
         matched_edge_point.id = edge_id;
@@ -170,9 +179,17 @@ void LocalSlam::save_log(const std::string& path_to_dir) {
     VslamDebugView debug_view_on_key_frame(key_frames.back().first.getImg());
     debug_view_on_key_frame.drawEdgePoints(key_frames.back().first.getFixedEdgePoints(), cv::Scalar(0, 0, 255));
     debug_view_on_key_frame.drawEdgePoints(current_frame_node.getFixedEdgePoints(), cv::Scalar(0, 255, 0));
+    
+    // draw rejected edge points
+    for (const auto& rejected_edge_point : rejected_edge_points) {
+        debug_view_on_key_frame.drawEdgePoints({rejected_edge_point.first, rejected_edge_point.second}, cv::Scalar(0, 255, 255));
+        debug_view_on_key_frame.drawEdgePoints({rejected_edge_point.second, rejected_edge_point.second}, cv::Scalar(0, 100, 100));
+    }
+
+    // draw unmatched edge points
+    debug_view_on_key_frame.drawEdgePoints(unmatched_edge_points, cv::Scalar(100, 100, 0));
+
     for (const auto& edge_3d : edge_space_dynamics.get_edge3ds()) {
-        std::cout << "id: " << edge_3d.id() << std::endl;
-        std::cout << "start_point: " << edge_3d.start_point().transpose() << std::endl;
         debug_view_on_key_frame.drawEdge3D(edge_3d, key_frames.back().second, camera_model.getCameraMatrix(), cv::Scalar(255, 255, 0));
     }
     cv::imwrite(path_to_dir + "key_frame" + std::to_string(frame_count) + ".png", debug_view_on_key_frame.getDebugImage());
