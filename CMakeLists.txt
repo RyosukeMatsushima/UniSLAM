@@ -22,7 +22,6 @@ find_package(OpenCV REQUIRED)
 # Find Eigen package
 find_package(Eigen3 REQUIRED)
 
-add_subdirectory(src/edges_space)
 add_subdirectory(src/local_slam)
 
 include_directories(
