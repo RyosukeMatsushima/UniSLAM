@@ -14,7 +14,7 @@ public:
 
     cv::Mat getDebugImage() const;
 
-private:
+protected:
     cv::Mat base_img_;
 };
 

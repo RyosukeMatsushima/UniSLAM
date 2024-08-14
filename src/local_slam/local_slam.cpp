@@ -160,10 +160,20 @@ std::vector<Line3D> LocalSlam::get_fixed_edges() {
 //}
 
 void LocalSlam::save_log(const std::string& path_to_dir) {
-    DebugView debug_view(current_frame_node.getImg());
-
+    // debug view on current frame
+    VslamDebugView debug_view(current_frame_node.getImg());
     debug_view.drawEdgePoints(key_frames.back().first.getFixedEdgePoints(), cv::Scalar(0, 0, 255));
     debug_view.drawEdgePoints(current_frame_node.getFixedEdgePoints(), cv::Scalar(0, 255, 0));
-
     cv::imwrite(path_to_dir + "frame" + std::to_string(frame_count) + ".png", debug_view.getDebugImage());
+
+    // debug view on key frame
+    VslamDebugView debug_view_on_key_frame(key_frames.back().first.getImg());
+    debug_view_on_key_frame.drawEdgePoints(key_frames.back().first.getFixedEdgePoints(), cv::Scalar(0, 0, 255));
+    debug_view_on_key_frame.drawEdgePoints(current_frame_node.getFixedEdgePoints(), cv::Scalar(0, 255, 0));
+    for (const auto& edge_3d : edge_space_dynamics.get_edge3ds()) {
+        std::cout << "id: " << edge_3d.id() << std::endl;
+        std::cout << "start_point: " << edge_3d.start_point().transpose() << std::endl;
+        debug_view_on_key_frame.drawEdge3D(edge_3d, key_frames.back().second, camera_model.getCameraMatrix(), cv::Scalar(255, 255, 0));
+    }
+    cv::imwrite(path_to_dir + "key_frame" + std::to_string(frame_count) + ".png", debug_view_on_key_frame.getDebugImage());
 }

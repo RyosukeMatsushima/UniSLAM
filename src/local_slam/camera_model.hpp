@@ -13,6 +13,10 @@ public:
 
     EdgeNode getEdgeNode(const EdgePoint& edge_point) const;
 
+    cv::Mat getCameraMatrix() const {
+        return camera_matrix;
+    }
+
 private:
     cv::Mat camera_matrix;
     cv::Size img_size;
