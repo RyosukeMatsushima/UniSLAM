@@ -143,3 +143,58 @@ TEST_F(OptimizeTest, optimizeWithoutNoise) {
     checkEdgeData(edge3);
 }
 
+TEST_F(OptimizeTest, useExternalPoseData) {
+    int max_iterations = 2000;
+
+    addNoise(frame0, Eigen::Vector3f(0.2f, 0.1f, 0.3f), Eigen::Vector3f(0.1f, 0.2f, 0.2f));
+    addNoise(frame1, Eigen::Vector3f(-1.2f, 0.1f, -0.3f), Eigen::Vector3f(1.1f, 0.3f, 0.2f));
+    addNoise(frame2, Eigen::Vector3f(0.2f, 1.1f, 0.3f), Eigen::Vector3f(0.0f, 0.2f, 1.2f));
+    addNoise(frame3, Eigen::Vector3f(0.2f, 0.0f, 0.5f), Eigen::Vector3f(-1.0f, -0.2f, 0.1f));
+
+
+    addNoise(edge0, Eigen::Vector3f(0.1f, 0.1f, 0.1f), Eigen::Vector3f(0.4f, -0.1f, 1.1f), 0.1f);
+    addNoise(edge1, Eigen::Vector3f(-0.1f, 0.1f, -0.1f), Eigen::Vector3f(-1.1f, -0.1f, 0.4f), 0.1f);
+    addNoise(edge2, Eigen::Vector3f(0.3f, 1.1f, 0.1f), Eigen::Vector3f(1.1f, 0.3f, -0.3f), 0.1f);
+    addNoise(edge3, Eigen::Vector3f(0.1f, -1.1f, 0.1f), Eigen::Vector3f(-0.1f, -0.4f, 0.7f), 0.1f);
+
+    setEdges();
+
+    for (int i = 0; i < max_iterations; i++) {
+        EXPECT_TRUE(edge_space_dynamics.optimize(frame0.pose, frame0.edge_nodes, frame0.correct_pose));
+        EXPECT_TRUE(edge_space_dynamics.optimize(frame1.pose, frame1.edge_nodes, frame1.correct_pose));
+        EXPECT_TRUE(edge_space_dynamics.optimize(frame2.pose, frame2.edge_nodes, frame2.correct_pose));
+        EXPECT_TRUE(edge_space_dynamics.optimize(frame3.pose, frame3.edge_nodes, frame3.correct_pose));
+    }
+
+    checkFrameData(frame0);
+    checkFrameData(frame1);
+    checkFrameData(frame2);
+
+    checkEdgeData(edge0);
+    checkEdgeData(edge1);
+    checkEdgeData(edge2);
+    checkEdgeData(edge3);
+}
+
+TEST_F(OptimizeTest, removeInvalidEdge) {
+// add noize to valid edges and pose
+// add invalid edge
+// optimize
+// check if invalid edge is removed
+// check if valid edges are optimized
+// check if pose is optimized
+}
+
+TEST_F(OptimizeTest, joinEdges) {
+// add noize to valid edges and pose
+// add similar edges
+// optimize
+// check if similar edges are joined
+// check if valid edges are optimized
+// check if pose is optimized
+}
+
+int main(int argc, char **argv) {
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}

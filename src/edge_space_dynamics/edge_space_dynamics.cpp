@@ -29,6 +29,9 @@ void EdgeSpaceDynamics::load_config(const std::string& config_file) {
         FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA = config["FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA"].as<float>();
         FRAME_POSE_CAL_FINISH_ROTATIONAL_DELTA = config["FRAME_POSE_CAL_FINISH_ROTATIONAL_DELTA"].as<float>();
 
+        EXTERNAL_POSITION_GAIN = config["EXTERNAL_POSITION_GAIN"].as<float>();
+        EXTERNAL_ROTATION_GAIN = config["EXTERNAL_ROTATION_GAIN"].as<float>();
+
         CAL_FINISH_FORCE_SIZE = config["CAL_FINISH_FORCE_SIZE"].as<float>();
         CAL_FINISH_TORQUE_SIZE = config["CAL_FINISH_TORQUE_SIZE"].as<float>();
     } catch (YAML::Exception& e) {
@@ -296,6 +299,23 @@ bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
 
     return true;
 }
+
+bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
+                                 std::vector<EdgeNode>& edge_nodes,
+                                 const Pose3D& extarnal_pose_data) {
+
+    if (!optimize(frame_pose, edge_nodes, true)) return false;
+
+    // move frame_pose to the direction of the external_pose_data
+    Eigen::Vector3f translation_diff = frame_pose.translationalDiffTo(extarnal_pose_data);
+    Eigen::Vector3f rotation_diff = frame_pose.rotationalDiffTo(extarnal_pose_data);
+
+    frame_pose.translate(translation_diff * EXTERNAL_POSITION_GAIN);
+    frame_pose.rotate(rotation_diff * EXTERNAL_ROTATION_GAIN);
+
+    return true;
+}
+
 
 std::vector<Line3D> EdgeSpaceDynamics::get_edge3ds() {
     return edges;

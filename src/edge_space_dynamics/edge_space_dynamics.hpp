@@ -30,6 +30,10 @@ public:
                   std::vector<EdgeNode>& edge_nodes,
                   const bool update_frame_pose);
 
+    bool optimize(Pose3D& frame_pose,
+                  std::vector<EdgeNode>& edge_nodes,
+                  const Pose3D& extarnal_pose_data);
+
     std::vector<Line3D> get_edge3ds();
     Line3D get_edge3d(int edge_id);
     int set_edge3d(Eigen::Vector3f start_point,
@@ -80,6 +84,10 @@ private:
     float FRAME_POSE_CAL_FINISH_TRANSLATE_VARIANCE;
     float FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA;
     float FRAME_POSE_CAL_FINISH_ROTATIONAL_DELTA;
+
+    // for optimization with external pose data
+    float EXTERNAL_POSITION_GAIN;
+    float EXTERNAL_ROTATION_GAIN;
 
     float CAL_FINISH_FORCE_SIZE;
     float CAL_FINISH_TORQUE_SIZE;
