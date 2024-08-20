@@ -34,6 +34,9 @@ public:
                   std::vector<EdgeNode>& edge_nodes,
                   const Pose3D& extarnal_pose_data);
 
+    bool find_invalid_edge_nodes(const Pose3D& frame_pose,
+                                 std::vector<EdgeNode>& edge_nodes);
+
     std::vector<Line3D> get_edge3ds();
     Line3D get_edge3d(int edge_id);
     int set_edge3d(Eigen::Vector3f start_point,
@@ -62,6 +65,9 @@ private:
                    Force3D& force_to_frame,
                    Force3D& force_to_edge,
                    float& torque_center_point_for_edge_line);
+
+    bool is_frame_pose_fixed(const Pose3D frame_pose,
+                             const std::vector<EdgeNode> edge_nodes);
 
     void load_config(const std::string& config_file);
 

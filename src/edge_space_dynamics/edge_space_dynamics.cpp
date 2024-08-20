@@ -73,11 +73,12 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
                    translation_stress_with_calculated_edges,
                    rotation_stress_with_calculated_edges);
 
-        if (frame_pose.translationalDiffTo(current_frame_pose).norm() < FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA &&
-            frame_pose.rotationalDiffTo(current_frame_pose).norm() < FRAME_POSE_CAL_FINISH_ROTATIONAL_DELTA) {
-            current_frame_pose.copy_to(frame_pose);
-            break;
-        }
+        // TODO: maybe this is wrong. we need to frame_pose_is_valid = true.
+        //if (frame_pose.translationalDiffTo(current_frame_pose).norm() < FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA &&
+        //    frame_pose.rotationalDiffTo(current_frame_pose).norm() < FRAME_POSE_CAL_FINISH_ROTATIONAL_DELTA) {
+        //    current_frame_pose.copy_to(frame_pose);
+        //    break;
+        //}
 
         float current_max_translation_stress = *std::max_element(translation_stress_with_calculated_edges.begin(),
                                                                  translation_stress_with_calculated_edges.end());
@@ -316,6 +317,21 @@ bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
     return true;
 }
 
+// TODO: impriment.
+bool EdgeSpaceDynamics::find_invalid_edge_nodes(const Pose3D& frame_pose,
+                                                std::vector<EdgeNode>& edge_nodes) {
+    // check is frame_pose is fixed
+    // remove most stressfull node
+    // calculate pose
+    // check the stress and is x% lower then before, remove the node
+    return true;
+}
+
+// TODO: impriment.
+bool EdgeSpaceDynamics::is_frame_pose_fixed(const Pose3D frame_pose,
+                                            const std::vector<EdgeNode> edge_nodes) {
+    return true;
+}
 
 std::vector<Line3D> EdgeSpaceDynamics::get_edge3ds() {
     return edges;
