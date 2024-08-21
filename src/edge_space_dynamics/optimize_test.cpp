@@ -186,7 +186,7 @@ TEST_F(OptimizeTest, useExternalPoseData) {
     setEdges();
 
     for (int i = 0; i < max_iterations; i++) {
-        EXPECT_TRUE(edge_space_dynamics.optimize(frame0.pose, frame0.edge_nodes, frame0.correct_pose));
+        EXPECT_TRUE(edge_space_dynamics.optimize(frame0.pose, frame0.edge_nodes, true));
         EXPECT_TRUE(edge_space_dynamics.optimize(frame1.pose, frame1.edge_nodes, frame1.correct_pose));
         EXPECT_TRUE(edge_space_dynamics.optimize(frame2.pose, frame2.edge_nodes, frame2.correct_pose));
         EXPECT_TRUE(edge_space_dynamics.optimize(frame3.pose, frame3.edge_nodes, frame3.correct_pose));

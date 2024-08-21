@@ -446,7 +446,7 @@ bool EdgeSpaceDynamics::update_dynamics(std::vector<EdgeNode> edge_nodes,
         frame_pose.rotate(force_to_frame_sum.torque * FRAME_POSE_ROTATE_GAIN / edge_nodes.size());
     }
 
-    if (use_external_pose_data) {
+    if (use_external_pose_data && update_frame_pose) {
         Eigen::Vector3f translation_diff = frame_pose.translationalDiffTo(extarnal_pose_data);
         Eigen::Vector3f rotation_diff = frame_pose.rotationalDiffTo(extarnal_pose_data);
 
