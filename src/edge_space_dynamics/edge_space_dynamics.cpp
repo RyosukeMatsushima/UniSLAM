@@ -63,7 +63,9 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
             edge_nodes_to_calculate.push_back(edge_nodes[edge_pointer + i]);
         }
         Pose3D current_frame_pose = frame_pose.clone();
-        if (!calculate_frame_pose(edge_nodes_to_calculate, current_frame_pose)) continue;
+        if (!calculate_frame_pose(edge_nodes_to_calculate, Pose3D(), false, current_frame_pose)) {
+            continue;
+        }
 
 
         // check if the calculated frame_pose is valid
@@ -321,12 +323,22 @@ int EdgeSpaceDynamics::set_edge3d(Eigen::Vector3f start_point,
 }
 
 bool EdgeSpaceDynamics::calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
+                                             const Pose3D& extarnal_pose_data,
+                                             const bool use_external_pose_data,
                                              Pose3D& frame_pose) {
 
     VectorAverage position_average(10); // TODO: set parameter
     // TODO: reconsider add rotation_average or not
     for (int i = 0; i < MAX_CAL_ITER; i++) {
-        if (!update_dynamics(edge_nodes, false, true, frame_pose)) {
+
+        bool result = false;
+        if (use_external_pose_data) {
+            result = update_dynamics(edge_nodes, extarnal_pose_data, false, true, frame_pose);
+        } else {
+            result = update_dynamics(edge_nodes, false, true, frame_pose);
+        }
+
+        if (!result) {
             std::cout << "EdgeSpaceDynamics::calculate_frame_pose: failed to update frame pose." << std::endl;
             return false;
         }

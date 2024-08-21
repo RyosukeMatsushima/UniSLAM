@@ -44,6 +44,8 @@ public:
                    float length);
 
     bool calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
+                              const Pose3D& extarnal_pose_data,
+                              const bool use_external_pose_data,
                               Pose3D& frame_pose);
 
     void get_stress(std::vector<EdgeNode> edge_nodes,

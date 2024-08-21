@@ -45,7 +45,7 @@ TEST_F(GetFramePoseTest, calculateFramePose) {
     frame_pose.translate(Eigen::Vector3f(0.0f, 0.0f, -1.2f));
     frame_pose.rotate(Eigen::Vector3f(0.1f, 0.0f, 0.0f));
 
-    bool result = edge_space_dynamics.calculate_frame_pose(edge_nodes, frame_pose);
+    bool result = edge_space_dynamics.calculate_frame_pose(edge_nodes, Pose3D(), false, frame_pose);
 
     Eigen::Vector3f expected_position(0.0, 0.0, -1.0);
     Eigen::Quaternionf expected_orientation = Eigen::Quaternionf::Identity();
@@ -59,7 +59,7 @@ TEST_F(GetFramePoseTest, calculateFramePoseHorizontalMoveTest) {
     frame_pose.translate(Eigen::Vector3f(0.1f, 1.0f, -1.2f));
     frame_pose.rotate(Eigen::Vector3f(1.0f, -2.0f, 1.1f));
 
-    bool result = edge_space_dynamics.calculate_frame_pose(edge_nodes, frame_pose);
+    bool result = edge_space_dynamics.calculate_frame_pose(edge_nodes, Pose3D(), false, frame_pose);
 
     Eigen::Vector3f expected_position(0.0, 0.0, -1.0);
     Eigen::Quaternionf expected_orientation = Eigen::Quaternionf::Identity();
