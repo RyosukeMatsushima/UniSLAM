@@ -66,6 +66,17 @@ private:
                    Force3D& force_to_edge,
                    float& torque_center_point_for_edge_line);
 
+    bool update_dynamics(std::vector<EdgeNode> edge_nodes,
+                         const bool update_edges,
+                         const bool update_frame_pose,
+                         Pose3D& frame_pose);
+
+    bool update_dynamics(std::vector<EdgeNode> edge_nodes,
+                         const Pose3D& extarnal_pose_data,
+                         const bool update_edges,
+                         const bool update_frame_pose,
+                         Pose3D& frame_pose);
+
     bool is_frame_pose_fixed(const Pose3D frame_pose,
                              const std::vector<EdgeNode> edge_nodes);
 

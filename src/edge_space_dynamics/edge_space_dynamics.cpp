@@ -267,35 +267,9 @@ bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
                                  std::vector<EdgeNode>& edge_nodes,
                                  const bool update_frame_pose) {
 
-    Pose3D current_frame_pose = frame_pose.clone();
-
-    Force3D force_to_frame_sum, force_to_edge_sum;
-
-    for (int i = 0; i < edge_nodes.size(); i++) {
-        EdgeNode edge_node = edge_nodes[i];
-        Line3D edge = edges[edge_node.edge_id];
-
-        Force3D force_to_frame;
-        Force3D force_to_edge;
-        float torque_center_point_for_edge_line;
-
-        if (!get_force(edge,
-                       edge_node,
-                       current_frame_pose,
-                       force_to_frame,
-                       force_to_edge,
-                       torque_center_point_for_edge_line)) return false;
-
-        force_to_frame_sum.add(force_to_frame);
-        force_to_edge_sum.add(force_to_edge);
-        edges[edge_node.edge_id].add_force(force_to_edge.force * EDGE_POSE_TRANSLATE_GAIN,
-                                           force_to_edge.torque * EDGE_POSE_ROTATE_GAIN,
-                                           torque_center_point_for_edge_line);
-    }
-
-    if (update_frame_pose) {
-        frame_pose.translate(force_to_frame_sum.force * FRAME_POSE_TRANSLATE_GAIN / edge_nodes.size());
-        frame_pose.rotate(force_to_frame_sum.torque * FRAME_POSE_ROTATE_GAIN / edge_nodes.size());
+    if (!update_dynamics(edge_nodes, true, update_frame_pose, frame_pose)) {
+        std::cout << "EdgeSpaceDynamics::optimize: failed to update frame pose." << std::endl;
+        return false;
     }
 
     return true;
@@ -305,15 +279,10 @@ bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
                                  std::vector<EdgeNode>& edge_nodes,
                                  const Pose3D& extarnal_pose_data) {
 
-    if (!optimize(frame_pose, edge_nodes, true)) return false;
-
-    // move frame_pose to the direction of the external_pose_data
-    Eigen::Vector3f translation_diff = frame_pose.translationalDiffTo(extarnal_pose_data);
-    Eigen::Vector3f rotation_diff = frame_pose.rotationalDiffTo(extarnal_pose_data);
-
-    frame_pose.translate(translation_diff * EXTERNAL_POSITION_GAIN);
-    frame_pose.rotate(rotation_diff * EXTERNAL_ROTATION_GAIN);
-
+    if (!update_dynamics(edge_nodes, extarnal_pose_data, true, true, frame_pose)) {
+        std::cout << "EdgeSpaceDynamics::optimize: failed to update frame pose." << std::endl;
+        return false;
+    }
     return true;
 }
 
@@ -357,32 +326,10 @@ bool EdgeSpaceDynamics::calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
     VectorAverage position_average(10); // TODO: set parameter
     // TODO: reconsider add rotation_average or not
     for (int i = 0; i < MAX_CAL_ITER; i++) {
-        Pose3D current_frame_pose = frame_pose.clone();
-
-        // TODO: remove force_to_edge_sum, it's not used
-        Force3D force_to_frame_sum, force_to_edge_sum;
-
-        for (int j = 0; j < edge_nodes.size(); j++) {
-            EdgeNode edge_node = edge_nodes[j];
-            Line3D edge = edges[edge_node.edge_id];
-
-            Force3D force_to_frame;
-            Force3D force_to_edge;
-            float torque_center_point_for_edge_line;
-
-            if (!get_force(edge,
-                           edge_node,
-                           frame_pose,
-                           force_to_frame,
-                           force_to_edge,
-                           torque_center_point_for_edge_line)) return false;
-
-            force_to_frame_sum.add(force_to_frame);
-            force_to_edge_sum.add(force_to_edge);
+        if (!update_dynamics(edge_nodes, false, true, frame_pose)) {
+            std::cout << "EdgeSpaceDynamics::calculate_frame_pose: failed to update frame pose." << std::endl;
+            return false;
         }
-
-        frame_pose.translate(force_to_frame_sum.force * FRAME_POSE_TRANSLATE_GAIN / edge_nodes.size());
-        frame_pose.rotate(force_to_frame_sum.torque * FRAME_POSE_ROTATE_GAIN / edge_nodes.size());
 
         // check if the frame_pose is fixed
         position_average.add_vector(frame_pose.position);
@@ -449,6 +396,65 @@ bool EdgeSpaceDynamics::get_force(Line3D edge,
     force_to_frame = force_calculation.getForceToFrame();
     force_to_edge = force_calculation.getForceToEdge();
     torque_center_point_for_edge_line = force_calculation.getTorqueCenterPointForEdgeLine();
+    return true;
+}
+
+
+bool EdgeSpaceDynamics::update_dynamics(std::vector<EdgeNode> edge_nodes,
+                                          const bool update_edges,
+                                          const bool update_frame_pose,
+                                          Pose3D& frame_pose) {
+
+    // TODO: remove force_to_edge_sum, it's not used
+    Force3D force_to_frame_sum, force_to_edge_sum;
+
+    for (int j = 0; j < edge_nodes.size(); j++) {
+        EdgeNode edge_node = edge_nodes[j];
+        Line3D edge = edges[edge_node.edge_id];
+    
+        Force3D force_to_frame;
+        Force3D force_to_edge;
+        float torque_center_point_for_edge_line;
+    
+        if (!get_force(edge,
+                       edge_node,
+                       frame_pose,
+                       force_to_frame,
+                       force_to_edge,
+                       torque_center_point_for_edge_line)) return false;
+
+        force_to_frame_sum.add(force_to_frame);
+        force_to_edge_sum.add(force_to_edge);
+
+        if (update_edges) {
+            edges[edge_node.edge_id].add_force(force_to_edge.force * EDGE_POSE_TRANSLATE_GAIN,
+                                               force_to_edge.torque * EDGE_POSE_ROTATE_GAIN,
+                                               torque_center_point_for_edge_line);
+        }
+    }
+
+    if (update_frame_pose) {
+        frame_pose.translate(force_to_frame_sum.force * FRAME_POSE_TRANSLATE_GAIN / edge_nodes.size());
+        frame_pose.rotate(force_to_frame_sum.torque * FRAME_POSE_ROTATE_GAIN / edge_nodes.size());
+    }
+
+    return true;
+}
+
+bool EdgeSpaceDynamics::update_dynamics(std::vector<EdgeNode> edge_nodes,
+                                        const Pose3D& extarnal_pose_data,
+                                        const bool update_edges,
+                                        const bool update_frame_pose,
+                                        Pose3D& frame_pose) {
+    update_dynamics(edge_nodes, update_edges, update_frame_pose, frame_pose);
+
+    // move frame_pose to the direction of the external_pose_data
+    Eigen::Vector3f translation_diff = frame_pose.translationalDiffTo(extarnal_pose_data);
+    Eigen::Vector3f rotation_diff = frame_pose.rotationalDiffTo(extarnal_pose_data);
+
+    frame_pose.translate(translation_diff * EXTERNAL_POSITION_GAIN);
+    frame_pose.rotate(rotation_diff * EXTERNAL_ROTATION_GAIN);
+
     return true;
 }
 
