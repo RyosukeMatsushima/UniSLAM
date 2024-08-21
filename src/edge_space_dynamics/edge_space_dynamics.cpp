@@ -327,9 +327,9 @@ bool EdgeSpaceDynamics::calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
                                              const bool use_external_pose_data,
                                              Pose3D& frame_pose) {
 
-    VectorAverage position_average(10); // TODO: set parameter
     // TODO: reconsider add rotation_average or not
     for (int i = 0; i < MAX_CAL_ITER; i++) {
+        Pose3D latest_frame_pose = frame_pose.clone();
 
         bool result = false;
         if (use_external_pose_data) {
@@ -344,9 +344,8 @@ bool EdgeSpaceDynamics::calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
         }
 
         // check if the frame_pose is fixed
-        position_average.add_vector(frame_pose.position);
-        if (!position_average.is_filled()) continue;
-        if (position_average.get_variance().norm() < FRAME_POSE_CAL_FINISH_TRANSLATE_VARIANCE) {
+        if (frame_pose.translationalDiffTo(latest_frame_pose).norm() < FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA &&
+            frame_pose.rotationalDiffTo(latest_frame_pose).norm() < FRAME_POSE_CAL_FINISH_ROTATIONAL_DELTA) {
             return true;
         }
     }
