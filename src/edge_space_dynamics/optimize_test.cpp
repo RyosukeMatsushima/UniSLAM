@@ -135,6 +135,10 @@ protected:
         std::vector<EdgeNode> valid_edge_nodes;
         for (const auto& edge_node : frame.edge_nodes) {
             if (edge_node.is_valid) valid_edge_nodes.push_back(edge_node);
+
+            if (!edge_node.is_valid) {
+                std::cout << "Invalid edge is removed" << std::endl;
+            }
         }
         frame.edge_nodes = valid_edge_nodes;
     }
@@ -175,7 +179,7 @@ TEST_F(OptimizeTest, useExternalPoseData) {
 }
 
 TEST_F(OptimizeTest, removeInvalidEdge) {
-    int max_iterations = 2000;
+    int max_iterations = 4000;
 
     // add noize to valid edges
     addNoise(frame0, Eigen::Vector3f(0.2f, 0.1f, 0.3f), Eigen::Vector3f(0.1f, 0.2f, 0.2f));
@@ -201,10 +205,10 @@ TEST_F(OptimizeTest, removeInvalidEdge) {
         EXPECT_TRUE(edge_space_dynamics.optimize(frame2.pose, frame2.edge_nodes, frame2.correct_pose, true));
         EXPECT_TRUE(edge_space_dynamics.optimize(frame3.pose, frame3.edge_nodes, frame3.correct_pose, true));
 
-//        removeInvalidEdge(frame0);
-//        removeInvalidEdge(frame1);
-//        removeInvalidEdge(frame2);
-//        removeInvalidEdge(frame3);
+        removeInvalidEdge(frame0);
+        removeInvalidEdge(frame1);
+        removeInvalidEdge(frame2);
+        removeInvalidEdge(frame3);
     }
 
     // check if invalid edge is removed

@@ -73,9 +73,6 @@ private:
                          bool& is_frame_pose_fixed,
                          Pose3D& frame_pose);
 
-    bool is_frame_pose_fixed(const Pose3D frame_pose,
-                             const std::vector<EdgeNode> edge_nodes);
-
     void load_config(const std::string& config_file);
 
     // Configuration values

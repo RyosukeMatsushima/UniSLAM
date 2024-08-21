@@ -275,22 +275,66 @@ bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
         std::cout << "EdgeSpaceDynamics::optimize: failed to update frame pose." << std::endl;
         return false;
     }
+
+    if (edge_nodes.size() <= EDGE_NUM_TO_GET_FRAME_POSE) {
+        return true;
+    }
+
+    if (is_frame_pose_fixed) {
+        // find invalid edge nodes
+        std::vector<float> translation_stress, rotation_stress;
+        get_stress(edge_nodes, frame_pose, translation_stress, rotation_stress);
+        float max_translation_stress = *std::max_element(translation_stress.begin(), translation_stress.end());
+        int max_translation_stress_index = std::distance(translation_stress.begin(), std::max_element(translation_stress.begin(), translation_stress.end()));
+
+        // if the frame pose is not fixed without the max stress node, the max stress node is invalid
+        std::vector<EdgeNode> edge_nodes_without_max_stress = edge_nodes;
+        edge_nodes_without_max_stress.erase(edge_nodes_without_max_stress.begin() + max_translation_stress_index);
+        Pose3D frame_pose_without_max_stress = frame_pose.clone();
+
+        bool is_frame_pose_fixed_without_max_stress = false;
+        if (!update_dynamics(edge_nodes_without_max_stress, extarnal_pose_data, false, true, use_external_pose_data, is_frame_pose_fixed_without_max_stress, frame_pose_without_max_stress)) {
+            std::cout << "EdgeSpaceDynamics::optimize: failed to update frame pose without max stress." << std::endl;
+            return true;
+        }
+
+        float translation_diff_threshold = FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA * 100.0f; // TODO: set parameter
+        if (frame_pose_without_max_stress.translationalDiffTo(frame_pose).norm() > translation_diff_threshold) {
+            edge_nodes[max_translation_stress_index].is_valid = false;
+            std::cout << "invalid edge node: " << max_translation_stress_index << std::endl;
+            std::cout << "translationalDiffTo: " << frame_pose_without_max_stress.translationalDiffTo(frame_pose).norm() << std::endl;
+            std::cout << "threshold: " << translation_diff_threshold << std::endl;
+        }
+    }
+
     return true;
 }
 
-// TODO: impriment.
+// frame_pose should be fixed before calling this function
 bool EdgeSpaceDynamics::find_invalid_edge_nodes(const Pose3D& frame_pose,
                                                 std::vector<EdgeNode>& edge_nodes) {
-    // check is frame_pose is fixed
-    // remove most stressfull node
-    // calculate pose
-    // check the stress and is x% lower then before, remove the node
-    return true;
-}
 
-// TODO: impriment.
-bool EdgeSpaceDynamics::is_frame_pose_fixed(const Pose3D frame_pose,
-                                            const std::vector<EdgeNode> edge_nodes) {
+    if (edge_nodes.size() < EDGE_NUM_TO_GET_FRAME_POSE) {
+        std::cout << "EdgeSpaceDynamics::find_invalid_edge_nodes: edge_nodes.size() < EDGE_NUM_TO_GET_FRAME_POSE" << std::endl;
+        return false;
+    }
+
+    // remove most stressfull node
+    std::vector<float> translation_stress, rotation_stress;
+    get_stress(edge_nodes, frame_pose, translation_stress, rotation_stress);
+    float max_translation_stress = *std::max_element(translation_stress.begin(), translation_stress.end());
+    int max_translation_stress_index = std::distance(translation_stress.begin(), std::max_element(translation_stress.begin(), translation_stress.end()));
+
+    float translation_stress_threshold = max_translation_stress * 0.4; // TODO: set parameter
+
+    // set the max_translation_stress_index as invalid if the second max stress is less than the threshold
+    translation_stress[max_translation_stress_index] = 0;
+    float second_max_translation_stress = *std::max_element(translation_stress.begin(), translation_stress.end());
+    if (second_max_translation_stress < translation_stress_threshold) {
+        edge_nodes[max_translation_stress_index].is_valid = false;
+        std::cout << "invalid edge node: " << max_translation_stress_index << std::endl;
+    }
+
     return true;
 }
 
