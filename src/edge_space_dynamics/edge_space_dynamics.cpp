@@ -267,23 +267,11 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
 
 bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
                                  std::vector<EdgeNode>& edge_nodes,
-                                 const bool update_frame_pose) {
+                                 const Pose3D& extarnal_pose_data,
+                                 const bool use_external_pose_data) {
 
     bool is_frame_pose_fixed = false;
-    if (!update_dynamics(edge_nodes, Pose3D(), true, update_frame_pose, false, is_frame_pose_fixed, frame_pose)) {
-        std::cout << "EdgeSpaceDynamics::optimize: failed to update frame pose." << std::endl;
-        return false;
-    }
-
-    return true;
-}
-
-bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
-                                 std::vector<EdgeNode>& edge_nodes,
-                                 const Pose3D& extarnal_pose_data) {
-
-    bool is_frame_pose_fixed = false;
-    if (!update_dynamics(edge_nodes, extarnal_pose_data, true, true, true, is_frame_pose_fixed, frame_pose)) {
+    if (!update_dynamics(edge_nodes, extarnal_pose_data, true, true, use_external_pose_data, is_frame_pose_fixed, frame_pose)) {
         std::cout << "EdgeSpaceDynamics::optimize: failed to update frame pose." << std::endl;
         return false;
     }

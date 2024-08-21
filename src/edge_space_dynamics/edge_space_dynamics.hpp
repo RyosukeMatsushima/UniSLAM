@@ -28,11 +28,8 @@ public:
 
     bool optimize(Pose3D& frame_pose,
                   std::vector<EdgeNode>& edge_nodes,
-                  const bool update_frame_pose);
-
-    bool optimize(Pose3D& frame_pose,
-                  std::vector<EdgeNode>& edge_nodes,
-                  const Pose3D& extarnal_pose_data);
+                  const Pose3D& extarnal_pose_data,
+                  const bool use_external_pose_data);
 
     bool find_invalid_edge_nodes(const Pose3D& frame_pose,
                                  std::vector<EdgeNode>& edge_nodes);
