@@ -69,14 +69,11 @@ private:
                    float& torque_center_point_for_edge_line);
 
     bool update_dynamics(std::vector<EdgeNode> edge_nodes,
-                         const bool update_edges,
-                         const bool update_frame_pose,
-                         Pose3D& frame_pose);
-
-    bool update_dynamics(std::vector<EdgeNode> edge_nodes,
                          const Pose3D& extarnal_pose_data,
                          const bool update_edges,
                          const bool update_frame_pose,
+                         const bool use_external_pose_data,
+                         bool& is_frame_pose_fixed,
                          Pose3D& frame_pose);
 
     bool is_frame_pose_fixed(const Pose3D frame_pose,

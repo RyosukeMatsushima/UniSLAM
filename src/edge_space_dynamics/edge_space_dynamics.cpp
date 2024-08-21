@@ -269,7 +269,8 @@ bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
                                  std::vector<EdgeNode>& edge_nodes,
                                  const bool update_frame_pose) {
 
-    if (!update_dynamics(edge_nodes, true, update_frame_pose, frame_pose)) {
+    bool is_frame_pose_fixed = false;
+    if (!update_dynamics(edge_nodes, Pose3D(), true, update_frame_pose, false, is_frame_pose_fixed, frame_pose)) {
         std::cout << "EdgeSpaceDynamics::optimize: failed to update frame pose." << std::endl;
         return false;
     }
@@ -281,7 +282,8 @@ bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
                                  std::vector<EdgeNode>& edge_nodes,
                                  const Pose3D& extarnal_pose_data) {
 
-    if (!update_dynamics(edge_nodes, extarnal_pose_data, true, true, frame_pose)) {
+    bool is_frame_pose_fixed = false;
+    if (!update_dynamics(edge_nodes, extarnal_pose_data, true, true, true, is_frame_pose_fixed, frame_pose)) {
         std::cout << "EdgeSpaceDynamics::optimize: failed to update frame pose." << std::endl;
         return false;
     }
@@ -329,23 +331,12 @@ bool EdgeSpaceDynamics::calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
 
     // TODO: reconsider add rotation_average or not
     for (int i = 0; i < MAX_CAL_ITER; i++) {
-        Pose3D latest_frame_pose = frame_pose.clone();
-
-        bool result = false;
-        if (use_external_pose_data) {
-            result = update_dynamics(edge_nodes, extarnal_pose_data, false, true, frame_pose);
-        } else {
-            result = update_dynamics(edge_nodes, false, true, frame_pose);
-        }
-
-        if (!result) {
-            std::cout << "EdgeSpaceDynamics::calculate_frame_pose: failed to update frame pose." << std::endl;
+        bool is_frame_pose_fixed = false;
+        if (!update_dynamics(edge_nodes, extarnal_pose_data, false, true, use_external_pose_data, is_frame_pose_fixed, frame_pose)) {
             return false;
         }
 
-        // check if the frame_pose is fixed
-        if (frame_pose.translationalDiffTo(latest_frame_pose).norm() < FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA &&
-            frame_pose.rotationalDiffTo(latest_frame_pose).norm() < FRAME_POSE_CAL_FINISH_ROTATIONAL_DELTA) {
+        if (is_frame_pose_fixed) {
             return true;
         }
     }
@@ -412,9 +403,15 @@ bool EdgeSpaceDynamics::get_force(Line3D edge,
 
 
 bool EdgeSpaceDynamics::update_dynamics(std::vector<EdgeNode> edge_nodes,
-                                          const bool update_edges,
-                                          const bool update_frame_pose,
-                                          Pose3D& frame_pose) {
+                                        const Pose3D& extarnal_pose_data,
+                                        const bool update_edges,
+                                        const bool update_frame_pose,
+                                        const bool use_external_pose_data,
+                                        bool& is_frame_pose_fixed,
+                                        Pose3D& frame_pose) {
+
+    // to check if the frame_pose is fixed
+    Pose3D latest_frame_pose = frame_pose.clone();
 
     // TODO: remove force_to_edge_sum, it's not used
     Force3D force_to_frame_sum, force_to_edge_sum;
@@ -449,22 +446,17 @@ bool EdgeSpaceDynamics::update_dynamics(std::vector<EdgeNode> edge_nodes,
         frame_pose.rotate(force_to_frame_sum.torque * FRAME_POSE_ROTATE_GAIN / edge_nodes.size());
     }
 
-    return true;
-}
+    if (use_external_pose_data) {
+        Eigen::Vector3f translation_diff = frame_pose.translationalDiffTo(extarnal_pose_data);
+        Eigen::Vector3f rotation_diff = frame_pose.rotationalDiffTo(extarnal_pose_data);
 
-bool EdgeSpaceDynamics::update_dynamics(std::vector<EdgeNode> edge_nodes,
-                                        const Pose3D& extarnal_pose_data,
-                                        const bool update_edges,
-                                        const bool update_frame_pose,
-                                        Pose3D& frame_pose) {
-    update_dynamics(edge_nodes, update_edges, update_frame_pose, frame_pose);
+        frame_pose.translate(translation_diff * EXTERNAL_POSITION_GAIN);
+        frame_pose.rotate(rotation_diff * EXTERNAL_ROTATION_GAIN);
+    }
 
-    // move frame_pose to the direction of the external_pose_data
-    Eigen::Vector3f translation_diff = frame_pose.translationalDiffTo(extarnal_pose_data);
-    Eigen::Vector3f rotation_diff = frame_pose.rotationalDiffTo(extarnal_pose_data);
-
-    frame_pose.translate(translation_diff * EXTERNAL_POSITION_GAIN);
-    frame_pose.rotate(rotation_diff * EXTERNAL_ROTATION_GAIN);
+    // check if the frame_pose is fixed
+    is_frame_pose_fixed = frame_pose.translationalDiffTo(latest_frame_pose).norm() < FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA &&
+                         frame_pose.rotationalDiffTo(latest_frame_pose).norm() < FRAME_POSE_CAL_FINISH_ROTATIONAL_DELTA;
 
     return true;
 }
