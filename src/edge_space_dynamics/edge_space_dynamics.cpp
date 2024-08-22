@@ -34,6 +34,12 @@ void EdgeSpaceDynamics::load_config(const std::string& config_file) {
 
         CAL_FINISH_FORCE_SIZE = config["CAL_FINISH_FORCE_SIZE"].as<float>();
         CAL_FINISH_TORQUE_SIZE = config["CAL_FINISH_TORQUE_SIZE"].as<float>();
+
+        EDGE_AVERAGE_STOCK_SIZE = config["EDGE_AVERAGE_STOCK_SIZE"].as<int>();
+        EDGE_FIXED_START_POINT_VARIANCE_THRESHOLD = config["EDGE_FIXED_START_POINT_VARIANCE_THRESHOLD"].as<float>();
+        EDGE_FIXED_DIRECTION_VARIANCE_THRESHOLD = config["EDGE_FIXED_DIRECTION_VARIANCE_THRESHOLD"].as<float>();
+        FIXED_EDGE_RATIO_THRESHOLD = config["FIXED_EDGE_RATIO_THRESHOLD"].as<float>();
+
     } catch (YAML::Exception& e) {
         std::cerr << "Error in loading config file: " << e.what() << std::endl;
         std::cerr << "You may miss some parameters in the config yaml file." << std::endl;
@@ -281,29 +287,27 @@ bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
     }
 
     if (is_frame_pose_fixed) {
-        // find invalid edge nodes
-        std::vector<float> translation_stress, rotation_stress;
-        get_stress(edge_nodes, frame_pose, translation_stress, rotation_stress);
-        float max_translation_stress = *std::max_element(translation_stress.begin(), translation_stress.end());
-        int max_translation_stress_index = std::distance(translation_stress.begin(), std::max_element(translation_stress.begin(), translation_stress.end()));
+        // calculate fixed edges ratio
+        int fixed_edges_count = 0;
+        for (auto edge_node : edge_nodes) {
+            if (edges[edge_node.edge_id].is_fixed()) {
+                fixed_edges_count++;
+            }
+        }
 
-        // if the frame pose is not fixed without the max stress node, the max stress node is invalid
-        std::vector<EdgeNode> edge_nodes_without_max_stress = edge_nodes;
-        edge_nodes_without_max_stress.erase(edge_nodes_without_max_stress.begin() + max_translation_stress_index);
-        Pose3D frame_pose_without_max_stress = frame_pose.clone();
+        float fixed_edges_ratio = (float)fixed_edges_count / (float)edge_nodes.size();
 
-        bool is_frame_pose_fixed_without_max_stress = false;
-        if (!update_dynamics(edge_nodes_without_max_stress, extarnal_pose_data, false, true, use_external_pose_data, is_frame_pose_fixed_without_max_stress, frame_pose_without_max_stress)) {
-            std::cout << "EdgeSpaceDynamics::optimize: failed to update frame pose without max stress." << std::endl;
+        // find invalid edge nodes if fixed edges ratio is less than the threshold
+        if (fixed_edges_ratio < FIXED_EDGE_RATIO_THRESHOLD) {
+            std::cout << "fixed edges ratio: " << fixed_edges_ratio << std::endl;
             return true;
         }
 
-        float translation_diff_threshold = FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA * 100.0f; // TODO: set parameter
-        if (frame_pose_without_max_stress.translationalDiffTo(frame_pose).norm() > translation_diff_threshold) {
-            edge_nodes[max_translation_stress_index].is_valid = false;
-            std::cout << "invalid edge node: " << max_translation_stress_index << std::endl;
-            std::cout << "translationalDiffTo: " << frame_pose_without_max_stress.translationalDiffTo(frame_pose).norm() << std::endl;
-            std::cout << "threshold: " << translation_diff_threshold << std::endl;
+        for (int i = 0; i < edge_nodes.size(); i++) {
+            if (!edges[edge_nodes[i].edge_id].is_fixed()) {
+                std::cout << "invalid edge node: " << i << std::endl;
+                edge_nodes[i].is_valid = false;
+            }
         }
     }
 
@@ -411,8 +415,18 @@ void EdgeSpaceDynamics::clear_edges() {
 }
 
 void EdgeSpaceDynamics::add_edge(const Line3D edge) {
-    edges.push_back(edge);
-    edge_ids.push_back(edge.id());
+    Line3D edge_to_add(edge.id(),
+                       edge.start_point(),
+                       edge.direction(),
+                       edge.length(),
+                       EDGE_AVERAGE_STOCK_SIZE,
+                       EDGE_FIXED_START_POINT_VARIANCE_THRESHOLD,
+                       EDGE_FIXED_DIRECTION_VARIANCE_THRESHOLD);
+
+    // TODO: guarantee the edge is added to the edges and edge_ids only here
+    // TODO: guarantee edge_id is unique
+    edges.push_back(edge_to_add);
+    edge_ids.push_back(edge_to_add.id());
 }
 
 bool EdgeSpaceDynamics::get_force(Line3D edge,
