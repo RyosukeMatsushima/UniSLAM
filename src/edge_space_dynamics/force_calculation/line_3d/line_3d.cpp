@@ -4,13 +4,23 @@
 Line3D::Line3D(const int id,
                const Eigen::Vector3f start_point,
                const Eigen::Vector3f direction,
-               const float length)
+               const float length,
+               const int stock_size,
+               const float fixed_start_point_variance_threshold,
+               const float fixed_direction_variance_threshold)
     : id_(id),
       start_point_(start_point),
       direction_(direction),
-      length_(length)
+      length_(length),
+      startPointAverage(stock_size),
+      directionAverage(stock_size),
+      fixed_start_point_variance_threshold(fixed_start_point_variance_threshold),
+      fixed_direction_variance_threshold(fixed_direction_variance_threshold)
 {
     direction_ = direction_.normalized();
+
+    startPointAverage.add_vector(start_point_);
+    directionAverage.add_vector(direction_);
 }
 
 void Line3D::add_force(const Eigen::Vector3f force,
@@ -36,6 +46,9 @@ void Line3D::add_force(const Eigen::Vector3f force,
         direction_ = updated_direction;
         direction_ = direction_.normalized();
     }
+
+    startPointAverage.add_vector(start_point_);
+    directionAverage.add_vector(direction_);
 }
 
 void Line3D::move(const Eigen::Vector3f delta)
@@ -153,4 +166,16 @@ Eigen::Vector3f Line3D::direction() const
 float Line3D::length() const
 {
     return length_;
+}
+
+bool Line3D::is_fixed() const
+{
+    // check vector average are filled
+    if (!startPointAverage.is_filled() || !directionAverage.is_filled()) {
+        return false;
+    }
+
+    // check variance of start point
+    return startPointAverage.get_variance().norm() < fixed_start_point_variance_threshold &&
+           directionAverage.get_variance().norm() < fixed_direction_variance_threshold;
 }
