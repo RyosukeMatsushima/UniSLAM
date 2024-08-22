@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(Line3D)
+project(VectorAverage)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FetchContent)
+
+# Fetch GoogleTest
 FetchContent_Declare(
   googletest
   URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
@@ -16,43 +18,39 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-# Find Eigen package
+# Find Eigen
 find_package(Eigen3 REQUIRED)
 
-# Add subdirectories
-add_subdirectory(vector_average)
-
+# vector_average
 add_library(
-    line_3d
-    line_3d.cpp
-    line_3d.hpp
+    vector_average
+    vector_average.cpp
 )
 
 target_include_directories(
-    line_3d
+    vector_average
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 target_link_libraries(
-    line_3d
-    PUBLIC
     vector_average
     PRIVATE
     Eigen3::Eigen
 )
 
 add_executable(
-    line_3d_test
-    line_3d_test.cpp
+    vector_average_test
+    vector_average_test.cpp
 )
 
 target_link_libraries(
-    line_3d_test
+    vector_average_test
+    PRIVATE
+    vector_average
     GTest::gtest_main
     Eigen3::Eigen
-    line_3d
 )
-
 include(GoogleTest)
-gtest_discover_tests(line_3d_test)
+gtest_discover_tests(vector_average_test)
+
