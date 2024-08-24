@@ -38,7 +38,7 @@ public:
 
     Line3D get_edge3d(int edge_id);
 
-    void remove_edge(int edge_id);
+    void remove_edge3d(int edge_id);
 
     int set_edge3d(Eigen::Vector3f start_point,
                    Eigen::Vector3f direction,

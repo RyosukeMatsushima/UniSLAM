@@ -289,7 +289,7 @@ bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
     // calculate fixed edges ratio
     int fixed_edges_count = 0;
     for (auto edge_node : edge_nodes) {
-        if (edges[edge_node.edge_id].is_fixed()) {
+        if (get_edge3d(edge_node.edge_id).is_fixed()) {
             fixed_edges_count++;
         }
     }
@@ -316,7 +316,7 @@ bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
         float threshold = average_updated_count * 0.5; // TODO: set parameter
         if (min_updated_count < threshold) {
             edge_nodes[min_updated_edge_node_index].is_valid = false;
-            remove_edge(edge_nodes[min_updated_edge_node_index].edge_id);
+            remove_edge3d(edge_nodes[min_updated_edge_node_index].edge_id);
         }
     }
 
@@ -368,11 +368,15 @@ std::vector<Line3D> EdgeSpaceDynamics::get_edge3ds() {
 }
 
 Line3D EdgeSpaceDynamics::get_edge3d(int edge_id) {
-    int index = get_edge_index(edge_id);
-    return edges[index];
+    try {
+        return edges[get_edge_index(edge_id)];
+    } catch (std::invalid_argument& e) {
+        throw std::invalid_argument("Edge id is not exist.");
+        return Line3D(0, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(0, 0, 0), 0);
+    }
 }
 
-void EdgeSpaceDynamics::remove_edge(int edge_id) {
+void EdgeSpaceDynamics::remove_edge3d(int edge_id) {
     int index = get_edge_index(edge_id);
     edges.erase(edges.begin() + index);
     edge_ids.erase(edge_ids.begin() + index);
@@ -535,6 +539,13 @@ bool EdgeSpaceDynamics::update_dynamics(std::vector<EdgeNode> edge_nodes,
 }
 
 int EdgeSpaceDynamics::get_edge_index(int edge_id) {
-    return std::distance(edge_ids.begin(), std::find(edge_ids.begin(), edge_ids.end(), edge_id));
+    int index = std::distance(edge_ids.begin(), std::find(edge_ids.begin(), edge_ids.end(), edge_id));
+
+    // throw error if id is not exist
+    if (index == edge_ids.size()) {
+        throw std::invalid_argument("Edge id is not exist.");
+    }
+
+    return index;
 }
 
