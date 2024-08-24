@@ -142,6 +142,7 @@ TEST(Line3DTest, CheckIsFixed) {
     Line3D line(0, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(1, 0, 0), 1.0, stock_size, fixed_start_point_variance_threshold, fixed_direction_variance_threshold);
 
     for (int i = 0; i < stock_size * 2; i++) {
+        EXPECT_EQ(line.update_count(), i);
         line.add_force(Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(0, 0, 0), 1.0);
 
         // stock_size - 2, because vector_average is updated when initialized
@@ -150,7 +151,12 @@ TEST(Line3DTest, CheckIsFixed) {
         } else {
             EXPECT_TRUE(line.is_fixed()) << "i: " << i;
         }
-    } 
+
+    }
+
+    line.clear_history();
+    EXPECT_FALSE(line.is_fixed());
+    EXPECT_EQ(line.update_count(), 0);
 }
 
 int main(int argc, char **argv)

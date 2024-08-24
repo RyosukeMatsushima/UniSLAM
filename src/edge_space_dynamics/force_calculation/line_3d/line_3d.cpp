@@ -49,6 +49,7 @@ void Line3D::add_force(const Eigen::Vector3f force,
 
     startPointAverage.add_vector(start_point_);
     directionAverage.add_vector(direction_);
+    update_count_++;
 }
 
 void Line3D::move(const Eigen::Vector3f delta)
@@ -178,4 +179,11 @@ bool Line3D::is_fixed() const
     // check variance of start point
     return startPointAverage.get_variance().norm() < fixed_start_point_variance_threshold &&
            directionAverage.get_variance().norm() < fixed_direction_variance_threshold;
+}
+
+void Line3D::clear_history()
+{
+    startPointAverage.clear();
+    directionAverage.clear();
+    update_count_ = 0;
 }

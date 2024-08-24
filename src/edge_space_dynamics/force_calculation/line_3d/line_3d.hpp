@@ -50,6 +50,10 @@ public:
 
     bool is_fixed() const;
 
+    void clear_history();
+
+    int update_count() const { return update_count_; }
+
 private:
     int id_;
 
@@ -62,6 +66,8 @@ private:
     VectorAverage startPointAverage;
 
     VectorAverage directionAverage;
+
+    unsigned int update_count_ = 0;
 
     const float fixed_start_point_variance_threshold;
 

@@ -39,3 +39,8 @@ Eigen::Vector3f VectorAverage::get_variance() const {
 
     return variance / static_cast<float>(vectors_.size());
 }
+
+void VectorAverage::clear() {
+    vectors_.clear();
+    current_sum_ = Eigen::Vector3f::Zero();
+}
