@@ -290,7 +290,8 @@ bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
 
     // remove less updated edge line.
     if (fixed_edges_ratio == 1) {
-        remove_less_updated_edge(edge_nodes);
+        if (joint_edge_3d(edge_nodes)) return true;
+        if (remove_less_updated_edge(edge_nodes)) return true;
     }
 
     // find invalid edge nodes if fixed edges ratio is less than the threshold
@@ -323,7 +324,6 @@ bool EdgeSpaceDynamics::find_invalid_edge_nodes(const Pose3D& frame_pose,
     float second_max_translation_stress = *std::max_element(translation_stress.begin(), translation_stress.end());
     if (second_max_translation_stress < translation_stress_threshold) {
         edge_nodes[max_translation_stress_index].is_valid = false;
-        std::cout << "invalid edge node: " << max_translation_stress_index << std::endl;
     }
 
     return true;
@@ -337,7 +337,7 @@ Line3D EdgeSpaceDynamics::get_edge3d(int edge_id) {
     try {
         return edges[get_edge_index(edge_id)];
     } catch (std::invalid_argument& e) {
-        throw std::invalid_argument("Edge id is not exist.");
+        throw std::invalid_argument("EdgeSpaceDynamics::get_edge3d: edge id is not exist.");
         return Line3D(0, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(0, 0, 0), 0);
     }
 }
@@ -509,7 +509,7 @@ int EdgeSpaceDynamics::get_edge_index(int edge_id) {
 
     // throw error if id is not exist
     if (index == edge_ids.size()) {
-        throw std::invalid_argument("Edge id is not exist.");
+        throw std::invalid_argument("EdgeSpaceDynamics::get_edge_index: edge id is not exist.");
     }
 
     return index;
@@ -525,7 +525,7 @@ float EdgeSpaceDynamics::fixed_edge_ratio(std::vector<EdgeNode> edge_nodes) {
     return (float)fixed_edges_count / (float)edge_nodes.size();
 }
 
-void EdgeSpaceDynamics::remove_less_updated_edge(std::vector<EdgeNode>& edge_nodes) {
+bool EdgeSpaceDynamics::remove_less_updated_edge(std::vector<EdgeNode>& edge_nodes) {
     int min_updated_count = std::numeric_limits<int>::max();
     int min_updated_edge_node_index = 0;
     float average_updated_count = 0;
@@ -538,14 +538,46 @@ void EdgeSpaceDynamics::remove_less_updated_edge(std::vector<EdgeNode>& edge_nod
             min_updated_count = updated_count;
             min_updated_edge_node_index = i;
         }
-        edges[edge_index].clear_history();
     }
 
     float threshold = average_updated_count * 0.5; // TODO: set parameter
     if (min_updated_count < threshold) {
+        clear_edges_history(edge_nodes);
         edge_nodes[min_updated_edge_node_index].is_valid = false;
         remove_edge3d(edge_nodes[min_updated_edge_node_index].edge_id);
+        return true;
     }
+
+    return false;
+}
+
+bool EdgeSpaceDynamics::joint_edge_3d(std::vector<EdgeNode>& edge_nodes) {
+    for (int i = 0; i < edge_nodes.size(); i++) {
+
+        int edge_index = get_edge_index(edge_nodes[i].edge_id);
+
+        if (!edges[edge_index].is_fixed()) continue;
+
+        for (int j = 0; j < edge_nodes.size(); j++) {
+
+            if (i == j) continue;
+
+            if (edge_nodes[i].edge_id == edge_nodes[j].edge_id) continue;
+
+            int edge_index2 = get_edge_index(edge_nodes[j].edge_id);
+
+            if (!edges[edge_index2].is_fixed()) continue;
+
+            if (edges[edge_index].connect(edges[edge_index2])) {
+                clear_edges_history(edge_nodes);
+
+                edge_nodes[j].edge_id = edge_nodes[i].edge_id;
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 void EdgeSpaceDynamics::check_invalid_edge_nodes(std::vector<EdgeNode>& edge_nodes) {
@@ -554,6 +586,12 @@ void EdgeSpaceDynamics::check_invalid_edge_nodes(std::vector<EdgeNode>& edge_nod
             edge_nodes[i].is_valid = false;
         }
 
+        edges[get_edge_index(edge_nodes[i].edge_id)].clear_history();
+    }
+}
+
+void EdgeSpaceDynamics::clear_edges_history(std::vector<EdgeNode>& edge_nodes) {
+    for (int i = 0; i < edge_nodes.size(); i++) {
         edges[get_edge_index(edge_nodes[i].edge_id)].clear_history();
     }
 }

@@ -81,9 +81,13 @@ private:
 
     float fixed_edge_ratio(std::vector<EdgeNode> edge_nodes);
 
-    void remove_less_updated_edge(std::vector<EdgeNode>& edge_nodes);
+    bool remove_less_updated_edge(std::vector<EdgeNode>& edge_nodes);
 
     void check_invalid_edge_nodes(std::vector<EdgeNode>& edge_nodes);
+
+    bool joint_edge_3d(std::vector<EdgeNode>& edge_nodes);
+
+    void clear_edges_history(std::vector<EdgeNode>& edge_nodes);
 
     void load_config(const std::string& config_file);
 

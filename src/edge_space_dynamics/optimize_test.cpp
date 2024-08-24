@@ -89,12 +89,25 @@ protected:
         EdgeData invalid_edge(Eigen::Vector3f(0.1, -1.0, 2.0), Eigen::Vector3f(-0.2, 0.1, -10.0), 1.0);
         invalid_edge.id = edge_space_dynamics.set_edge3d(invalid_edge.start_point, invalid_edge.direction, invalid_edge.length);
 
+        // TODO: add EdgeNode with random values
         frame0.edge_nodes.push_back(EdgeNode(Eigen::Vector3f(0.1, -1.0, 2.0), Eigen::Vector2f(0.0, 1.0), invalid_edge.id));
         frame1.edge_nodes.push_back(EdgeNode(Eigen::Vector3f(0.1, -1.0, 2.0), Eigen::Vector2f(0.0, 1.0), invalid_edge.id));
         frame2.edge_nodes.push_back(EdgeNode(Eigen::Vector3f(0.1, -1.0, 2.0), Eigen::Vector2f(0.0, 1.0), invalid_edge.id));
         frame3.edge_nodes.push_back(EdgeNode(Eigen::Vector3f(0.1, -1.0, 2.0), Eigen::Vector2f(0.0, 1.0), invalid_edge.id));
 
         return invalid_edge.id;
+    }
+
+    // add duplicate edge with edge0
+    int addDuplicateEdge() {
+        EdgeData duplicate_edge(edge0.start_point, edge0.direction, edge0.length);
+        duplicate_edge.id = edge_space_dynamics.set_edge3d(duplicate_edge.start_point, duplicate_edge.direction, duplicate_edge.length);
+
+        frame0.edge_nodes.push_back(EdgeNode(frame0.edge_nodes[0].direction_frame_to_edge, frame0.edge_nodes[0].edge_direction, duplicate_edge.id));
+        frame1.edge_nodes.push_back(EdgeNode(frame1.edge_nodes[0].direction_frame_to_edge, frame1.edge_nodes[0].edge_direction, duplicate_edge.id));
+        frame2.edge_nodes.push_back(EdgeNode(frame2.edge_nodes[0].direction_frame_to_edge, frame2.edge_nodes[0].edge_direction, duplicate_edge.id));
+        frame3.edge_nodes.push_back(EdgeNode(frame3.edge_nodes[0].direction_frame_to_edge, frame3.edge_nodes[0].edge_direction, duplicate_edge.id));
+        return duplicate_edge.id;
     }
 
     void addNoise(FrameData& frame, Eigen::Vector3f translation_noise, Eigen::Vector3f rotation_noise) {
@@ -182,38 +195,27 @@ protected:
 
 TEST_F(OptimizeTest, useExternalPoseData) {
     int max_iterations = 2000;
-
     addNoiseForAllFrames();
-    
     addNoiseForAllEdges();
-
     setEdges();
-
     for (int i = 0; i < max_iterations; i++) {
         optimizeAllFrames();
     }
-
     checkAllData();
 }
 
 
 TEST_F(OptimizeTest, removeInvalidEdge) {
     int max_iterations = 4000;
-
     addNoiseForAllFrames();
-
     addNoiseForAllEdges();
-
     setEdges();
-
     // add invalid edge
     // TODO: add more invalid edges
     int invalid_edge_id = addInvalidEdge();
-
     // optimize
     for (int i = 0; i < max_iterations; i++) {
         optimizeAllFrames();
-
         removeInvalidEdgeFromAllFrames();
     }
 
@@ -228,12 +230,28 @@ TEST_F(OptimizeTest, removeInvalidEdge) {
 }
 
 TEST_F(OptimizeTest, joinEdges) {
-// add noize to valid edges and pose
-// add similar edges
-// optimize
-// check if similar edges are joined
-// check if valid edges are optimized
-// check if pose is optimized
+    int max_iterations = 4000;
+    addNoiseForAllFrames();
+    addNoiseForAllEdges();
+    setEdges();
+    int duplicate_edge_id = addDuplicateEdge();
+
+    for (int i = 0; i < max_iterations; i++) {
+        optimizeAllFrames();
+    }
+
+    // check if duplicate edge is joined
+    checkEdgeNotIncluded(frame0, duplicate_edge_id);
+    checkEdgeNotIncluded(frame1, duplicate_edge_id);
+    checkEdgeNotIncluded(frame2, duplicate_edge_id);
+    checkEdgeNotIncluded(frame3, duplicate_edge_id);
+
+    EXPECT_EQ(frame0.edge_nodes[4].edge_id, edge0.id);
+    EXPECT_EQ(frame1.edge_nodes[4].edge_id, edge0.id);
+    EXPECT_EQ(frame2.edge_nodes[4].edge_id, edge0.id);
+    EXPECT_EQ(frame3.edge_nodes[4].edge_id, edge0.id);
+
+    checkAllData();
 }
 
 TEST(EdgeControlTest, setGetRemoveEdge) {
