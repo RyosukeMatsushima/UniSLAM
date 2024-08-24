@@ -286,51 +286,17 @@ bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
 
     if (!is_frame_pose_fixed) return true;
 
-    // calculate fixed edges ratio
-    int fixed_edges_count = 0;
-    for (auto edge_node : edge_nodes) {
-        if (get_edge3d(edge_node.edge_id).is_fixed()) {
-            fixed_edges_count++;
-        }
-    }
-
-    float fixed_edges_ratio = (float)fixed_edges_count / (float)edge_nodes.size();
+    float fixed_edges_ratio = fixed_edge_ratio(edge_nodes);
 
     // remove less updated edge line.
     if (fixed_edges_ratio == 1) {
-        int min_updated_count = std::numeric_limits<int>::max();
-        int min_updated_edge_node_index = 0;
-        float average_updated_count = 0;
-
-        for (int i = 0; i < edge_nodes.size(); i++) {
-            int edge_index = get_edge_index(edge_nodes[i].edge_id);
-            int updated_count = edges[edge_index].update_count();
-            average_updated_count += float(updated_count) / float(edge_nodes.size());
-            if (updated_count < min_updated_count) {
-                min_updated_count = updated_count;
-                min_updated_edge_node_index = i;
-            }
-            edges[edge_index].clear_history();
-        }
-
-        float threshold = average_updated_count * 0.5; // TODO: set parameter
-        if (min_updated_count < threshold) {
-            edge_nodes[min_updated_edge_node_index].is_valid = false;
-            remove_edge3d(edge_nodes[min_updated_edge_node_index].edge_id);
-        }
+        remove_less_updated_edge(edge_nodes);
     }
 
     // find invalid edge nodes if fixed edges ratio is less than the threshold
     else if (fixed_edges_ratio > FIXED_EDGE_RATIO_THRESHOLD) {
-        for (int i = 0; i < edge_nodes.size(); i++) {
-            if (!edges[edge_nodes[i].edge_id].is_fixed()) {
-                edge_nodes[i].is_valid = false;
-            }
-
-            edges[get_edge_index(edge_nodes[i].edge_id)].clear_history();
-        }
+        check_invalid_edge_nodes(edge_nodes);
     }
-
 
     return true;
 }
@@ -549,3 +515,45 @@ int EdgeSpaceDynamics::get_edge_index(int edge_id) {
     return index;
 }
 
+float EdgeSpaceDynamics::fixed_edge_ratio(std::vector<EdgeNode> edge_nodes) {
+    int fixed_edges_count = 0;
+    for (auto edge_node : edge_nodes) {
+        if (get_edge3d(edge_node.edge_id).is_fixed()) {
+            fixed_edges_count++;
+        }
+    }
+    return (float)fixed_edges_count / (float)edge_nodes.size();
+}
+
+void EdgeSpaceDynamics::remove_less_updated_edge(std::vector<EdgeNode>& edge_nodes) {
+    int min_updated_count = std::numeric_limits<int>::max();
+    int min_updated_edge_node_index = 0;
+    float average_updated_count = 0;
+
+    for (int i = 0; i < edge_nodes.size(); i++) {
+        int edge_index = get_edge_index(edge_nodes[i].edge_id);
+        int updated_count = edges[edge_index].update_count();
+        average_updated_count += float(updated_count) / float(edge_nodes.size());
+        if (updated_count < min_updated_count) {
+            min_updated_count = updated_count;
+            min_updated_edge_node_index = i;
+        }
+        edges[edge_index].clear_history();
+    }
+
+    float threshold = average_updated_count * 0.5; // TODO: set parameter
+    if (min_updated_count < threshold) {
+        edge_nodes[min_updated_edge_node_index].is_valid = false;
+        remove_edge3d(edge_nodes[min_updated_edge_node_index].edge_id);
+    }
+}
+
+void EdgeSpaceDynamics::check_invalid_edge_nodes(std::vector<EdgeNode>& edge_nodes) {
+    for (int i = 0; i < edge_nodes.size(); i++) {
+        if (!edges[edge_nodes[i].edge_id].is_fixed()) {
+            edge_nodes[i].is_valid = false;
+        }
+
+        edges[get_edge_index(edge_nodes[i].edge_id)].clear_history();
+    }
+}

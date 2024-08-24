@@ -79,6 +79,12 @@ private:
 
     int get_edge_index(int edge_id);
 
+    float fixed_edge_ratio(std::vector<EdgeNode> edge_nodes);
+
+    void remove_less_updated_edge(std::vector<EdgeNode>& edge_nodes);
+
+    void check_invalid_edge_nodes(std::vector<EdgeNode>& edge_nodes);
+
     void load_config(const std::string& config_file);
 
     // Configuration values
