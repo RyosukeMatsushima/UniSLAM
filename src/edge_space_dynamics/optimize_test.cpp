@@ -138,56 +138,71 @@ protected:
         }
         frame.edge_nodes = valid_edge_nodes;
     }
-};
 
-TEST_F(OptimizeTest, useExternalPoseData) {
-    int max_iterations = 2000;
+    void addNoiseForAllFrames() {
+        addNoise(frame0, Eigen::Vector3f(0.2f, 0.1f, 0.3f), Eigen::Vector3f(0.1f, 0.2f, 0.2f));
+        addNoise(frame1, Eigen::Vector3f(-1.2f, 0.1f, -0.3f), Eigen::Vector3f(1.1f, 0.3f, 0.2f));
+        addNoise(frame2, Eigen::Vector3f(0.2f, 1.1f, 0.3f), Eigen::Vector3f(0.0f, 0.2f, 1.2f));
+        addNoise(frame3, Eigen::Vector3f(0.2f, 0.0f, 0.5f), Eigen::Vector3f(-1.0f, -0.2f, 0.1f));
+    }
 
-    addNoise(frame0, Eigen::Vector3f(0.2f, 0.1f, 0.3f), Eigen::Vector3f(0.1f, 0.2f, 0.2f));
-    addNoise(frame1, Eigen::Vector3f(-1.2f, 0.1f, -0.3f), Eigen::Vector3f(1.1f, 0.3f, 0.2f));
-    addNoise(frame2, Eigen::Vector3f(0.2f, 1.1f, 0.3f), Eigen::Vector3f(0.0f, 0.2f, 1.2f));
-    addNoise(frame3, Eigen::Vector3f(0.2f, 0.0f, 0.5f), Eigen::Vector3f(-1.0f, -0.2f, 0.1f));
+    void addNoiseForAllEdges() {
+        addNoise(edge0, Eigen::Vector3f(0.1f, 0.1f, 0.1f), Eigen::Vector3f(0.4f, -0.1f, 1.1f), 0.1f);
+        addNoise(edge1, Eigen::Vector3f(-0.1f, 0.1f, -0.1f), Eigen::Vector3f(-1.1f, -0.1f, 0.4f), 0.1f);
+        addNoise(edge2, Eigen::Vector3f(0.3f, 1.1f, 0.1f), Eigen::Vector3f(1.1f, 0.3f, -0.3f), 0.1f);
+        addNoise(edge3, Eigen::Vector3f(0.1f, -1.1f, 0.1f), Eigen::Vector3f(-0.1f, -0.4f, 0.7f), 0.1f);
+    }
 
-
-    addNoise(edge0, Eigen::Vector3f(0.1f, 0.1f, 0.1f), Eigen::Vector3f(0.4f, -0.1f, 1.1f), 0.1f);
-    addNoise(edge1, Eigen::Vector3f(-0.1f, 0.1f, -0.1f), Eigen::Vector3f(-1.1f, -0.1f, 0.4f), 0.1f);
-    addNoise(edge2, Eigen::Vector3f(0.3f, 1.1f, 0.1f), Eigen::Vector3f(1.1f, 0.3f, -0.3f), 0.1f);
-    addNoise(edge3, Eigen::Vector3f(0.1f, -1.1f, 0.1f), Eigen::Vector3f(-0.1f, -0.4f, 0.7f), 0.1f);
-
-    setEdges();
-
-    for (int i = 0; i < max_iterations; i++) {
+    void optimizeAllFrames() {
         EXPECT_TRUE(edge_space_dynamics.optimize(frame0.pose, frame0.edge_nodes, Pose3D(), false));
         EXPECT_TRUE(edge_space_dynamics.optimize(frame1.pose, frame1.edge_nodes, frame1.correct_pose, true));
         EXPECT_TRUE(edge_space_dynamics.optimize(frame2.pose, frame2.edge_nodes, frame2.correct_pose, true));
         EXPECT_TRUE(edge_space_dynamics.optimize(frame3.pose, frame3.edge_nodes, frame3.correct_pose, true));
     }
 
-    checkFrameData(frame0);
-    checkFrameData(frame1);
-    checkFrameData(frame2);
-    checkFrameData(frame3);
+    void removeInvalidEdgeFromAllFrames() {
+        removeInvalidEdge(frame0);
+        removeInvalidEdge(frame1);
+        removeInvalidEdge(frame2);
+        removeInvalidEdge(frame3);
+    }
 
-    checkEdgeData(edge0);
-    checkEdgeData(edge1);
-    checkEdgeData(edge2);
-    checkEdgeData(edge3);
+    void checkAllData() {
+        checkFrameData(frame0);
+        checkFrameData(frame1);
+        checkFrameData(frame2);
+        checkFrameData(frame3);
+
+        checkEdgeData(edge0);
+        checkEdgeData(edge1);
+        checkEdgeData(edge2);
+        checkEdgeData(edge3);
+    }
+};
+
+TEST_F(OptimizeTest, useExternalPoseData) {
+    int max_iterations = 2000;
+
+    addNoiseForAllFrames();
+    
+    addNoiseForAllEdges();
+
+    setEdges();
+
+    for (int i = 0; i < max_iterations; i++) {
+        optimizeAllFrames();
+    }
+
+    checkAllData();
 }
+
 
 TEST_F(OptimizeTest, removeInvalidEdge) {
     int max_iterations = 4000;
 
-    // add noize to valid edges
-    addNoise(frame0, Eigen::Vector3f(0.2f, 0.1f, 0.3f), Eigen::Vector3f(0.1f, 0.2f, 0.2f));
-    addNoise(frame1, Eigen::Vector3f(-1.2f, 0.1f, -0.3f), Eigen::Vector3f(1.1f, 0.3f, 0.2f));
-    addNoise(frame2, Eigen::Vector3f(0.2f, 1.1f, 0.3f), Eigen::Vector3f(0.0f, 0.2f, 1.2f));
-    addNoise(frame3, Eigen::Vector3f(0.2f, 0.0f, 0.5f), Eigen::Vector3f(-1.0f, -0.2f, 0.1f));
+    addNoiseForAllFrames();
 
-
-    addNoise(edge0, Eigen::Vector3f(0.1f, 0.1f, 0.1f), Eigen::Vector3f(0.4f, -0.1f, 1.1f), 0.1f);
-    addNoise(edge1, Eigen::Vector3f(-0.1f, 0.1f, -0.1f), Eigen::Vector3f(-1.1f, -0.1f, 0.4f), 0.1f);
-    addNoise(edge2, Eigen::Vector3f(0.3f, 1.1f, 0.1f), Eigen::Vector3f(1.1f, 0.3f, -0.3f), 0.1f);
-    addNoise(edge3, Eigen::Vector3f(0.1f, -1.1f, 0.1f), Eigen::Vector3f(-0.1f, -0.4f, 0.7f), 0.1f);
+    addNoiseForAllEdges();
 
     setEdges();
 
@@ -197,15 +212,9 @@ TEST_F(OptimizeTest, removeInvalidEdge) {
 
     // optimize
     for (int i = 0; i < max_iterations; i++) {
-        EXPECT_TRUE(edge_space_dynamics.optimize(frame0.pose, frame0.edge_nodes, Pose3D(), false));
-        EXPECT_TRUE(edge_space_dynamics.optimize(frame1.pose, frame1.edge_nodes, frame1.correct_pose, true));
-        EXPECT_TRUE(edge_space_dynamics.optimize(frame2.pose, frame2.edge_nodes, frame2.correct_pose, true));
-        EXPECT_TRUE(edge_space_dynamics.optimize(frame3.pose, frame3.edge_nodes, frame3.correct_pose, true));
+        optimizeAllFrames();
 
-        removeInvalidEdge(frame0);
-        removeInvalidEdge(frame1);
-        removeInvalidEdge(frame2);
-        removeInvalidEdge(frame3);
+        removeInvalidEdgeFromAllFrames();
     }
 
     // check if invalid edge is removed
@@ -215,15 +224,7 @@ TEST_F(OptimizeTest, removeInvalidEdge) {
     checkEdgeNotIncluded(frame3, invalid_edge_id);
 
     // check if valid edges are optimized
-    checkFrameData(frame0);
-    checkFrameData(frame1);
-    checkFrameData(frame2);
-    checkFrameData(frame3);
-
-    checkEdgeData(edge0);
-    checkEdgeData(edge1);
-    checkEdgeData(edge2);
-    checkEdgeData(edge3);
+    checkAllData();
 }
 
 TEST_F(OptimizeTest, joinEdges) {
