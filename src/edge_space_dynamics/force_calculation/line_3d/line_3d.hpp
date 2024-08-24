@@ -69,9 +69,9 @@ private:
 
     unsigned int update_count_ = 0;
 
-    const float fixed_start_point_variance_threshold;
+    float fixed_start_point_variance_threshold;
 
-    const float fixed_direction_variance_threshold;
+    float fixed_direction_variance_threshold;
 };
 
 #endif // LINE_3D_HPP

@@ -35,7 +35,11 @@ public:
                                  std::vector<EdgeNode>& edge_nodes);
 
     std::vector<Line3D> get_edge3ds();
+
     Line3D get_edge3d(int edge_id);
+
+    void remove_edge(int edge_id);
+
     int set_edge3d(Eigen::Vector3f start_point,
                    Eigen::Vector3f direction,
                    float length);
@@ -72,6 +76,8 @@ private:
                          const bool use_external_pose_data,
                          bool& is_frame_pose_fixed,
                          Pose3D& frame_pose);
+
+    int get_edge_index(int edge_id);
 
     void load_config(const std::string& config_file);
 
