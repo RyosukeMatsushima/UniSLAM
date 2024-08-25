@@ -29,6 +29,24 @@ TEST(EdgeControlTest, setGetRemoveEdge) {
     }
 }
 
+TEST(EdgeSpaceDynamics, addEdge) {
+    EdgeSpaceDynamics edge_space_dynamics(CONFIG_YAML_PATH);
+
+    EdgeNode edge_node(Eigen::Vector3f(1.0, 0.0, 1.0), Eigen::Vector2f(0.0, 1.0), 0);
+    Pose3D pose3d;
+
+    float distance_to_edge = 1.0;
+    int edge_id = edge_space_dynamics.set_edge3d(edge_node, pose3d, distance_to_edge);
+
+    EXPECT_EQ(edge_id, 0);
+
+    Line3D edge = edge_space_dynamics.get_edge3d(edge_id);
+
+    EXPECT_EQ(edge.length(), 0.0);
+    EXPECT_EQ(edge.start_point(), Eigen::Vector3f(1.0, 0.0, 1.0).normalized()*distance_to_edge);
+    EXPECT_EQ(edge.direction(), Eigen::Vector3f(0.0, 1.0, 0.0));
+}
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

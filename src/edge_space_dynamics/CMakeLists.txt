@@ -51,7 +51,6 @@ target_link_libraries(
     vector_average
     force_calculation
     line_3d
-    PRIVATE
     GTest::gtest_main
     Eigen3::Eigen
     yaml-cpp
@@ -114,8 +113,6 @@ target_link_libraries(
     edge_control_test
     PRIVATE
     edge_space_dynamics
-    Eigen3::Eigen
-    yaml-cpp
 )
 
 include(GoogleTest)

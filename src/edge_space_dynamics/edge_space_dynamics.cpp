@@ -266,8 +266,9 @@ bool EdgeSpaceDynamics::add_new_edge(const Pose3D frame1_pose,
         return false;
     }
 
-    add_edge(edge);
-    edge_id = edge.id();
+    edge_id = set_edge3d(edge.start_point(),
+                         edge.direction(),
+                         edge.length());
     return true;
 }
 
@@ -351,10 +352,30 @@ void EdgeSpaceDynamics::remove_edge3d(int edge_id) {
 int EdgeSpaceDynamics::set_edge3d(Eigen::Vector3f start_point,
                                   Eigen::Vector3f direction,
                                   float length) {
-    int edge_id = edges.size();
-    Line3D edge3d(edge_id, start_point, direction, length);
-    add_edge(edge3d);
+    // edge id is the max element of the edge_ids + 1
+    int edge_id = edge_ids.size() == 0 ? 0 : *std::max_element(edge_ids.begin(), edge_ids.end()) + 1;
+
+    Line3D edge3d(edge_id,
+                  start_point,
+                  direction,
+                  length,
+                  EDGE_AVERAGE_STOCK_SIZE,
+                  EDGE_FIXED_START_POINT_VARIANCE_THRESHOLD,
+                  EDGE_FIXED_DIRECTION_VARIANCE_THRESHOLD);
+
+    // TODO: guarantee the edge is added to the edges and edge_ids only here
+    // TODO: guarantee edge_id is unique
+    edges.push_back(edge3d);
+    edge_ids.push_back(edge_id);
     return edge_id;
+}
+
+int EdgeSpaceDynamics::set_edge3d(const EdgeNode edge_node,
+                                  const Pose3D frame_pose,
+                                  const float distance_to_edge) {
+    return set_edge3d(frame_pose.position + frame_pose.rotateVectorToWorld(edge_node.direction_frame_to_edge) * distance_to_edge,
+                      frame_pose.rotateVectorToWorld(Eigen::Vector3f(edge_node.edge_direction[0], edge_node.edge_direction[1], 0)),
+                      0.0f);
 }
 
 bool EdgeSpaceDynamics::calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
@@ -409,21 +430,6 @@ void EdgeSpaceDynamics::get_stress(std::vector<EdgeNode> edge_nodes,
 void EdgeSpaceDynamics::clear_edges() {
     edges.clear();
     edge_ids.clear();
-}
-
-void EdgeSpaceDynamics::add_edge(const Line3D edge) {
-    Line3D edge_to_add(edge.id(),
-                       edge.start_point(),
-                       edge.direction(),
-                       edge.length(),
-                       EDGE_AVERAGE_STOCK_SIZE,
-                       EDGE_FIXED_START_POINT_VARIANCE_THRESHOLD,
-                       EDGE_FIXED_DIRECTION_VARIANCE_THRESHOLD);
-
-    // TODO: guarantee the edge is added to the edges and edge_ids only here
-    // TODO: guarantee edge_id is unique
-    edges.push_back(edge_to_add);
-    edge_ids.push_back(edge_to_add.id());
 }
 
 bool EdgeSpaceDynamics::get_force(Line3D edge,

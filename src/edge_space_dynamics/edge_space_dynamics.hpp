@@ -44,6 +44,10 @@ public:
                    Eigen::Vector3f direction,
                    float length);
 
+    int set_edge3d(const EdgeNode edge_node,
+                   const Pose3D frame_pose,
+                   const float distance_to_edge);
+
     bool calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
                               const Pose3D& extarnal_pose_data,
                               const bool use_external_pose_data,
@@ -59,8 +63,6 @@ public:
 private:
     std::vector<Line3D> edges;
     std::vector<int> edge_ids;
-
-    void add_edge(const Line3D edge);
 
     bool get_force(Line3D edge,
                    EdgeNode edge_node,
