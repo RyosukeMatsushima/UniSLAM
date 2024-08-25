@@ -105,12 +105,26 @@ target_link_libraries(
     yaml-cpp
 )
 
+add_executable(
+    edge_control_test
+    edge_control_test.cpp
+)
+
+target_link_libraries(
+    edge_control_test
+    PRIVATE
+    edge_space_dynamics
+    Eigen3::Eigen
+    yaml-cpp
+)
+
 include(GoogleTest)
 gtest_discover_tests(add_new_edge_test)
 gtest_discover_tests(get_frame_pose_test)
 gtest_discover_tests(optimize_test)
+gtest_discover_tests(edge_control_test)
 
 target_compile_definitions(add_new_edge_test PRIVATE PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 target_compile_definitions(get_frame_pose_test PRIVATE PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 target_compile_definitions(optimize_test PRIVATE PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
-
+target_compile_definitions(edge_control_test PRIVATE PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
