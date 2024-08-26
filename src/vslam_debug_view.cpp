@@ -14,8 +14,10 @@ void VslamDebugView::drawEdge3D(const Line3D& edge_3d, const Pose3D& pose, const
     cv::Mat rvec = (cv::Mat_<double>(3, 3) << rotation_matrix(0, 0), rotation_matrix(0, 1), rotation_matrix(0, 2),
                                               rotation_matrix(1, 0), rotation_matrix(1, 1), rotation_matrix(1, 2),
                                               rotation_matrix(2, 0), rotation_matrix(2, 1), rotation_matrix(2, 2));
+    // invert rotation matrix
+    rvec = rvec.inv();
 
-    cv::Mat tvec = (cv::Mat_<double>(3, 1) << pose.position.x(), pose.position.y(), pose.position.z());
+    cv::Mat tvec = (cv::Mat_<double>(3, 1) << -pose.position.x(), -pose.position.y(), -pose.position.z());
 
     cv::Mat dist_coeffs = cv::Mat::zeros(5, 1, CV_64F); // Assuming no lens distortion for now
 

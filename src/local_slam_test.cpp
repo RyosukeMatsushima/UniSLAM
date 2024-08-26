@@ -106,8 +106,13 @@ TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
         local_slam.optimize(optimize_iteration);
         local_slam.save_log(RESULT_IMAGE_PATH);
     }
-    
-    local_slam.optimize(400);
+
+    for (int i = 0; i < 10; i++) {
+        Pose3D calculateed_pose;
+        local_slam.update(getCurrentImage(), getCurrentPose(), true, false, calculateed_pose);
+        local_slam.optimize(optimize_iteration);
+        local_slam.save_log(RESULT_IMAGE_PATH);
+    }
 
     return;
 
