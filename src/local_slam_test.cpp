@@ -50,6 +50,15 @@ protected:
         return double_squares_space.getImage(rotation, position);
     }
 
+    cv::Mat getImageFrom(const Pose3D& pose) {
+        cv::Mat position = (cv::Mat_<double>(3, 1) << pose.position.x(), pose.position.y(), pose.position.z());
+        Eigen::Matrix3f rotation_matrix = pose.orientation.toRotationMatrix();
+        cv::Mat rotation = (cv::Mat_<double>(3, 3) << rotation_matrix(0, 0), rotation_matrix(0, 1), rotation_matrix(0, 2),
+                                                      rotation_matrix(1, 0), rotation_matrix(1, 1), rotation_matrix(1, 2),
+                                                      rotation_matrix(2, 0), rotation_matrix(2, 1), rotation_matrix(2, 2));
+        return double_squares_space.getImage(rotation, position);
+    }
+
     Pose3D getCurrentPose() {
         return Pose3D(getPosition(), getOrientation());
     }
@@ -78,9 +87,14 @@ protected:
         cv::imwrite(RESULT_IMAGE_PATH + file_name, key_frame_debug_view.getDebugImage());
 
         Pose3D camera_pose;
-        camera_pose.translate(Eigen::Vector3f(1, -0.6, -1.5));
-        camera_pose.rotate(Eigen::Vector3f(-0.2, -0.7, 0));
-        VslamDebugView third_person_view = local_slam.get_third_person_view(camera_pose, file_name);
+        camera_pose.translate(Eigen::Vector3f(0.7, -0.6, -1.1));
+        camera_pose.rotate(Eigen::Vector3f(-0.7, -0.7, 0));
+        cv::Mat base_image = getImageFrom(camera_pose);
+        cv::Mat camera_matrix = double_squares_space.getCameraMatrix();
+        VslamDebugView third_person_view = local_slam.get_third_person_view(camera_pose,
+                                                                            base_image,
+                                                                            camera_matrix,
+                                                                            file_name);
         cv::imwrite(RESULT_IMAGE_PATH + file_name, third_person_view.getDebugImage());
     }
 };
@@ -122,10 +136,11 @@ TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
         save_log();
     }
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10; i++) {
+        std::cout << "optimize iteration: " << i << std::endl;
         Pose3D calculateed_pose;
         local_slam.update(getCurrentImage(), getCurrentPose(), true, false, calculateed_pose);
-        local_slam.optimize(optimize_iteration * 10);
+        local_slam.optimize(optimize_iteration);
         save_log();
     }
 

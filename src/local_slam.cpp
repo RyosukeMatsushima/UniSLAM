@@ -220,10 +220,11 @@ VslamDebugView LocalSlam::get_key_frame_debug_view(std::string& file_name) {
     return debug_view;
 }
 
-VslamDebugView LocalSlam::get_third_person_view(const Pose3D& camera_pose, std::string& file_name) {
-    VslamDebugView debug_view_third_person_view(cv::Mat::zeros(1000, 1000, current_frame_node.getImg().type()));
-
-    cv::Mat camera_matrix = (cv::Mat_<double>(3, 3) << 1000, 0, 500, 0, 1000, 500, 0, 0, 1);
+VslamDebugView LocalSlam::get_third_person_view(const Pose3D& camera_pose,
+                                                cv::Mat& base_image,
+                                                cv::Mat& camera_matrix,
+                                                std::string& file_name) {
+    VslamDebugView debug_view_third_person_view(base_image);
 
     for (const auto& edge_3d : edge_space_dynamics.get_edge3ds()) {
         debug_view_third_person_view.drawEdge3D(edge_3d, camera_pose, camera_matrix, cv::Scalar(255, 255, 0));

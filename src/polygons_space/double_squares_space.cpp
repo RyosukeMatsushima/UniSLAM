@@ -26,9 +26,9 @@ DoubleSquaresSpace::DoubleSquaresSpace()
     std::vector<cv::Point3f> polygon2 = {p5, p6, p7, p8};
     std::vector<cv::Point3f> polygon3 = {p9, p10, p11, p12};
 
+    polygons_space.setPolygon(polygon3, cv::Scalar(255, 0, 0));
     polygons_space.setPolygon(polygon1, cv::Scalar(0, 0, 255));
     polygons_space.setPolygon(polygon2, cv::Scalar(0, 255, 0));
-    polygons_space.setPolygon(polygon3, cv::Scalar(255, 0, 0));
 }
 
 cv::Mat DoubleSquaresSpace::getImage(const cv::InputArray &rvec,

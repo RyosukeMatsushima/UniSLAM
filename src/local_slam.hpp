@@ -56,7 +56,10 @@ public:
 
     VslamDebugView get_current_debug_view(std::string& file_name);
     VslamDebugView get_key_frame_debug_view(std::string& file_name);
-    VslamDebugView get_third_person_view(const Pose3D& camera_pose, std::string& file_name);
+    VslamDebugView get_third_person_view(const Pose3D& camera_pose,
+                                         cv::Mat& base_image,
+                                         cv::Mat& camera_matrix,
+                                         std::string& file_name);
 
 private:
     int frame_count = 0;
