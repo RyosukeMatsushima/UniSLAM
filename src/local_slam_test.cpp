@@ -68,6 +68,21 @@ protected:
         EXPECT_NEAR(estimated_pose.orientation.z(), current_pose.orientation.z(), allowed_error);
         EXPECT_NEAR(estimated_pose.orientation.w(), current_pose.orientation.w(), allowed_error);
     }
+
+    void save_log() {
+        std::string file_name;
+        VslamDebugView current_debug_view = local_slam.get_current_debug_view(file_name);
+        cv::imwrite(RESULT_IMAGE_PATH + file_name, current_debug_view.getDebugImage());
+
+        VslamDebugView key_frame_debug_view = local_slam.get_key_frame_debug_view(file_name);
+        cv::imwrite(RESULT_IMAGE_PATH + file_name, key_frame_debug_view.getDebugImage());
+
+        Pose3D camera_pose;
+        camera_pose.translate(Eigen::Vector3f(1, -0.6, -1.5));
+        camera_pose.rotate(Eigen::Vector3f(-0.2, -0.7, 0));
+        VslamDebugView third_person_view = local_slam.get_third_person_view(camera_pose, file_name);
+        cv::imwrite(RESULT_IMAGE_PATH + file_name, third_person_view.getDebugImage());
+    }
 };
 
 TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
@@ -82,7 +97,7 @@ TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
     for (float x = position.at<double>(0); x < max_xy_position; x += dxy_position) {
         movePosition(dxy_position, 0, 0);
         did_finish_initilization = local_slam.multi_frame_init(getCurrentImage());
-        local_slam.save_log(RESULT_IMAGE_PATH);
+        save_log();
         if (did_finish_initilization) break;
     }
     ASSERT_TRUE(did_finish_initilization);
@@ -94,7 +109,7 @@ TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
         Pose3D calculateed_pose;
         local_slam.update(getCurrentImage(), getCurrentPose(), true, false, calculateed_pose);
         local_slam.optimize(optimize_iteration);
-        local_slam.save_log(RESULT_IMAGE_PATH);
+        save_log();
     }
 
     // camera moves to y-axis positive direction
@@ -104,14 +119,14 @@ TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
         Pose3D calculateed_pose;
         local_slam.update(getCurrentImage(), getCurrentPose(), true, false, calculateed_pose);
         local_slam.optimize(optimize_iteration);
-        local_slam.save_log(RESULT_IMAGE_PATH);
+        save_log();
     }
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 100; i++) {
         Pose3D calculateed_pose;
         local_slam.update(getCurrentImage(), getCurrentPose(), true, false, calculateed_pose);
-        local_slam.optimize(optimize_iteration);
-        local_slam.save_log(RESULT_IMAGE_PATH);
+        local_slam.optimize(optimize_iteration * 10);
+        save_log();
     }
 
     return;
@@ -122,7 +137,7 @@ TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
         Pose3D calculateed_pose;
         EXPECT_TRUE(local_slam.update(getCurrentImage(), Pose3D(), false, true, calculateed_pose));
         checkPose(calculateed_pose);
-        local_slam.save_log(RESULT_IMAGE_PATH);
+        save_log();
         local_slam.optimize(optimize_iteration);
     }
 

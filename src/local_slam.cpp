@@ -196,43 +196,40 @@ std::vector<Line3D> LocalSlam::get_fixed_edges() {
     return edge_space_dynamics.get_edge3ds();
 }
 
-void LocalSlam::save_log(const std::string& path_to_dir) {
-    // debug view on current frame
+VslamDebugView LocalSlam::get_current_debug_view(std::string& file_name) {
     VslamDebugView debug_view(current_frame_node.getImg());
     debug_view.drawEdgePoints(key_frames.back().frame_node.getFixedEdgePoints(), cv::Scalar(0, 0, 255));
     debug_view.drawEdgePoints(current_frame_node.getFixedEdgePoints(), cv::Scalar(0, 255, 0));
-    cv::imwrite(path_to_dir + "frame" + std::to_string(frame_count) + ".png", debug_view.getDebugImage());
 
-    // debug view on key frame
-    VslamDebugView debug_view_on_key_frame(key_frames.back().frame_node.getImg());
-    debug_view_on_key_frame.drawEdgePoints(key_frames.back().frame_node.getFixedEdgePoints(), cv::Scalar(0, 0, 255));
-    debug_view_on_key_frame.drawEdgePoints(current_frame_node.getFixedEdgePoints(), cv::Scalar(0, 255, 0));
-    
-    // draw rejected edge points
-//    for (const auto& rejected_edge_point : rejected_edge_points) {
-//        debug_view_on_key_frame.drawEdgePoints({rejected_edge_point.first, rejected_edge_point.second}, cv::Scalar(0, 255, 255));
-//        debug_view_on_key_frame.drawEdgePoints({rejected_edge_point.second, rejected_edge_point.second}, cv::Scalar(0, 100, 100));
-//    }
+    file_name = "current_frame_" + std::to_string(frame_count) + ".png";
+    return debug_view;
+}
 
-    // draw unmatched edge points
-    std::cout << "unmatched edge points: " << unmatched_edge_points.size() << std::endl;
-    debug_view_on_key_frame.drawEdgePoints(unmatched_edge_points, cv::Scalar(100, 100, 0));
+VslamDebugView LocalSlam::get_key_frame_debug_view(std::string& file_name) {
+    VslamDebugView debug_view(key_frames.back().frame_node.getImg());
+    debug_view.drawEdgePoints(key_frames.back().frame_node.getFixedEdgePoints(), cv::Scalar(0, 0, 255));
+    debug_view.drawEdgePoints(current_frame_node.getFixedEdgePoints(), cv::Scalar(0, 255, 0));
 
-    for (const auto& edge_3d : edge_space_dynamics.get_edge3ds()) {
-        debug_view_on_key_frame.drawEdge3D(edge_3d, key_frames.back().external_pose_data, camera_model.getCameraMatrix(), cv::Scalar(255, 255, 0));
+    debug_view.drawEdgePoints(unmatched_edge_points, cv::Scalar(0, 0, 255));
+
+    for (const auto& edge_line : edge_space_dynamics.get_edge3ds()) {
+        debug_view.drawEdge3D(edge_line, key_frames.back().calculated_pose, camera_model.getCameraMatrix(), cv::Scalar(255, 0, 0));
     }
-    cv::imwrite(path_to_dir + "key_frame" + std::to_string(frame_count) + ".png", debug_view_on_key_frame.getDebugImage());
 
-    // third person view
+    file_name = "key_frame_" + std::to_string(frame_count) + ".png";
+    return debug_view;
+}
+
+VslamDebugView LocalSlam::get_third_person_view(const Pose3D& camera_pose, std::string& file_name) {
     VslamDebugView debug_view_third_person_view(cv::Mat::zeros(1000, 1000, current_frame_node.getImg().type()));
 
-    Pose3D camera_pose;
-    camera_pose.translate(Eigen::Vector3f(1, -0.6, -1.5));
-    camera_pose.rotate(Eigen::Vector3f(-0.2, -0.7, 0));
     cv::Mat camera_matrix = (cv::Mat_<double>(3, 3) << 1000, 0, 500, 0, 1000, 500, 0, 0, 1);
 
     for (const auto& edge_3d : edge_space_dynamics.get_edge3ds()) {
         debug_view_third_person_view.drawEdge3D(edge_3d, camera_pose, camera_matrix, cv::Scalar(255, 255, 0));
     }
-    cv::imwrite(path_to_dir + "third_person_view" + std::to_string(frame_count) + ".png", debug_view_third_person_view.getDebugImage());
+
+    file_name = "third_person_view_" + std::to_string(frame_count) + ".png";
+    return debug_view_third_person_view;
 }
+
