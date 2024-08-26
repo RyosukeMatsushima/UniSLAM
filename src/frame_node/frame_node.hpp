@@ -1,8 +1,8 @@
 #ifndef FRAME_NODE_HPP
 #define FRAME_NODE_HPP
 
-#define HEALTHY_DISTANCE_RATIO 0.4f // compare with window_size
-#define HEALTHY_ANGLE_RATIO 0.4f // compare with angle_resolution
+#define HEALTHY_DISTANCE_RATIO 0.3f // compare with window_size
+#define HEALTHY_ANGLE_RATIO 0.3f // compare with angle_resolution
 #define KEYFRAME_EDGEPOINT_NUM_RATIO 0.8f // compare with fixed_edge_points.size() in previous frame
 
 #define MIN_EDGEPOINT_NUM 1
@@ -38,6 +38,8 @@ public:
     EdgePoint getFixedEdgePoint(const int edge_point_id) const;
 
     void shuffleFixedEdgePoints();
+
+    void clearFixedEdgePoints();
 
     void moveFixedEdgePointToBack(const int edge_point_id);
 

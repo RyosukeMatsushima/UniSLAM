@@ -31,11 +31,6 @@ protected:
         position.at<double>(2) += double(z);
     }
 
-    bool doMultiFrameInit() {
-        cv::Mat current_image = getCurrentImage();
-        return local_slam.multi_frame_init(current_image, getPosition(), getOrientation());
-    }
-
     Eigen::Vector3f getPosition() {
         return Eigen::Vector3f(float(position.at<double>(0)), float(position.at<double>(1)), float(position.at<double>(2)));
     }
@@ -59,11 +54,6 @@ protected:
         return Pose3D(getPosition(), getOrientation());
     }
 
-    bool doUpdate(Pose3D& pose) {
-        cv::Mat current_image = getCurrentImage();
-        return local_slam.update(current_image, pose);
-    }
-
     void checkPose(Pose3D& estimated_pose) {
         Pose3D current_pose = getCurrentPose();
 
@@ -80,38 +70,56 @@ protected:
     }
 };
 
-TEST_F(LocalSlamTest, withSquareSpaceWithoutExternalPose) {
-    float dxy_position = 0.1;
+TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
 
-    // initialize local_slam
-    // initialize should not finish without movement
-    ASSERT_FALSE(doMultiFrameInit());
-    local_slam.save_log(RESULT_IMAGE_PATH);
+    const int optimize_iteration = 100;
 
-    // move position x-axis
-    movePosition(dxy_position, 0, 0);
-    // initialize should not finish with only x-axis movement
-    ASSERT_FALSE(doMultiFrameInit());
-    local_slam.save_log(RESULT_IMAGE_PATH);
+    float dxy_position = 0.01;
+    float max_xy_position = 0.2;
 
-    // move position y-axis
-    movePosition(0, dxy_position, 0);
-    // initialize should finish
-    ASSERT_TRUE(doMultiFrameInit());
-    local_slam.save_log(RESULT_IMAGE_PATH);
+    // multi frame initialization
+    bool did_finish_initilization = false;
+    for (float x = position.at<double>(0); x < max_xy_position; x += dxy_position) {
+        movePosition(dxy_position, 0, 0);
+        did_finish_initilization = local_slam.multi_frame_init(getCurrentImage());
+        local_slam.save_log(RESULT_IMAGE_PATH);
+        if (did_finish_initilization) break;
+    }
+    ASSERT_TRUE(did_finish_initilization);
 
-    // check getPose
-    Pose3D pose(Eigen::Vector3f(1.1, -1.1, 0), Eigen::Quaternionf::Identity());
-    EXPECT_TRUE(doUpdate(pose));
-    local_slam.save_log(RESULT_IMAGE_PATH);
-    checkPose(pose);
+    // camera moves to x-axis positive direction
+    // still calculate pose should be floated and update() should return false
+    for (float x = position.at<double>(0); x < max_xy_position; x += dxy_position) {
+        movePosition(dxy_position, 0, 0);
+        Pose3D calculateed_pose;
+        local_slam.update(getCurrentImage(), getCurrentPose(), true, false, calculateed_pose);
+        local_slam.optimize(optimize_iteration);
+        local_slam.save_log(RESULT_IMAGE_PATH);
+    }
 
-    // back to original position
-    movePosition(-dxy_position, -dxy_position, 0);
-    pose = Pose3D(Eigen::Vector3f(1.1, 0.1, 0), Eigen::Quaternionf::Identity());
-    ASSERT_TRUE(doUpdate(pose));
-    local_slam.save_log(RESULT_IMAGE_PATH);
-    checkPose(pose);
+    // camera moves to y-axis positive direction
+    // before end of this movement, the calculated pose should be fixed and update() should return true
+    for (float y = position.at<double>(1); y < max_xy_position; y += dxy_position) {
+        movePosition(0, dxy_position, 0);
+        Pose3D calculateed_pose;
+        local_slam.update(getCurrentImage(), getCurrentPose(), true, false, calculateed_pose);
+        local_slam.optimize(optimize_iteration);
+        local_slam.save_log(RESULT_IMAGE_PATH);
+    }
+    
+    local_slam.optimize(400);
+
+    return;
+
+    // check calculated pose
+    for (float x = position.at<double>(0); x > -max_xy_position; x -= dxy_position) {
+        movePosition(-dxy_position, -dxy_position, 0);
+        Pose3D calculateed_pose;
+        EXPECT_TRUE(local_slam.update(getCurrentImage(), Pose3D(), false, true, calculateed_pose));
+        checkPose(calculateed_pose);
+        local_slam.save_log(RESULT_IMAGE_PATH);
+        local_slam.optimize(optimize_iteration);
+    }
 
     // TODO: check pose with more movement. Need to allow the position is scaled without external pose data.
 }

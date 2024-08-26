@@ -5,7 +5,7 @@
 #define VALID_ROTATIONAL_DIFF 0.1f // for initialization
 
 // for frame_node
-#define WINDOW_SIZE 200
+#define WINDOW_SIZE 100
 #define ANGLE_RESOLUTION 0.2f
 
 // for edge_space_dynamics
@@ -14,6 +14,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "frame_node.hpp"
+#include "frame_node_data.hpp"
 #include "edge_space_dynamics.hpp"
 #include "camera_model.hpp"
 #include "vslam_debug_view.hpp"
@@ -23,9 +24,7 @@ public:
     LocalSlam(const CameraModel& camera_model,
               const std::string& edge_space_dynamics_config_file);
 
-    bool multi_frame_init(const cv::Mat& image,
-                          const Eigen::Vector3f& external_position_data,
-                          const Eigen::Quaternionf& external_orientation_data);
+    bool multi_frame_init(const cv::Mat& image);
 
     // 1. make Frame instance
     // 2. find matching edges to the last key frame
@@ -34,6 +33,9 @@ public:
     // 5. calculate first matched edges pose and register them to edge space dynamics.
     // 6. return the pose of the current frame
     bool update(const cv::Mat& image,
+                const Pose3D& external_pose_data,
+                const bool use_external_pose_data,
+                const bool calculate_pose,
                 Pose3D& pose);
 
     // TODO: add update with external pose data
@@ -41,7 +43,7 @@ public:
     //             Pose3D& pose,
     //             const Pose3D& external_pose_data);
 
-    void optimize();
+    void optimize(const int iteration);
 
     void fix_edges(FrameNode& frame_node1,
                    FrameNode& frame_node2,
@@ -55,11 +57,13 @@ public:
 private:
     int frame_count = 0;
 
+    bool did_finish_initilization = false;
+
     EdgeSpaceDynamics edge_space_dynamics;
 
     CameraModel camera_model;
 
-    std::vector<std::pair<FrameNode, Pose3D>> key_frames;
+    std::vector<FrameNodeData> key_frames;
 
     void update_latest_n_frame_nodes(const FrameNode& frame_node);
 
@@ -69,6 +73,7 @@ private:
     bool calculate_first_matched_edges(const FrameNode& last_key_frame,
                                  const FrameNode& current_frame);
 
+    void add_key_frame(FrameNodeData);
 
     FrameNode current_frame_node; // for debug view
 

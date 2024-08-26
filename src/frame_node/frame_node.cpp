@@ -138,6 +138,12 @@ void FrameNode::shuffleFixedEdgePoints() {
     fixed_edge_point_ids = std::move(shuffled_fixed_edge_point_ids);
 }
 
+void FrameNode::clearFixedEdgePoints() {
+    fixed_edge_points.clear();
+    fixed_edge_point_ids.clear();
+    fixed_edge_distribution = cv::Mat::zeros(fixed_edge_distribution.size(), CV_8UC1);
+}
+
 void FrameNode::moveFixedEdgePointToBack(const int edge_point_id) {
     int index = getEdgePointIndex(edge_point_id);
 

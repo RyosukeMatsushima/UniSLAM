@@ -11,8 +11,14 @@ EdgePoint EdgePointFinder::find_key_edge_point(const Frame frame,
                                                const int window_size,
                                                bool& result) const
 {
-    // entry_point should have buffer from the frame edge
+    // reject if the entry point is too close to the frame edge
+    if (entry_point.x <= window_size || entry_point.x >= frame.getGrayImage().cols - window_size ||
+        entry_point.y <= window_size || entry_point.y >= frame.getGrayImage().rows - window_size) {
+        result = false;
+        return EdgePoint(cv::Point(0, 0), cv::Vec2f(0, 0));
+    }
 
+    // entry_point should have buffer from the frame edge
     cv::Mat intensity_block = frame.discreteAngleEdgeIntensity.getBlockIntensity(entry_point, window_size, gradient_angle, 0);
 
     bool is_valid;
