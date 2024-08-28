@@ -56,7 +56,31 @@ cv::Point EdgePointFinder::find_max_intensity_point(const cv::Mat& intensity_map
 
     is_valid = max_intensity > 0;
 
-    return max_intensity_point;
+    if (!is_valid) {
+        return max_intensity_point;
+    }
+
+    // return the point closest to the center
+    double intensity_threshold = max_intensity * 0.99; // TODO: make this a parameter
+
+    cv::Point closest_point = max_intensity_point;
+    double min_distance = std::numeric_limits<double>::max();
+
+    cv::Point center(intensity_map.cols / 2, intensity_map.rows / 2);
+
+    for (int i = 0; i < intensity_map.rows; i++) {
+        for (int j = 0; j < intensity_map.cols; j++) {
+            if (intensity_map.at<float>(i, j) > intensity_threshold) {
+                double distance = cv::norm(cv::Point(j, i) - center);
+                if (distance < min_distance) {
+                    min_distance = distance;
+                    closest_point = cv::Point(j, i);
+                }
+            }
+        }
+    }
+
+    return closest_point;
 }
 
 
