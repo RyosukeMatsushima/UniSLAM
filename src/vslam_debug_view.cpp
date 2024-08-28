@@ -33,5 +33,5 @@ void VslamDebugView::drawEdge3D(const Line3D& edge_3d, const Pose3D& pose, const
     cv::arrowedLine(base_img_, projected_points[0], projected_points[1], color, 2);
 
     // draw id
-    cv::putText(base_img_, std::to_string(edge_3d.id()), projected_points[0], cv::FONT_HERSHEY_SIMPLEX, 0.5, color, 2);
+    cv::putText(base_img_, std::to_string(edge_3d.id()), projected_points[0], cv::FONT_HERSHEY_SIMPLEX, 0.5, color, 1);
 }

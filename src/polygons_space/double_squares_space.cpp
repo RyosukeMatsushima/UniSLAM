@@ -15,7 +15,7 @@ DoubleSquaresSpace::DoubleSquaresSpace()
     cv::Point3f p7(square_size, -square_size, base_z + square_size);
     cv::Point3f p8(-square_size, -square_size, base_z + square_size);
 
-    square_size = 0.4;
+    square_size = 0.3;
     base_z = 1.0;
     cv::Point3f p9(-square_size, -square_size, base_z);
     cv::Point3f p10(square_size, -square_size, base_z);

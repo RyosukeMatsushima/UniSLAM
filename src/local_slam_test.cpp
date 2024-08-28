@@ -136,7 +136,7 @@ TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
         save_log();
     }
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 50; i++) {
         std::cout << "optimize iteration: " << i << std::endl;
         Pose3D calculateed_pose;
         local_slam.update(getCurrentImage(), getCurrentPose(), true, false, calculateed_pose);
@@ -144,10 +144,9 @@ TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
         save_log();
     }
 
-    return;
-
     // check calculated pose
     for (float x = position.at<double>(0); x > -max_xy_position; x -= dxy_position) {
+        std::cout << "calculate pose" << std::endl;
         movePosition(-dxy_position, -dxy_position, 0);
         Pose3D calculateed_pose;
         EXPECT_TRUE(local_slam.update(getCurrentImage(), Pose3D(), false, true, calculateed_pose));

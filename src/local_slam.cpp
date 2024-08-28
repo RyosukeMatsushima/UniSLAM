@@ -151,7 +151,6 @@ bool LocalSlam::get_pose(const FrameNode& frame_node,
                                                          pose);
 
         // TODO: move valid edge point to the biginning of the vector in frame_node
-
         for (const auto& edge_node : edge_nodes) {
             key_frames.back().frame_node.moveFixedEdgePointToBack(edge_node.edge_id);
         }
@@ -166,6 +165,9 @@ bool LocalSlam::get_pose(const FrameNode& frame_node,
 
 void LocalSlam::add_key_frame(FrameNodeData frame_node_data) {
     std::vector<EdgePoint> edge_points = key_frames.back().frame_node.findNewEdgePoints();
+
+    std::cout << "edge_points.size() = " << edge_points.size() << std::endl;
+    found_edge_points = edge_points;
 
     unmatched_edge_points.clear();
     for (auto& edge_point : edge_points) {
@@ -198,7 +200,8 @@ std::vector<Line3D> LocalSlam::get_fixed_edges() {
 
 VslamDebugView LocalSlam::get_current_debug_view(std::string& file_name) {
     VslamDebugView debug_view(current_frame_node.getImg());
-    debug_view.drawEdgePoints(key_frames.back().frame_node.getFixedEdgePoints(), cv::Scalar(0, 0, 255));
+    debug_view.drawEdgePoints(found_edge_points, cv::Scalar(225, 255, 0));
+    debug_view.drawEdgePoints(key_frames.back().frame_node.getFixedEdgePoints(), cv::Scalar(225, 0, 0));
     debug_view.drawEdgePoints(current_frame_node.getFixedEdgePoints(), cv::Scalar(0, 255, 0));
 
     file_name = "current_frame_" + std::to_string(frame_count) + ".png";
@@ -207,13 +210,31 @@ VslamDebugView LocalSlam::get_current_debug_view(std::string& file_name) {
 
 VslamDebugView LocalSlam::get_key_frame_debug_view(std::string& file_name) {
     VslamDebugView debug_view(key_frames.back().frame_node.getImg());
-    debug_view.drawEdgePoints(key_frames.back().frame_node.getFixedEdgePoints(), cv::Scalar(0, 0, 255));
+    debug_view.drawEdgePoints(found_edge_points, cv::Scalar(225, 255, 0));
+    debug_view.drawEdgePoints(key_frames.back().frame_node.getFixedEdgePoints(), cv::Scalar(225, 0, 0));
     debug_view.drawEdgePoints(current_frame_node.getFixedEdgePoints(), cv::Scalar(0, 255, 0));
-
     debug_view.drawEdgePoints(unmatched_edge_points, cv::Scalar(0, 0, 255));
 
     for (const auto& edge_line : edge_space_dynamics.get_edge3ds()) {
         debug_view.drawEdge3D(edge_line, key_frames.back().calculated_pose, camera_model.getCameraMatrix(), cv::Scalar(255, 0, 0));
+    }
+
+    for (const auto& edge_point : key_frames.back().frame_node.getFixedEdgePoints()) {
+        try {
+            Line3D edge_3d = edge_space_dynamics.get_edge3d(edge_point.id);
+            debug_view.drawEdge3D(edge_3d, key_frames.back().calculated_pose, camera_model.getCameraMatrix(), cv::Scalar(0, 0, 255));
+        } catch (const std::exception& e) {
+            std::cout << e.what() << std::endl;
+        }
+    }
+
+    for (const auto& edge_point : current_frame_node.getFixedEdgePoints()) {
+        try {
+            Line3D edge_3d = edge_space_dynamics.get_edge3d(edge_point.id);
+            debug_view.drawEdge3D(edge_3d, key_frames.back().calculated_pose, camera_model.getCameraMatrix(), cv::Scalar(0, 255, 0));
+        } catch (const std::exception& e) {
+            std::cout << e.what() << std::endl;
+        }
     }
 
     file_name = "key_frame_" + std::to_string(frame_count) + ".png";
@@ -227,7 +248,25 @@ VslamDebugView LocalSlam::get_third_person_view(const Pose3D& camera_pose,
     VslamDebugView debug_view_third_person_view(base_image);
 
     for (const auto& edge_3d : edge_space_dynamics.get_edge3ds()) {
-        debug_view_third_person_view.drawEdge3D(edge_3d, camera_pose, camera_matrix, cv::Scalar(255, 255, 0));
+        debug_view_third_person_view.drawEdge3D(edge_3d, camera_pose, camera_matrix, cv::Scalar(255, 0, 0));
+    }
+
+    for (const auto& edge_point : key_frames.back().frame_node.getFixedEdgePoints()) {
+        try {
+            Line3D edge_3d = edge_space_dynamics.get_edge3d(edge_point.id);
+            debug_view_third_person_view.drawEdge3D(edge_3d, camera_pose, camera_matrix, cv::Scalar(0, 0, 255));
+        } catch (const std::exception& e) {
+            std::cout << e.what() << std::endl;
+        }
+    }
+
+    for (const auto& edge_point : current_frame_node.getFixedEdgePoints()) {
+        try {
+            Line3D edge_3d = edge_space_dynamics.get_edge3d(edge_point.id);
+            debug_view_third_person_view.drawEdge3D(edge_3d, camera_pose, camera_matrix, cv::Scalar(0, 255, 0));
+        } catch (const std::exception& e) {
+            std::cout << e.what() << std::endl;
+        }
     }
 
     file_name = "third_person_view_" + std::to_string(frame_count) + ".png";
