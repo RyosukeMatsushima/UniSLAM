@@ -73,7 +73,6 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
             continue;
         }
 
-
         // check if the calculated frame_pose is valid
         std::vector<float> translation_stress_with_calculated_edges, rotation_stress_with_calculated_edges;
         get_stress(edge_nodes_to_calculate,
@@ -291,12 +290,16 @@ bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
 
     // remove less updated edge line.
     if (fixed_edges_ratio == 1) {
-        if (joint_edge_3d(edge_nodes)) return true;
-        if (remove_less_updated_edge(edge_nodes)) return true;
+        // TODO: need to remove edge point from all key frames
+        // if (joint_edge_3d(edge_nodes)) return true;
+
+        // TODO: need to remove edge point from all key frames
+        //if (remove_less_updated_edge(edge_nodes)) return true;
     }
 
     // find invalid edge nodes if fixed edges ratio is less than the threshold
     else if (fixed_edges_ratio > FIXED_EDGE_RATIO_THRESHOLD) {
+        std::cout << "find_invalid_edge_nodes" << std::endl;
         check_invalid_edge_nodes(edge_nodes);
     }
 
@@ -338,7 +341,7 @@ Line3D EdgeSpaceDynamics::get_edge3d(int edge_id) {
     try {
         return edges[get_edge_index(edge_id)];
     } catch (std::invalid_argument& e) {
-        throw std::invalid_argument("EdgeSpaceDynamics::get_edge3d: edge id is not exist.");
+        throw std::invalid_argument("EdgeSpaceDynamics::get_edge3d: edge id is not exist. id: " + std::to_string(edge_id));
         return Line3D(0, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(0, 0, 0), 0);
     }
 }
@@ -558,6 +561,7 @@ bool EdgeSpaceDynamics::remove_less_updated_edge(std::vector<EdgeNode>& edge_nod
 }
 
 bool EdgeSpaceDynamics::joint_edge_3d(std::vector<EdgeNode>& edge_nodes) {
+    bool did_joint = false;
     for (int i = 0; i < edge_nodes.size(); i++) {
 
         int edge_index = get_edge_index(edge_nodes[i].edge_id);
@@ -577,13 +581,14 @@ bool EdgeSpaceDynamics::joint_edge_3d(std::vector<EdgeNode>& edge_nodes) {
             if (edges[edge_index].connect(edges[edge_index2])) {
                 clear_edges_history(edge_nodes);
 
+                std::cout << "jointed id: " << edge_nodes[j].edge_id << " to " << edge_nodes[i].edge_id << std::endl;
                 edge_nodes[j].edge_id = edge_nodes[i].edge_id;
-                return true;
+                did_joint = true;
             }
         }
     }
 
-    return false;
+    return did_joint;
 }
 
 void EdgeSpaceDynamics::check_invalid_edge_nodes(std::vector<EdgeNode>& edge_nodes) {

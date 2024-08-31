@@ -74,7 +74,7 @@ private:
 
     void update_latest_n_frame_nodes(const FrameNode& frame_node);
 
-    bool get_pose(const FrameNode& frame_node,
+    bool get_pose(FrameNode& frame_node,
                   Pose3D& pose);
 
     bool calculate_first_matched_edges(const FrameNode& last_key_frame,

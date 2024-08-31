@@ -76,8 +76,9 @@ bool LocalSlam::update(const cv::Mat& image,
 void LocalSlam::optimize(const int iteration) {
     for (int i = 0; i < iteration; i++) {
         for (int key_frame_index = 0; key_frame_index < key_frames.size(); key_frame_index++) {
+            std::vector<EdgePoint> edge_points = key_frames[key_frame_index].frame_node.getFixedEdgePoints();
             std::vector<EdgeNode> edge_nodes;
-            for (const auto& edge_point : key_frames[key_frame_index].frame_node.getFixedEdgePoints()) {
+            for (const auto& edge_point : edge_points) {
                 EdgeNode edge_node = camera_model.getEdgeNode(edge_point);
                 edge_node.is_valid = true;
                 edge_nodes.push_back(edge_node);
@@ -88,10 +89,12 @@ void LocalSlam::optimize(const int iteration) {
                                          key_frames[key_frame_index].external_pose_data,
                                          key_frames[key_frame_index].use_external_pose_data);
 
-            // remove invalid edge points
-            for (const auto& edge_node : edge_nodes) {
-                if (!edge_node.is_valid) {
-                    key_frames[key_frame_index].frame_node.removeFixedEdgePoint(edge_node.edge_id);
+            // update fixed edge points
+            key_frames[key_frame_index].frame_node.clearFixedEdgePoints();
+            for (int i = 0; i < edge_points.size(); i++) {
+                if (edge_nodes[i].is_valid) {
+                    edge_points[i].id = edge_nodes[i].edge_id;
+                    key_frames[key_frame_index].frame_node.addFixedEdgePoint(edge_points[i]);
                 }
             }
         }
@@ -137,11 +140,12 @@ void LocalSlam::fix_edges(FrameNode& frame_node1,
     }
 }
 
-bool LocalSlam::get_pose(const FrameNode& frame_node,
+bool LocalSlam::get_pose(FrameNode& frame_node,
                          Pose3D& pose) {
 
+    std::vector<EdgePoint> edge_points = frame_node.getFixedEdgePoints();
     std::vector<EdgeNode> edge_nodes;
-    for (const auto& edge_point : frame_node.getFixedEdgePoints()) {
+    for (const auto& edge_point : edge_points) {
         edge_nodes.push_back(camera_model.getEdgeNode(edge_point));
     }
 
@@ -151,8 +155,23 @@ bool LocalSlam::get_pose(const FrameNode& frame_node,
                                                          pose);
 
         // TODO: move valid edge point to the biginning of the vector in frame_node
-        for (const auto& edge_node : edge_nodes) {
-            key_frames.back().frame_node.moveFixedEdgePointToBack(edge_node.edge_id);
+        frame_node.clearFixedEdgePoints();
+        std::vector<EdgePoint> valid_edge_points;
+        std::vector<EdgePoint> invalid_edge_points;
+        for (int i = 0; i < edge_points.size(); i++) {
+            edge_points[i].id = edge_nodes[i].edge_id;
+            if (edge_nodes[i].is_valid) {
+                valid_edge_points.push_back(edge_points[i]);
+            } else {
+                invalid_edge_points.push_back(edge_points[i]);
+            }
+        }
+
+        for (const auto& edge_point : valid_edge_points) {
+            frame_node.addFixedEdgePoint(edge_point);
+        }
+        for (const auto& edge_point : invalid_edge_points) {
+            frame_node.addFixedEdgePoint(edge_point);
         }
 
         return result;

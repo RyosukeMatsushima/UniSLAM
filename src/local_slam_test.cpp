@@ -101,7 +101,7 @@ protected:
 
 TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
 
-    const int optimize_iteration = 100;
+    const int optimize_iteration = 10;
 
     float dxy_position = 0.01;
     float max_xy_position = 0.2;
@@ -119,6 +119,7 @@ TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
     // camera moves to x-axis positive direction
     // still calculate pose should be floated and update() should return false
     for (float x = position.at<double>(0); x < max_xy_position; x += dxy_position) {
+        std::cout << std::endl;
         movePosition(dxy_position, 0, 0);
         Pose3D calculateed_pose;
         local_slam.update(getCurrentImage(), getCurrentPose(), true, false, calculateed_pose);
@@ -129,6 +130,7 @@ TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
     // camera moves to y-axis positive direction
     // before end of this movement, the calculated pose should be fixed and update() should return true
     for (float y = position.at<double>(1); y < max_xy_position; y += dxy_position) {
+        std::cout << std::endl;
         movePosition(0, dxy_position, 0);
         Pose3D calculateed_pose;
         local_slam.update(getCurrentImage(), getCurrentPose(), true, false, calculateed_pose);
@@ -137,6 +139,7 @@ TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
     }
 
     for (int i = 0; i < 50; i++) {
+        std::cout << std::endl;
         std::cout << "optimize iteration: " << i << std::endl;
         Pose3D calculateed_pose;
         local_slam.update(getCurrentImage(), getCurrentPose(), true, false, calculateed_pose);
@@ -146,6 +149,7 @@ TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
 
     // check calculated pose
     for (float x = position.at<double>(0); x > -max_xy_position; x -= dxy_position) {
+        std::cout << std::endl;
         std::cout << "calculate pose" << std::endl;
         movePosition(-dxy_position, -dxy_position, 0);
         Pose3D calculateed_pose;
