@@ -14,6 +14,8 @@ public:
     VslamDebugView(const cv::Mat& base_img);
 
     void drawEdge3D(const Line3D& edge_3d, const Pose3D& pose, const cv::InputArray& camera_matrix, const cv::Scalar& color);
+
+    void drawPose3D(const Pose3D& pose, const Pose3D& camera_pose, const cv::InputArray& camera_matrix, const cv::Scalar& color, const float size);
 };
 
 #endif // VSLAM_DEBUG_VIEW_HPP

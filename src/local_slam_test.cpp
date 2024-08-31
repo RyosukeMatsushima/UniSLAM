@@ -87,8 +87,8 @@ protected:
         cv::imwrite(RESULT_IMAGE_PATH + file_name, key_frame_debug_view.getDebugImage());
 
         Pose3D camera_pose;
-        camera_pose.translate(Eigen::Vector3f(0.7, -0.6, -1.1));
-        camera_pose.rotate(Eigen::Vector3f(-0.7, -0.7, 0));
+        camera_pose.translate(Eigen::Vector3f(0.2, -0.2, -1.5));
+        camera_pose.rotate(Eigen::Vector3f(-0.7, -0.6, 0));
         cv::Mat base_image = getImageFrom(camera_pose);
         cv::Mat camera_matrix = double_squares_space.getCameraMatrix();
         VslamDebugView third_person_view = local_slam.get_third_person_view(camera_pose,

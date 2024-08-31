@@ -288,6 +288,15 @@ VslamDebugView LocalSlam::get_third_person_view(const Pose3D& camera_pose,
         }
     }
 
+    // draw current frame pose
+    debug_view_third_person_view.drawPose3D(key_frames.back().calculated_pose, camera_pose, camera_matrix, cv::Scalar(255, 0, 255), 0.3);
+    debug_view_third_person_view.drawPose3D(key_frames.back().external_pose_data, camera_pose, camera_matrix, cv::Scalar(0, 255, 255), 0.3);
+
+    for (const auto& key_frame : key_frames) {
+        debug_view_third_person_view.drawPose3D(key_frame.calculated_pose, camera_pose, camera_matrix, cv::Scalar(255, 0, 0), 0.2);
+        debug_view_third_person_view.drawPose3D(key_frame.external_pose_data, camera_pose, camera_matrix, cv::Scalar(0, 255, 0), 0.2);
+    }
+
     file_name = "third_person_view_" + std::to_string(frame_count) + ".png";
     return debug_view_third_person_view;
 }
