@@ -56,12 +56,6 @@ bool LocalSlam::update(const cv::Mat& image,
         return false;
     }
 
-    // if is_key_frame, add new edge points to edge space dynamics
-    if (is_key_frame) {
-        std::cout << "add key frame" << std::endl;
-        add_key_frame(FrameNodeData(current_frame_node, external_pose_data, pose, use_external_pose_data));
-    }
-
     // calculate the pose of the current frame
     if (calculate_pose) {
         if (!get_pose(current_frame_node, pose)) {
@@ -70,10 +64,33 @@ bool LocalSlam::update(const cv::Mat& image,
         }
     }
 
+    // is_key_frame = true if use_external_pose_data is true and last n key frames are not use_external_pose_data
+    int n = 2;
+    if (use_external_pose_data) {
+        is_key_frame = true;
+        for (int i = 1; i <= n; i++) {
+            if (key_frames.size() < i) {
+                break;
+            }
+            if (key_frames[key_frames.size() - i].use_external_pose_data) {
+                is_key_frame = false;
+                break;
+            }
+        }
+    }
+
+    // if is_key_frame, add new edge points to edge space dynamics
+    if (is_key_frame) {
+        std::cout << "add key frame" << std::endl;
+        add_key_frame(FrameNodeData(current_frame_node, external_pose_data, pose, use_external_pose_data));
+    }
+
     return true;
 }
 
 void LocalSlam::optimize(const int iteration) {
+    optimize_count++;
+
     for (int i = 0; i < iteration; i++) {
         for (int key_frame_index = 0; key_frame_index < key_frames.size(); key_frame_index++) {
             std::vector<EdgePoint> edge_points = key_frames[key_frame_index].frame_node.getFixedEdgePoints();
@@ -223,7 +240,7 @@ VslamDebugView LocalSlam::get_current_debug_view(std::string& file_name) {
     debug_view.drawEdgePoints(key_frames.back().frame_node.getFixedEdgePoints(), cv::Scalar(225, 0, 0));
     debug_view.drawEdgePoints(current_frame_node.getFixedEdgePoints(), cv::Scalar(0, 255, 0));
 
-    file_name = "current_frame_" + std::to_string(frame_count) + ".png";
+    file_name = "current_frame frame: " + std::to_string(frame_count) + " optimize: " + std::to_string(optimize_count) + ".png";
     return debug_view;
 }
 
@@ -256,7 +273,7 @@ VslamDebugView LocalSlam::get_key_frame_debug_view(std::string& file_name) {
         }
     }
 
-    file_name = "key_frame_" + std::to_string(frame_count) + ".png";
+    file_name = "key_frame frame: " + std::to_string(frame_count) + " optimize: " + std::to_string(optimize_count) + ".png";
     return debug_view;
 }
 
@@ -289,15 +306,17 @@ VslamDebugView LocalSlam::get_third_person_view(const Pose3D& camera_pose,
     }
 
     // draw current frame pose
-    debug_view_third_person_view.drawPose3D(key_frames.back().calculated_pose, camera_pose, camera_matrix, cv::Scalar(255, 0, 255), 0.3);
-    debug_view_third_person_view.drawPose3D(key_frames.back().external_pose_data, camera_pose, camera_matrix, cv::Scalar(0, 255, 255), 0.3);
+    //debug_view_third_person_view.drawPose3D(key_frames.back().calculated_pose, camera_pose, camera_matrix, cv::Scalar(255, 0, 255), 0.3);
+    //debug_view_third_person_view.drawPose3D(key_frames.back().external_pose_data, camera_pose, camera_matrix, cv::Scalar(0, 255, 255), 0.3);
 
-    for (const auto& key_frame : key_frames) {
+    for (int i = 0; i < key_frames.size(); i++) {
+        FrameNodeData key_frame = key_frames[key_frames.size() - i - 1];
         debug_view_third_person_view.drawPose3D(key_frame.calculated_pose, camera_pose, camera_matrix, cv::Scalar(255, 0, 0), 0.2);
-        debug_view_third_person_view.drawPose3D(key_frame.external_pose_data, camera_pose, camera_matrix, cv::Scalar(0, 255, 0), 0.2);
+
+        if (key_frame.use_external_pose_data) debug_view_third_person_view.drawPose3D(key_frame.external_pose_data, camera_pose, camera_matrix, cv::Scalar(0, 255, 0), 0.2);
     }
 
-    file_name = "third_person_view_" + std::to_string(frame_count) + ".png";
+    file_name = "third_person_view frame: " + std::to_string(frame_count) + " optimize: " + std::to_string(optimize_count) + ".png";
     return debug_view_third_person_view;
 }
 
