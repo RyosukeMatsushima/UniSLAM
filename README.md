@@ -53,3 +53,6 @@ To run the unit tests for `inter_eye`, you can use Docker as well:
    ```bash
    docker compose down
    ```
+
+## Current Progress
+See [progress](progress) for the current progress of the project.
