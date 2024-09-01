@@ -107,11 +107,9 @@ void LocalSlam::optimize(const int iteration) {
                                          key_frames[key_frame_index].use_external_pose_data);
 
             // update fixed edge points
-            key_frames[key_frame_index].frame_node.clearFixedEdgePoints();
             for (int i = 0; i < edge_points.size(); i++) {
-                if (edge_nodes[i].is_valid) {
-                    edge_points[i].id = edge_nodes[i].edge_id;
-                    key_frames[key_frame_index].frame_node.addFixedEdgePoint(edge_points[i]);
+                if (edge_nodes[i].edge_id != edge_points[i].id) {
+                    did_changed_edge_id(edge_points[i].id, edge_nodes[i].edge_id);
                 }
             }
         }
@@ -228,6 +226,21 @@ void LocalSlam::add_key_frame(FrameNodeData frame_node_data) {
     }
 
     key_frames.push_back(frame_node_data);
+}
+
+void LocalSlam::did_changed_edge_id(const int before_edge_id,
+                                    const int after_edge_id) {
+    for (int i = 0; i < key_frames.size(); i++) {
+        std::vector<EdgePoint> edge_points = key_frames[i].frame_node.getFixedEdgePoints();
+        key_frames[i].frame_node.clearFixedEdgePoints();
+
+        for (auto& edge_point : edge_points) {
+            if (edge_point.id == before_edge_id) {
+                edge_point.id = after_edge_id;
+            }
+            key_frames[i].frame_node.addFixedEdgePoint(edge_point);
+        }
+    }
 }
 
 std::vector<Line3D> LocalSlam::get_fixed_edges() {

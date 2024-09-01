@@ -84,6 +84,9 @@ private:
 
     void add_key_frame(FrameNodeData);
 
+    void did_changed_edge_id(const int before_edge_id,
+                             const int after_edge_id);
+
     FrameNode current_frame_node; // for debug view
 
     std::vector<std::pair<EdgePoint, EdgePoint>> rejected_edge_points; // for debug view

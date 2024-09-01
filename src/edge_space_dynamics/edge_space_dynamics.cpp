@@ -290,11 +290,10 @@ bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
 
     // remove less updated edge line.
     if (fixed_edges_ratio == 1) {
-        // TODO: need to remove edge point from all key frames
-        // if (joint_edge_3d(edge_nodes)) return true;
+        if (joint_edge_3d(edge_nodes)) return true;
 
         // TODO: need to remove edge point from all key frames
-        //if (remove_less_updated_edge(edge_nodes)) return true;
+        // if (remove_less_updated_edge(edge_nodes)) return true;
     }
 
     // find invalid edge nodes if fixed edges ratio is less than the threshold
