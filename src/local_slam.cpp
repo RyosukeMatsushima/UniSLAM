@@ -111,6 +111,10 @@ void LocalSlam::optimize(const int iteration) {
                 if (edge_nodes[i].edge_id != edge_points[i].id) {
                     did_changed_edge_id(edge_points[i].id, edge_nodes[i].edge_id);
                 }
+
+                if (!edge_nodes[i].is_valid) {
+                    key_frames[key_frame_index].frame_node.removeFixedEdgePoint(edge_nodes[i].edge_id);
+                }
             }
         }
     }

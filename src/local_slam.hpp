@@ -6,7 +6,7 @@
 
 // for frame_node
 #define WINDOW_SIZE 100
-#define ANGLE_RESOLUTION 0.2f
+#define ANGLE_RESOLUTION 0.1f
 
 // for edge_space_dynamics
 #define VALID_EDGE_NODES_RATIO_THRESHOLD 0.6f
