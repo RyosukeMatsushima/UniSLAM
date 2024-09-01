@@ -95,4 +95,8 @@ void VslamDebugView::drawPose3D(const Pose3D& pose, const Pose3D& camera_pose, c
     cv::circle(base_img_, projected_points[0], 5, color, -1);
 }
 
+void VslamDebugView::addDiscriptionText(const std::string& text) {
+    cv::putText(base_img_, text, cv::Point(20, 20), cv::FONT_HERSHEY_SIMPLEX, 0.8, cv::Scalar(255, 255, 255), 1);
+}
+
 

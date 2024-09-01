@@ -78,12 +78,14 @@ protected:
         EXPECT_NEAR(estimated_pose.orientation.w(), current_pose.orientation.w(), allowed_error);
     }
 
-    void save_log() {
+    void save_log(std::string discription = "") {
         std::string file_name;
         VslamDebugView current_debug_view = local_slam.get_current_debug_view(file_name);
+        current_debug_view.addDiscriptionText(discription);
         cv::imwrite(RESULT_IMAGE_PATH + file_name, current_debug_view.getDebugImage());
 
         VslamDebugView key_frame_debug_view = local_slam.get_key_frame_debug_view(file_name);
+        key_frame_debug_view.addDiscriptionText(discription);
         cv::imwrite(RESULT_IMAGE_PATH + file_name, key_frame_debug_view.getDebugImage());
 
         Pose3D camera_pose;
@@ -95,6 +97,7 @@ protected:
                                                                             base_image,
                                                                             camera_matrix,
                                                                             file_name);
+        third_person_view.addDiscriptionText(discription);
         cv::imwrite(RESULT_IMAGE_PATH + file_name, third_person_view.getDebugImage());
     }
 };
@@ -115,12 +118,16 @@ TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
     for (float x = position.at<double>(0); x < max_xy_position; x += dxy_position) {
         movePosition(dxy_position, 0, 0);
         did_finish_initilization = local_slam.multi_frame_init(getCurrentImage());
-        save_log();
-        if (did_finish_initilization) break;
+        if (did_finish_initilization) {
+            save_log("multi frame initialization finished");
+            break;
+        }
+        save_log("multi frame initialization");
     }
     ASSERT_TRUE(did_finish_initilization);
-    
+
     local_slam.update(getCurrentImage(), getCurrentPose(), true, false, calculateed_pose);
+    save_log("add first external pose data");
 
     // camera moves to x-axis positive direction
     // still calculate pose should be floated and update() should return false
@@ -129,10 +136,11 @@ TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
         movePosition(dxy_position, 0, 0);
         local_slam.update(getCurrentImage(), Pose3D(), false, false, calculateed_pose);
         local_slam.optimize(optimize_iteration);
-        save_log();
+        save_log("camera moves to x-axis positive direction");
     }
 
     local_slam.update(getCurrentImage(), getCurrentPose(), true, false, calculateed_pose);
+    save_log("add second external pose data");
 
     // camera moves to y-axis positive direction
     // before end of this movement, the calculated pose should be fixed and update() should return true
@@ -141,17 +149,18 @@ TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
         movePosition(0, dxy_position, 0);
         local_slam.update(getCurrentImage(), Pose3D(), false, false, calculateed_pose);
         local_slam.optimize(optimize_iteration);
-        save_log();
+        save_log("camera moves to y-axis positive direction");
     }
 
     local_slam.update(getCurrentImage(), getCurrentPose(), true, false, calculateed_pose);
+    save_log("add third external pose data");
 
     for (int i = 0; i < 50; i++) {
         std::cout << std::endl;
         std::cout << "optimize iteration: " << i << std::endl;
         //local_slam.update(getCurrentImage(), Pose3D(), false, false, calculateed_pose);
         local_slam.optimize(optimize_iteration);
-        save_log();
+        save_log("optimize");
     }
 
     return;
