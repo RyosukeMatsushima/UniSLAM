@@ -276,6 +276,15 @@ bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
                                  const Pose3D& extarnal_pose_data,
                                  const bool use_external_pose_data) {
 
+    // edge_node as invalid if the edge is not exist
+    for (int i = 0; i < edge_nodes.size(); i++) {
+        try {
+            get_edge_index(edge_nodes[i].edge_id);
+        } catch (std::invalid_argument& e) {
+            edge_nodes[i].is_valid = false;
+        }
+    }
+
     bool is_frame_pose_fixed = false;
     if (!update_dynamics(edge_nodes, extarnal_pose_data, true, true, use_external_pose_data, is_frame_pose_fixed, frame_pose)) {
         std::cout << "EdgeSpaceDynamics::optimize: failed to update frame pose." << std::endl;
@@ -293,12 +302,11 @@ bool EdgeSpaceDynamics::optimize(Pose3D& frame_pose,
         if (joint_edge_3d(edge_nodes)) return true;
 
         // TODO: need to remove edge point from all key frames
-        // if (remove_less_updated_edge(edge_nodes)) return true;
+        if (remove_less_updated_edge(edge_nodes)) return true;
     }
 
     // find invalid edge nodes if fixed edges ratio is less than the threshold
     else if (fixed_edges_ratio > FIXED_EDGE_RATIO_THRESHOLD) {
-        std::cout << "find_invalid_edge_nodes" << std::endl;
         check_invalid_edge_nodes(edge_nodes);
     }
 
@@ -404,7 +412,8 @@ void EdgeSpaceDynamics::get_stress(std::vector<EdgeNode> edge_nodes,
                                    std::vector<float>& translation_stress,
                                    std::vector<float>& rotation_stress) {
     for (auto edge_node : edge_nodes) {
-        Line3D edge = edges[edge_node.edge_id];
+        if (!edge_node.is_valid) continue;
+        Line3D edge = edges[get_edge_index(edge_node.edge_id)];
 
         Force3D force_to_frame;
         Force3D force_to_edge;
@@ -468,8 +477,13 @@ bool EdgeSpaceDynamics::update_dynamics(std::vector<EdgeNode> edge_nodes,
     Force3D force_to_frame_sum, force_to_edge_sum;
 
     for (int j = 0; j < edge_nodes.size(); j++) {
+        if (!edge_nodes[j].is_valid) continue;
+
         EdgeNode edge_node = edge_nodes[j];
-        Line3D edge = edges[edge_node.edge_id];
+
+        int edge_index = get_edge_index(edge_node.edge_id);
+
+        Line3D edge = edges[edge_index];
     
         Force3D force_to_frame;
         Force3D force_to_edge;
@@ -486,7 +500,7 @@ bool EdgeSpaceDynamics::update_dynamics(std::vector<EdgeNode> edge_nodes,
         force_to_edge_sum.add(force_to_edge);
 
         if (update_edges) {
-            edges[edge_node.edge_id].add_force(force_to_edge.force * EDGE_POSE_TRANSLATE_GAIN,
+            edges[edge_index].add_force(force_to_edge.force * EDGE_POSE_TRANSLATE_GAIN,
                                                force_to_edge.torque * EDGE_POSE_ROTATE_GAIN,
                                                torque_center_point_for_edge_line);
         }
@@ -539,6 +553,7 @@ bool EdgeSpaceDynamics::remove_less_updated_edge(std::vector<EdgeNode>& edge_nod
     float average_updated_count = 0;
 
     for (int i = 0; i < edge_nodes.size(); i++) {
+        if (!edge_nodes[i].is_valid) continue;
         int edge_index = get_edge_index(edge_nodes[i].edge_id);
         int updated_count = edges[edge_index].update_count();
         average_updated_count += float(updated_count) / float(edge_nodes.size());
@@ -562,7 +577,7 @@ bool EdgeSpaceDynamics::remove_less_updated_edge(std::vector<EdgeNode>& edge_nod
 bool EdgeSpaceDynamics::joint_edge_3d(std::vector<EdgeNode>& edge_nodes) {
     bool did_joint = false;
     for (int i = 0; i < edge_nodes.size(); i++) {
-
+        if (!edge_nodes[i].is_valid) continue;
         int edge_index = get_edge_index(edge_nodes[i].edge_id);
 
         if (!edges[edge_index].is_fixed()) continue;
@@ -573,6 +588,7 @@ bool EdgeSpaceDynamics::joint_edge_3d(std::vector<EdgeNode>& edge_nodes) {
 
             if (edge_nodes[i].edge_id == edge_nodes[j].edge_id) continue;
 
+            if (!edge_nodes[j].is_valid) continue;
             int edge_index2 = get_edge_index(edge_nodes[j].edge_id);
 
             if (!edges[edge_index2].is_fixed()) continue;
@@ -592,7 +608,8 @@ bool EdgeSpaceDynamics::joint_edge_3d(std::vector<EdgeNode>& edge_nodes) {
 
 void EdgeSpaceDynamics::check_invalid_edge_nodes(std::vector<EdgeNode>& edge_nodes) {
     for (int i = 0; i < edge_nodes.size(); i++) {
-        if (!edges[edge_nodes[i].edge_id].is_fixed()) {
+        if (!edge_nodes[i].is_valid) continue;
+        if (!edges[get_edge_index(edge_nodes[i].edge_id)].is_fixed()) {
             edge_nodes[i].is_valid = false;
         }
 
@@ -602,6 +619,7 @@ void EdgeSpaceDynamics::check_invalid_edge_nodes(std::vector<EdgeNode>& edge_nod
 
 void EdgeSpaceDynamics::clear_edges_history(std::vector<EdgeNode>& edge_nodes) {
     for (int i = 0; i < edge_nodes.size(); i++) {
+        if (!edge_nodes[i].is_valid) continue;
         edges[get_edge_index(edge_nodes[i].edge_id)].clear_history();
     }
 }
