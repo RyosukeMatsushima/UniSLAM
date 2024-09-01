@@ -46,8 +46,11 @@ TEST(CameraModelTest, getDirectionAndAngle) {
         // direction is 90 degree rotated normalised gradient
         Eigen::Vector2f expected_edge_direction(0, 1);
 
-        EXPECT_EQ(edge_node.direction_frame_to_edge, expected_direction_frame_to_edge);
-        EXPECT_EQ(edge_node.edge_direction, expected_edge_direction);
+        EXPECT_NEAR(edge_node.direction_frame_to_edge(0), expected_direction_frame_to_edge(0), 1e-6);
+        EXPECT_NEAR(edge_node.direction_frame_to_edge(1), expected_direction_frame_to_edge(1), 1e-6);
+        EXPECT_NEAR(edge_node.direction_frame_to_edge(2), expected_direction_frame_to_edge(2), 1e-6);
+        EXPECT_NEAR(edge_node.edge_direction(0), expected_edge_direction(0), 1e-6);
+        EXPECT_NEAR(edge_node.edge_direction(1), expected_edge_direction(1), 1e-6);
     }
 }
 
