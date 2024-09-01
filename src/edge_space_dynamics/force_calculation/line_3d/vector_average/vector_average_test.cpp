@@ -60,6 +60,14 @@ TEST(VectorAverageTest, variance) {
     vector_average.add_vector(v5);
     vector_average.add_vector(v6);
 
+    // check variance does not change if vectors are changed
+    v1 += Eigen::Vector3f(1, 0, 0);
+    v2 += Eigen::Vector3f(1, 0, 1);
+    v3 += Eigen::Vector3f(1, 1, 0);
+    v4 += Eigen::Vector3f(1, 1, 0);
+    v5 += Eigen::Vector3f(1, 0, 1);
+    v6 += Eigen::Vector3f(1, -1, 0);
+
     Eigen::Vector3f variance = vector_average.get_variance();
 
     EXPECT_EQ(variance[0], 0);

@@ -13,6 +13,8 @@ public:
     bool is_filled() const;
     Eigen::Vector3f get_variance() const;
 
+    void clear();
+
 private:
     int stock_size_;
     std::vector<Eigen::Vector3f> vectors_;

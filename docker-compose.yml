@@ -6,7 +6,7 @@ services:
       context: ./
       dockerfile: Dockerfile
     volumes:
-      - .:/inter_eye
-    working_dir: /inter_eye
+      - .:/uni_slam
+    working_dir: /uni_slam
     ports:
       - 8000:8000

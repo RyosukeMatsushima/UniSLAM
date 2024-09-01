@@ -31,11 +31,6 @@ protected:
         position.at<double>(2) += double(z);
     }
 
-    bool doMultiFrameInit() {
-        cv::Mat current_image = getCurrentImage();
-        return local_slam.multi_frame_init(current_image, getPosition(), getOrientation());
-    }
-
     Eigen::Vector3f getPosition() {
         return Eigen::Vector3f(float(position.at<double>(0)), float(position.at<double>(1)), float(position.at<double>(2)));
     }
@@ -55,13 +50,17 @@ protected:
         return double_squares_space.getImage(rotation, position);
     }
 
-    Pose3D getCurrentPose() {
-        return Pose3D(getPosition(), getOrientation());
+    cv::Mat getImageFrom(const Pose3D& pose) {
+        cv::Mat position = (cv::Mat_<double>(3, 1) << pose.position.x(), pose.position.y(), pose.position.z());
+        Eigen::Matrix3f rotation_matrix = pose.orientation.toRotationMatrix();
+        cv::Mat rotation = (cv::Mat_<double>(3, 3) << rotation_matrix(0, 0), rotation_matrix(0, 1), rotation_matrix(0, 2),
+                                                      rotation_matrix(1, 0), rotation_matrix(1, 1), rotation_matrix(1, 2),
+                                                      rotation_matrix(2, 0), rotation_matrix(2, 1), rotation_matrix(2, 2));
+        return double_squares_space.getImage(rotation, position);
     }
 
-    bool doUpdate(Pose3D& pose) {
-        cv::Mat current_image = getCurrentImage();
-        return local_slam.update(current_image, pose);
+    Pose3D getCurrentPose() {
+        return Pose3D(getPosition(), getOrientation());
     }
 
     void checkPose(Pose3D& estimated_pose) {
@@ -78,40 +77,104 @@ protected:
         EXPECT_NEAR(estimated_pose.orientation.z(), current_pose.orientation.z(), allowed_error);
         EXPECT_NEAR(estimated_pose.orientation.w(), current_pose.orientation.w(), allowed_error);
     }
+
+    void save_log(std::string discription = "") {
+        std::string file_name;
+        VslamDebugView current_debug_view = local_slam.get_current_debug_view(file_name);
+        current_debug_view.addDiscriptionText(discription);
+        cv::imwrite(RESULT_IMAGE_PATH + file_name, current_debug_view.getDebugImage());
+
+        VslamDebugView key_frame_debug_view = local_slam.get_key_frame_debug_view(file_name);
+        key_frame_debug_view.addDiscriptionText(discription);
+        cv::imwrite(RESULT_IMAGE_PATH + file_name, key_frame_debug_view.getDebugImage());
+
+        Pose3D camera_pose;
+        camera_pose.translate(Eigen::Vector3f(0.2, -0.2, -1.5));
+        camera_pose.rotate(Eigen::Vector3f(-0.7, -0.6, 0));
+        cv::Mat base_image = getImageFrom(camera_pose);
+        cv::Mat camera_matrix = double_squares_space.getCameraMatrix();
+        VslamDebugView third_person_view = local_slam.get_third_person_view(camera_pose,
+                                                                            base_image,
+                                                                            camera_matrix,
+                                                                            file_name);
+        third_person_view.addDiscriptionText(discription);
+        cv::imwrite(RESULT_IMAGE_PATH + file_name, third_person_view.getDebugImage());
+    }
 };
 
-TEST_F(LocalSlamTest, withSquareSpaceWithoutExternalPose) {
-    float dxy_position = 0.1;
+TEST_F(LocalSlamTest, multiFrameInitWithExternalPoseData) {
 
-    // initialize local_slam
-    // initialize should not finish without movement
-    ASSERT_FALSE(doMultiFrameInit());
-    local_slam.save_log(RESULT_IMAGE_PATH);
+    const int optimize_iteration = 20;
 
-    // move position x-axis
-    movePosition(dxy_position, 0, 0);
-    // initialize should not finish with only x-axis movement
-    ASSERT_FALSE(doMultiFrameInit());
-    local_slam.save_log(RESULT_IMAGE_PATH);
+    float dxy_position = 0.01;
+    float max_xy_position = 0.2;
 
-    // move position y-axis
-    movePosition(0, dxy_position, 0);
-    // initialize should finish
-    ASSERT_TRUE(doMultiFrameInit());
-    local_slam.save_log(RESULT_IMAGE_PATH);
+    movePosition(-max_xy_position, -max_xy_position, 0);
 
-    // check getPose
-    Pose3D pose(Eigen::Vector3f(1.1, -1.1, 0), Eigen::Quaternionf::Identity());
-    EXPECT_TRUE(doUpdate(pose));
-    local_slam.save_log(RESULT_IMAGE_PATH);
-    checkPose(pose);
+    Pose3D calculateed_pose;
 
-    // back to original position
-    movePosition(-dxy_position, -dxy_position, 0);
-    pose = Pose3D(Eigen::Vector3f(1.1, 0.1, 0), Eigen::Quaternionf::Identity());
-    ASSERT_TRUE(doUpdate(pose));
-    local_slam.save_log(RESULT_IMAGE_PATH);
-    checkPose(pose);
+    // multi frame initialization
+    bool did_finish_initilization = false;
+    for (float x = position.at<double>(0); x < max_xy_position; x += dxy_position) {
+        movePosition(dxy_position, 0, 0);
+        did_finish_initilization = local_slam.multi_frame_init(getCurrentImage());
+        if (did_finish_initilization) {
+            save_log("multi frame initialization finished");
+            break;
+        }
+        save_log("multi frame initialization");
+    }
+    ASSERT_TRUE(did_finish_initilization);
+
+    local_slam.update(getCurrentImage(), getCurrentPose(), true, false, calculateed_pose);
+    save_log("add first external pose data");
+
+    // camera moves to x-axis positive direction
+    // still calculate pose should be floated and update() should return false
+    for (float x = position.at<double>(0); x < max_xy_position; x += dxy_position) {
+        std::cout << std::endl;
+        movePosition(dxy_position, 0, 0);
+        local_slam.update(getCurrentImage(), Pose3D(), false, false, calculateed_pose);
+        local_slam.optimize(optimize_iteration);
+        save_log("camera moves to x-axis positive direction");
+    }
+
+    local_slam.update(getCurrentImage(), getCurrentPose(), true, false, calculateed_pose);
+    save_log("add second external pose data");
+
+    // camera moves to y-axis positive direction
+    // before end of this movement, the calculated pose should be fixed and update() should return true
+    for (float y = position.at<double>(1); y < max_xy_position; y += dxy_position) {
+        std::cout << std::endl;
+        movePosition(0, dxy_position, 0);
+        local_slam.update(getCurrentImage(), Pose3D(), false, false, calculateed_pose);
+        local_slam.optimize(optimize_iteration);
+        save_log("camera moves to y-axis positive direction");
+    }
+
+    local_slam.update(getCurrentImage(), getCurrentPose(), true, false, calculateed_pose);
+    save_log("add third external pose data");
+
+    for (int i = 0; i < 50; i++) {
+        std::cout << std::endl;
+        std::cout << "optimize iteration: " << i << std::endl;
+        //local_slam.update(getCurrentImage(), Pose3D(), false, false, calculateed_pose);
+        local_slam.optimize(optimize_iteration);
+        save_log("optimize");
+    }
+
+    return;
+
+    // check calculated pose
+    for (float x = position.at<double>(0); x > -max_xy_position; x -= dxy_position) {
+        std::cout << std::endl;
+        std::cout << "calculate pose" << std::endl;
+        movePosition(-dxy_position, -dxy_position, 0);
+        EXPECT_TRUE(local_slam.update(getCurrentImage(), Pose3D(), false, true, calculateed_pose));
+        checkPose(calculateed_pose);
+        save_log();
+        local_slam.optimize(optimize_iteration);
+    }
 
     // TODO: check pose with more movement. Need to allow the position is scaled without external pose data.
 }

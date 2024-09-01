@@ -91,7 +91,7 @@ std::vector<EdgePoint> FrameNode::findNewEdgePoints() const {
 
             cv::Point2f point = cv::Point2f(j*window_size, i*window_size);
 
-            for (float angle = 0.0f; angle < 2 * M_PI; angle += angle_resolution) {
+            for (float angle = 0.0f; angle < 2 * M_PI - angle_resolution; angle += angle_resolution) {
 
                 bool is_valid = false;
                 EdgePoint edge_point = EdgePointFinder().find_key_edge_point(frame_2d,
@@ -136,6 +136,12 @@ void FrameNode::shuffleFixedEdgePoints() {
 
     fixed_edge_points = std::move(shuffled_fixed_edge_points);
     fixed_edge_point_ids = std::move(shuffled_fixed_edge_point_ids);
+}
+
+void FrameNode::clearFixedEdgePoints() {
+    fixed_edge_points.clear();
+    fixed_edge_point_ids.clear();
+    fixed_edge_distribution = cv::Mat::zeros(fixed_edge_distribution.size(), CV_8UC1);
 }
 
 void FrameNode::moveFixedEdgePointToBack(const int edge_point_id) {

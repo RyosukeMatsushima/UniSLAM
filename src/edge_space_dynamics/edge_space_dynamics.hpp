@@ -28,15 +28,29 @@ public:
 
     bool optimize(Pose3D& frame_pose,
                   std::vector<EdgeNode>& edge_nodes,
-                  const bool update_frame_pose);
+                  const Pose3D& extarnal_pose_data,
+                  const bool use_external_pose_data);
+
+    bool find_invalid_edge_nodes(const Pose3D& frame_pose,
+                                 std::vector<EdgeNode>& edge_nodes);
 
     std::vector<Line3D> get_edge3ds();
+
     Line3D get_edge3d(int edge_id);
+
+    void remove_edge3d(int edge_id);
+
     int set_edge3d(Eigen::Vector3f start_point,
                    Eigen::Vector3f direction,
                    float length);
 
+    int set_edge3d(const EdgeNode edge_node,
+                   const Pose3D frame_pose,
+                   const float distance_to_edge);
+
     bool calculate_frame_pose(std::vector<EdgeNode> edge_nodes,
+                              const Pose3D& extarnal_pose_data,
+                              const bool use_external_pose_data,
                               Pose3D& frame_pose);
 
     void get_stress(std::vector<EdgeNode> edge_nodes,
@@ -50,14 +64,32 @@ private:
     std::vector<Line3D> edges;
     std::vector<int> edge_ids;
 
-    void add_edge(const Line3D edge);
-
     bool get_force(Line3D edge,
                    EdgeNode edge_node,
                    Pose3D frame_pose,
                    Force3D& force_to_frame,
                    Force3D& force_to_edge,
                    float& torque_center_point_for_edge_line);
+
+    bool update_dynamics(std::vector<EdgeNode> edge_nodes,
+                         const Pose3D& extarnal_pose_data,
+                         const bool update_edges,
+                         const bool update_frame_pose,
+                         const bool use_external_pose_data,
+                         bool& is_frame_pose_fixed,
+                         Pose3D& frame_pose);
+
+    int get_edge_index(int edge_id);
+
+    float fixed_edge_ratio(std::vector<EdgeNode> edge_nodes);
+
+    bool remove_less_updated_edge(std::vector<EdgeNode>& edge_nodes);
+
+    void check_invalid_edge_nodes(std::vector<EdgeNode>& edge_nodes);
+
+    bool joint_edge_3d(std::vector<EdgeNode>& edge_nodes);
+
+    void clear_edges_history(std::vector<EdgeNode>& edge_nodes);
 
     void load_config(const std::string& config_file);
 
@@ -81,8 +113,17 @@ private:
     float FRAME_POSE_CAL_FINISH_TRANSLATIONAL_DELTA;
     float FRAME_POSE_CAL_FINISH_ROTATIONAL_DELTA;
 
+    // for optimization with external pose data
+    float EXTERNAL_POSITION_GAIN;
+    float EXTERNAL_ROTATION_GAIN;
+
     float CAL_FINISH_FORCE_SIZE;
     float CAL_FINISH_TORQUE_SIZE;
+
+    int EDGE_AVERAGE_STOCK_SIZE;
+    float EDGE_FIXED_START_POINT_VARIANCE_THRESHOLD;
+    float EDGE_FIXED_DIRECTION_VARIANCE_THRESHOLD;
+    float FIXED_EDGE_RATIO_THRESHOLD;
 };
 
 #endif // EDGE_SPACE_DYNAMICS_HPP

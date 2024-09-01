@@ -30,25 +30,8 @@ enable_testing()
 # Find Eigen
 find_package(Eigen3 REQUIRED)
 
+# Add subdirectories
 add_subdirectory(force_calculation)
-
-# vector_average
-add_library(
-    vecotr_average
-    vector_average.cpp
-)
-
-target_include_directories(
-    vecotr_average
-    PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-target_link_libraries(
-    vecotr_average
-    PRIVATE
-    Eigen3::Eigen
-)
 
 # edge_space_dynamics
 add_library(
@@ -64,26 +47,13 @@ target_include_directories(
 
 target_link_libraries(
     edge_space_dynamics
-    PRIVATE
+    PUBLIC
+    vector_average
     force_calculation
     line_3d
-    vecotr_average
     GTest::gtest_main
     Eigen3::Eigen
     yaml-cpp
-)
-
-add_executable(
-    vector_average_test
-    vector_average_test.cpp
-)
-
-target_link_libraries(
-    vector_average_test
-    PRIVATE
-    vecotr_average
-    GTest::gtest_main
-    Eigen3::Eigen
 )
 
 add_executable(
@@ -134,13 +104,24 @@ target_link_libraries(
     yaml-cpp
 )
 
+add_executable(
+    edge_control_test
+    edge_control_test.cpp
+)
+
+target_link_libraries(
+    edge_control_test
+    PRIVATE
+    edge_space_dynamics
+)
+
 include(GoogleTest)
-gtest_discover_tests(vector_average_test)
 gtest_discover_tests(add_new_edge_test)
 gtest_discover_tests(get_frame_pose_test)
 gtest_discover_tests(optimize_test)
+gtest_discover_tests(edge_control_test)
 
 target_compile_definitions(add_new_edge_test PRIVATE PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 target_compile_definitions(get_frame_pose_test PRIVATE PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 target_compile_definitions(optimize_test PRIVATE PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
-
+target_compile_definitions(edge_control_test PRIVATE PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")

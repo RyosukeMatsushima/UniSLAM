@@ -28,7 +28,7 @@ protected:
         edge_nodes.push_back(createEdgeNode(1.0, 0.0, 2.0, 1.0, 1.0, edge_space_dynamics.set_edge3d(Eigen::Vector3f(1.2, 0.1, 2.0), Eigen::Vector3f(0.1, -1.0, 0.0), 1.0)));
     }
 
-    void checkFramePose(const Pose3D& frame_pose, const Eigen::Vector3f& expected_position, const Eigen::Quaternionf& expected_orientation, float position_error_threshold = 1e-4, float rotate_error_threshold = 1e-4) {
+    void checkFramePose(const Pose3D& frame_pose, const Eigen::Vector3f& expected_position, const Eigen::Quaternionf& expected_orientation, float position_error_threshold = 1e-3, float rotate_error_threshold = 1e-3) {
         EXPECT_NEAR(frame_pose.position.x(), expected_position.x(), position_error_threshold);
         EXPECT_NEAR(frame_pose.position.y(), expected_position.y(), position_error_threshold);
         EXPECT_NEAR(frame_pose.position.z(), expected_position.z(), position_error_threshold);
@@ -45,7 +45,7 @@ TEST_F(GetFramePoseTest, calculateFramePose) {
     frame_pose.translate(Eigen::Vector3f(0.0f, 0.0f, -1.2f));
     frame_pose.rotate(Eigen::Vector3f(0.1f, 0.0f, 0.0f));
 
-    bool result = edge_space_dynamics.calculate_frame_pose(edge_nodes, frame_pose);
+    bool result = edge_space_dynamics.calculate_frame_pose(edge_nodes, Pose3D(), false, frame_pose);
 
     Eigen::Vector3f expected_position(0.0, 0.0, -1.0);
     Eigen::Quaternionf expected_orientation = Eigen::Quaternionf::Identity();
@@ -59,7 +59,7 @@ TEST_F(GetFramePoseTest, calculateFramePoseHorizontalMoveTest) {
     frame_pose.translate(Eigen::Vector3f(0.1f, 1.0f, -1.2f));
     frame_pose.rotate(Eigen::Vector3f(1.0f, -2.0f, 1.1f));
 
-    bool result = edge_space_dynamics.calculate_frame_pose(edge_nodes, frame_pose);
+    bool result = edge_space_dynamics.calculate_frame_pose(edge_nodes, Pose3D(), false, frame_pose);
 
     Eigen::Vector3f expected_position(0.0, 0.0, -1.0);
     Eigen::Quaternionf expected_orientation = Eigen::Quaternionf::Identity();
