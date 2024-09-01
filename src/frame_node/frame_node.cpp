@@ -91,7 +91,7 @@ std::vector<EdgePoint> FrameNode::findNewEdgePoints() const {
 
             cv::Point2f point = cv::Point2f(j*window_size, i*window_size);
 
-            for (float angle = 0.0f; angle < 2 * M_PI; angle += angle_resolution) {
+            for (float angle = 0.0f; angle < 2 * M_PI - angle_resolution; angle += angle_resolution) {
 
                 bool is_valid = false;
                 EdgePoint edge_point = EdgePointFinder().find_key_edge_point(frame_2d,
