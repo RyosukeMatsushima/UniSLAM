@@ -61,7 +61,7 @@ bool EdgeSpaceDynamics::get_frame_pose(std::vector<EdgeNode>& edge_nodes,
     float min_translation_stress = std::numeric_limits<float>::max();
     float min_rotation_stress = std::numeric_limits<float>::max();
 
-    for (int edge_pointer = 0; edge_pointer < edge_nodes.size() - EDGE_NUM_TO_GET_FRAME_POSE; edge_pointer++) {
+    for (int edge_pointer = 0; edge_pointer <= edge_nodes.size() - EDGE_NUM_TO_GET_FRAME_POSE; edge_pointer++) {
 
         // get EDGE_NUM_TO_GET_FRAME_POSE edges to calculate frame_pose
         std::vector<EdgeNode> edge_nodes_to_calculate;
@@ -412,7 +412,6 @@ void EdgeSpaceDynamics::get_stress(std::vector<EdgeNode> edge_nodes,
                                    std::vector<float>& translation_stress,
                                    std::vector<float>& rotation_stress) {
     for (auto edge_node : edge_nodes) {
-        if (!edge_node.is_valid) continue;
         Line3D edge = edges[get_edge_index(edge_node.edge_id)];
 
         Force3D force_to_frame;
