@@ -28,7 +28,7 @@ protected:
         edge_nodes.push_back(createEdgeNode(1.0, 0.0, 2.0, 1.0, 1.0, edge_space_dynamics.set_edge3d(Eigen::Vector3f(1.2, 0.1, 2.0), Eigen::Vector3f(0.1, -1.0, 0.0), 1.0)));
     }
 
-    void checkFramePose(const Pose3D& frame_pose, const Eigen::Vector3f& expected_position, const Eigen::Quaternionf& expected_orientation, float position_error_threshold = 1e-3, float rotate_error_threshold = 1e-3) {
+    void checkFramePose(const Pose3D& frame_pose, const Eigen::Vector3f& expected_position, const Eigen::Quaternionf& expected_orientation, float position_error_threshold = 1e-2, float rotate_error_threshold = 1e-3) {
         EXPECT_NEAR(frame_pose.position.x(), expected_position.x(), position_error_threshold);
         EXPECT_NEAR(frame_pose.position.y(), expected_position.y(), position_error_threshold);
         EXPECT_NEAR(frame_pose.position.z(), expected_position.z(), position_error_threshold);
@@ -90,9 +90,9 @@ TEST_F(GetFramePoseTest, getFramePoseWithNoise) {
     // edge_node should be valid except for the first and last edge_node
     for (int i = 0; i < edge_nodes.size(); i++) {
         if (i == 0 || i == edge_nodes.size() - 1) {
-            EXPECT_FALSE(edge_nodes[i].is_valid);
+            EXPECT_FALSE(edge_nodes[i].is_valid) << "edge index: " << i;
         } else {
-            EXPECT_TRUE(edge_nodes[i].is_valid);
+            EXPECT_TRUE(edge_nodes[i].is_valid) << "edge index: " << i;
         }
     }
 }

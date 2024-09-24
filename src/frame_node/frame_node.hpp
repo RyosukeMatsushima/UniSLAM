@@ -13,7 +13,7 @@
 #include "frame.h"
 #include "edge.h"
 #include "edge_point_finder.hpp"
-
+#include "edge_distribution.hpp" // Include the EdgeDistribution class
 
 class FrameNode {
 public:
@@ -60,6 +60,6 @@ private:
 
     Frame frame_2d; //TODO: rename to Frame2D
 
-    cv::Mat fixed_edge_distribution;
+    EdgeDistribution fixed_edge_distribution; // Use EdgeDistribution class instead of cv::Mat
 };
 #endif // FRAME_NODE_HPP
