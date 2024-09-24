@@ -5,7 +5,7 @@
 #define VALID_ROTATIONAL_DIFF 0.1f // for initialization
 
 // for frame_node
-#define WINDOW_SIZE 100
+#define WINDOW_SIZE 50
 #define ANGLE_RESOLUTION 0.1f
 
 // for edge_space_dynamics

@@ -20,6 +20,7 @@ enable_testing()
 find_package(OpenCV REQUIRED)
 
 add_subdirectory(edge_point_finder)
+add_subdirectory(edge_distribution)
 
 add_library(
     frame_node
@@ -34,7 +35,7 @@ target_include_directories(
 
 target_link_libraries(
     frame_node
-    PRIVATE
+    PUBLIC
     edge_point
     edge
     frame
@@ -42,7 +43,8 @@ target_link_libraries(
     debug_view
     edge_point_check
     edge_point_finder
-    GTest::gtest_main
+    edge_distribution
+    PRIVATE
     ${OpenCV_LIBS}
 )
 

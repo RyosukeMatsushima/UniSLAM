@@ -5,8 +5,8 @@ FrameNode::FrameNode(const cv::Mat& image,
                      const float angle_resolution)
                      : frame_2d(image, angle_resolution),
                        window_size(window_size),
-                       angle_resolution(angle_resolution) {
-    fixed_edge_distribution = cv::Mat::zeros(image.size() / window_size, CV_8UC1);
+                       angle_resolution(angle_resolution),
+                       fixed_edge_distribution(image.size(), cv::Size(window_size, window_size)) {
 }
 
 bool FrameNode::matchEdge(const EdgePoint& edge_point,
@@ -70,13 +70,13 @@ void FrameNode::addFixedEdgePoint(const EdgePoint& edge_point) {
     fixed_edge_points.push_back(edge_point);
     fixed_edge_point_ids.push_back(edge_point.id);
 
-    fixed_edge_distribution.at<uchar>(edge_point.point / window_size) += 1;
+    fixed_edge_distribution.add_edge_point(edge_point.point);
 }
 
 void FrameNode::removeFixedEdgePoint(const int edge_point_id) {
     int index = getEdgePointIndex(edge_point_id);
 
-    fixed_edge_distribution.at<uchar>(fixed_edge_points[index].point / window_size) -= 1;
+    fixed_edge_distribution.remove_edge_point(fixed_edge_points[index].point);
 
     fixed_edge_points.erase(fixed_edge_points.begin() + index);
     fixed_edge_point_ids.erase(fixed_edge_point_ids.begin() + index);
@@ -85,21 +85,20 @@ void FrameNode::removeFixedEdgePoint(const int edge_point_id) {
 std::vector<EdgePoint> FrameNode::findNewEdgePoints() const {
     std::vector<EdgePoint> new_edge_points;
 
-    for (int i = 1; i < fixed_edge_distribution.rows; i++) {
-        for (int j = 1; j < fixed_edge_distribution.cols; j++) {
-            if (fixed_edge_distribution.at<uchar>(i, j) >= 1)  continue;
+    std::vector<cv::Point> empty_windows = fixed_edge_distribution.get_empty_windows();
 
-            cv::Point2f point = cv::Point2f(j*window_size, i*window_size);
+    for (const cv::Point& point : empty_windows) {
+        for (float angle = 0.0f; angle < 2 * M_PI - angle_resolution; angle += angle_resolution) {
+            EdgePointFinder edge_point_finder;
+            bool is_valid = false;
+            EdgePoint edge_point = edge_point_finder.find_key_edge_point(frame_2d,
+                                                                        point,
+                                                                        angle,
+                                                                        window_size,
+                                                                        is_valid);
 
-            for (float angle = 0.0f; angle < 2 * M_PI - angle_resolution; angle += angle_resolution) {
-
-                bool is_valid = false;
-                EdgePoint edge_point = EdgePointFinder().find_key_edge_point(frame_2d,
-                                                                             point,
-                                                                             angle,
-                                                                             window_size,
-                                                                             is_valid);
-                if (is_valid) new_edge_points.push_back(edge_point);
+            if (is_valid) {
+                new_edge_points.push_back(edge_point);
             }
         }
     }
@@ -141,7 +140,7 @@ void FrameNode::shuffleFixedEdgePoints() {
 void FrameNode::clearFixedEdgePoints() {
     fixed_edge_points.clear();
     fixed_edge_point_ids.clear();
-    fixed_edge_distribution = cv::Mat::zeros(fixed_edge_distribution.size(), CV_8UC1);
+    fixed_edge_distribution.clear();
 }
 
 void FrameNode::moveFixedEdgePointToBack(const int edge_point_id) {
@@ -168,7 +167,7 @@ FrameNode& FrameNode::operator=(const FrameNode& other_frame_node) {
     frame_2d = other_frame_node.frame_2d;
     fixed_edge_points = std::move(other_frame_node.fixed_edge_points);
     fixed_edge_point_ids = std::move(other_frame_node.fixed_edge_point_ids);
-    fixed_edge_distribution = other_frame_node.fixed_edge_distribution.clone();
+    fixed_edge_distribution = other_frame_node.fixed_edge_distribution;
     return *this;
 }
 
